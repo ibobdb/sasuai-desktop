@@ -11,15 +11,18 @@
     "category": "Utility"
   },
   "win": {
-    "target": ["portable", "msi"],
-    "msi": {
-      "oneClick": false,
-      "perMachine": true,
-      "uninstallDisplayName": "Sasuai Store",
-      "uninstallIcon": "./templateIcon.png",
-      "installerIcon": "./templateIcon.png",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
+    "target": ["portable", "msi"]
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": true,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "./templateIcon.png",
+    "uninstallerIcon": "./templateIcon.png",
+    "uninstallDisplayName": "Sasuai Store",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Sasuai Store"
   }
 }
