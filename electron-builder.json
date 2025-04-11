@@ -1,24 +1,25 @@
 {
-    "appId": "com.georgimy.electron-template",
-    "files": [
-        "dist-electron",
-        "dist-react"
-    ],
-    "extraResources": [
-        "dist-electron/preload.cjs"
-    ],
-    "icon": "./templateIcon.png",
-    "mac": {
-        "target": "dmg"
-    },
-    "linux": {
-        "target": "AppImage",
-        "category": "Utility"
-    },
-    "win": {
-        "target": [
-            "portable",
-            "msi"
-        ]
+  "appId": "com.sasuai.store",
+  "files": ["dist-electron", "dist-react"],
+  "extraResources": ["dist-electron/preload.cjs"],
+  "icon": "./templateIcon.png",
+  "mac": {
+    "target": "dmg"
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility"
+  },
+  "win": {
+    "target": ["portable", "msi"],
+    "msi": {
+      "oneClick": false,
+      "perMachine": true,
+      "uninstallDisplayName": "Sasuai Store",
+      "uninstallIcon": "./templateIcon.png",
+      "installerIcon": "./templateIcon.png",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
+  }
 }
