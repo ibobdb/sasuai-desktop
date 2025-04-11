@@ -5,6 +5,7 @@
   "type": "module",
   "main": "dist-electron/main.js",
   "description": "Sasuai Store Desktop App",
+  "author": "Sasuai Team",
   "contributors": [
     {
       "name": "samunu",
