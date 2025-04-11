@@ -1,8 +1,9 @@
 {
   "appId": "com.sasuai.store",
+  "productName": "Sasuai Store",
   "files": ["dist-electron", "dist-react"],
   "extraResources": ["dist-electron/preload.cjs"],
-  "icon": "./templateIcon.png",
+  "icon": "./favicon.png",
   "mac": {
     "target": "dmg"
   },
@@ -11,18 +12,31 @@
     "category": "Utility"
   },
   "win": {
-    "target": ["portable", "msi"]
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ]
   },
   "nsis": {
     "oneClick": false,
     "perMachine": true,
     "allowElevation": true,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "./templateIcon.png",
-    "uninstallerIcon": "./templateIcon.png",
+    "installerIcon": "./favicon.ico",
+    "uninstallerIcon": "./favicon.ico",
     "uninstallDisplayName": "Sasuai Store",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Sasuai Store"
+    "shortcutName": "Sasuai Store",
+    "artifactName": "sasuai-store-setup-${version}.exe"
+  },
+  "portable": {
+    "artifactName": "sasuai-store-portable-${version}.exe"
   }
 }
