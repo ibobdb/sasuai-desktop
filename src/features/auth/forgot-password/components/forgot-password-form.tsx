@@ -63,6 +63,15 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
               Continue
             </Button>
           </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div className="text-sm text-muted-foreground">
+              Remembered your password?
+            </div>
+            <Button variant="link" size="sm" disabled={isLoading}>
+              Sign in
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
