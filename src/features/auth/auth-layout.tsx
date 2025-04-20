@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: Props) {
       <WindowControls />
 
       {/* Content area */}
-      <div className="flex-1 container grid items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
+      <div className="flex-1 container grid items-center justify-center lg:max-w-none lg:px-0">
         <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
           <div className="mb-4 flex items-center justify-center">
             <svg
