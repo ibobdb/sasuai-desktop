@@ -26,7 +26,6 @@ nsis:
   perMachine: true
   allowElevation: true
   allowToChangeInstallationDirectory: true
-  showDetails: true
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
