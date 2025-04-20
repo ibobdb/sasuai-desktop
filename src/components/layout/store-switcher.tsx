@@ -1,16 +1,16 @@
-import * as React from 'react';
-import { SidebarMenu, SidebarMenuButton } from '@/components/ui/sidebar';
+import * as React from 'react'
+import { SidebarMenu, SidebarMenuButton } from '@/components/ui/sidebar'
 
 export function StoreSwitcher({
-  stores,
+  stores
 }: {
   stores: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
+    name: string
+    logo: React.ElementType
+    plan: string
+  }[]
 }) {
-  const [activeStore] = React.useState(stores[0]);
+  const [activeStore] = React.useState(stores[0])
 
   return (
     <SidebarMenu>
@@ -27,5 +27,5 @@ export function StoreSwitcher({
         </div>
       </SidebarMenuButton>
     </SidebarMenu>
-  );
+  )
 }

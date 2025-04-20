@@ -1,13 +1,8 @@
-import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import {
-  IconArrowRightDashed,
-  IconDeviceLaptop,
-  IconMoon,
-  IconSun,
-} from '@tabler/icons-react';
-import { useSearch } from '@/context/search-context';
-import { useTheme } from '@/context/theme-context';
+import React from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { IconArrowRightDashed, IconDeviceLaptop, IconMoon, IconSun } from '@tabler/icons-react'
+import { useSearch } from '@/context/search-context'
+import { useTheme } from '@/context/theme-context'
 import {
   CommandDialog,
   CommandEmpty,
@@ -15,23 +10,23 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-} from '@/components/ui/command';
-import { sidebarData } from './layout/data/sidebar-data';
-import { ScrollArea } from './ui/scroll-area';
+  CommandSeparator
+} from '@/components/ui/command'
+import { sidebarData } from './layout/data/sidebar-data'
+import { ScrollArea } from './ui/scroll-area'
 
 export function CommandMenu() {
-  const navigate = useNavigate();
-  const { setTheme } = useTheme();
-  const { open, setOpen } = useSearch();
+  const navigate = useNavigate()
+  const { setTheme } = useTheme()
+  const { open, setOpen } = useSearch()
 
   const runCommand = React.useCallback(
     (command: () => unknown) => {
-      setOpen(false);
-      command();
+      setOpen(false)
+      command()
     },
-    [setOpen],
-  );
+    [setOpen]
+  )
 
   return (
     <CommandDialog modal open={open} onOpenChange={setOpen}>
@@ -48,7 +43,7 @@ export function CommandMenu() {
                       key={`${navItem.url}-${i}`}
                       value={navItem.title}
                       onSelect={() => {
-                        runCommand(() => navigate({ to: navItem.url }));
+                        runCommand(() => navigate({ to: navItem.url }))
                       }}
                     >
                       <div className="mr-2 flex h-4 w-4 items-center justify-center">
@@ -56,14 +51,14 @@ export function CommandMenu() {
                       </div>
                       {navItem.title}
                     </CommandItem>
-                  );
+                  )
 
                 return navItem.items?.map((subItem, i) => (
                   <CommandItem
                     key={`${subItem.url}-${i}`}
                     value={subItem.title}
                     onSelect={() => {
-                      runCommand(() => navigate({ to: subItem.url }));
+                      runCommand(() => navigate({ to: subItem.url }))
                     }}
                   >
                     <div className="mr-2 flex h-4 w-4 items-center justify-center">
@@ -71,7 +66,7 @@ export function CommandMenu() {
                     </div>
                     {subItem.title}
                   </CommandItem>
-                ));
+                ))
               })}
             </CommandGroup>
           ))}
@@ -92,5 +87,5 @@ export function CommandMenu() {
         </ScrollArea>
       </CommandList>
     </CommandDialog>
-  );
+  )
 }

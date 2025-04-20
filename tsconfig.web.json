@@ -1,0 +1,32 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": [
+    "electron/preload/*.d.ts",
+    "src/utils",
+    "src/main.tsx",
+    "src/routeTree.gen.ts",
+    "src/vite-env.d.ts",
+    "src/stores",
+    "src/routes",
+    "src/lib",
+    "src/hooks",
+    "src/features",
+    "src/context",
+    "src/config",
+    "src/components"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@renderer/*": [
+        "src/renderer/src/*"
+      ],
+      "@/*": [
+        "src/*"
+      ]
+    }
+  }
+}

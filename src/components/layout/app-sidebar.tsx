@@ -1,22 +1,27 @@
-import { Github } from 'lucide-react';
+import { Github } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-  useSidebar,
-} from '@/components/ui/sidebar';
-import { NavGroup } from '@/components/layout/nav-group';
-import { StoreSwitcher } from '@/components/layout/store-switcher';
-import { sidebarData } from './data/sidebar-data';
-import { Footer } from '@/components/layout/footer';
+  useSidebar
+} from '@/components/ui/sidebar'
+import { NavGroup } from '@/components/layout/nav-group'
+import { StoreSwitcher } from '@/components/layout/store-switcher'
+import { sidebarData } from './data/sidebar-data'
+import { Footer } from '@/components/layout/footer'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = useSidebar();
+  const { state } = useSidebar()
 
   return (
-    <Sidebar collapsible="icon" variant="floating" {...props}>
+    <Sidebar
+      collapsible="icon"
+      variant="floating"
+      className="mt-12 h-[calc(100vh-3rem)]" /* Add margin-top and adjust height */
+      {...props}
+    >
       <SidebarHeader>
         <StoreSwitcher stores={sidebarData.stores} />
       </SidebarHeader>
@@ -41,5 +46,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }

@@ -25,28 +25,26 @@ const errors500LazyImport = createFileRoute('/(errors)/500')()
 const errors404LazyImport = createFileRoute('/(errors)/404')()
 const errors403LazyImport = createFileRoute('/(errors)/403')()
 const errors401LazyImport = createFileRoute('/(errors)/401')()
-const authForgotPasswordLazyImport = createFileRoute(
-  '/(auth)/forgot-password',
-)()
+const authForgotPasswordLazyImport = createFileRoute('/(auth)/forgot-password')()
 
 // Create/Update Routes
 
 const AuthenticatedRouteRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRoute
 } as any)
 
 const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => AuthenticatedRouteRoute
 } as any)
 
 const errors503LazyRoute = errors503LazyImport
   .update({
     id: '/(errors)/503',
     path: '/503',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
   .lazy(() => import('./routes/(errors)/503.lazy').then((d) => d.Route))
 
@@ -54,7 +52,7 @@ const errors500LazyRoute = errors500LazyImport
   .update({
     id: '/(errors)/500',
     path: '/500',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
   .lazy(() => import('./routes/(errors)/500.lazy').then((d) => d.Route))
 
@@ -62,7 +60,7 @@ const errors404LazyRoute = errors404LazyImport
   .update({
     id: '/(errors)/404',
     path: '/404',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
   .lazy(() => import('./routes/(errors)/404.lazy').then((d) => d.Route))
 
@@ -70,7 +68,7 @@ const errors403LazyRoute = errors403LazyImport
   .update({
     id: '/(errors)/403',
     path: '/403',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
   .lazy(() => import('./routes/(errors)/403.lazy').then((d) => d.Route))
 
@@ -78,7 +76,7 @@ const errors401LazyRoute = errors401LazyImport
   .update({
     id: '/(errors)/401',
     path: '/401',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
 
@@ -86,22 +84,20 @@ const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   .update({
     id: '/(auth)/forgot-password',
     path: '/forgot-password',
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => rootRoute
   } as any)
-  .lazy(() =>
-    import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
-  )
+  .lazy(() => import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route))
 
 const authSignInRoute = authSignInImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRoute
 } as any)
 
 const auth500Route = auth500Import.update({
   id: '/(auth)/500',
   path: '/500',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRoute
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -188,11 +184,12 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(
+  AuthenticatedRouteRouteChildren
+)
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteRouteWithChildren
@@ -233,26 +230,9 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | ''
-    | '/500'
-    | '/sign-in'
-    | '/forgot-password'
-    | '/401'
-    | '/403'
-    | '/404'
-    | '/503'
-    | '/'
+  fullPaths: '' | '/500' | '/sign-in' | '/forgot-password' | '/401' | '/403' | '/404' | '/503' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/500'
-    | '/sign-in'
-    | '/forgot-password'
-    | '/401'
-    | '/403'
-    | '/404'
-    | '/503'
-    | '/'
+  to: '/500' | '/sign-in' | '/forgot-password' | '/401' | '/403' | '/404' | '/503' | '/'
   id:
     | '__root__'
     | '/_authenticated'
@@ -289,7 +269,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors403LazyRoute: errors403LazyRoute,
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
-  errors503LazyRoute: errors503LazyRoute,
+  errors503LazyRoute: errors503LazyRoute
 }
 
 export const routeTree = rootRoute

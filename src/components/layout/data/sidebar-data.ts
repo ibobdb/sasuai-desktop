@@ -1,19 +1,19 @@
-import { IconLayoutDashboard } from '@tabler/icons-react';
-import { Command } from 'lucide-react';
-import { type SidebarData } from '../types';
+import { IconLayoutDashboard } from '@tabler/icons-react'
+import { Command } from 'lucide-react'
+import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
     name: 'sasuai',
     email: 'admin@sasuai.com',
-    avatar: '/avatars/shadcn.jpg',
+    avatar: '/avatars/shadcn.jpg'
   },
   stores: [
     {
       name: 'Sasuai Store',
       logo: Command,
-      plan: 'Store Management',
-    },
+      plan: 'Store Management'
+    }
   ],
   navGroups: [
     {
@@ -22,9 +22,9 @@ export const sidebarData: SidebarData = {
         {
           title: 'Dashboard',
           url: '/',
-          icon: IconLayoutDashboard,
-        },
-      ],
-    },
-  ],
-};
+          icon: IconLayoutDashboard
+        }
+      ]
+    }
+  ]
+}

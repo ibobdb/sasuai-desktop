@@ -1,44 +1,63 @@
-import { HTMLAttributes, useState } from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { HTMLAttributes, useState } from 'react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+  FormMessage
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 
-type ForgotFormProps = HTMLAttributes<HTMLDivElement>;
+type ForgotFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z.object({
   email: z
     .string()
     .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
-});
+    .email({ message: 'Invalid email address' })
+})
 
 export function ForgotForm({ className, ...props }: ForgotFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '' },
-  });
+    defaultValues: { email: '' }
+  })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    // eslint-disable-next-line no-console
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    setIsLoading(true)
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+    try {
+      // Panggil API forgot password melalui Electron
+      const response = await window.api.fetchApi('http://localhost:3000/api/auth/forgot-password', {
+        method: 'POST',
+        data: { email: data.email },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.success) {
+        toast.success(response.message || 'Password reset link has been sent to your email')
+        navigate({ to: '/sign-in' })
+      } else {
+        toast.error(response.message || 'Failed to send reset link')
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      toast.error('An error occurred while processing your request')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -53,27 +72,29 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
                 <FormItem className="space-y-1">
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="name@example.com" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button className="mt-2" disabled={isLoading}>
-              Continue
+            <Button className="mt-2" type="submit" disabled={isLoading}>
+              {isLoading ? 'Sending...' : 'Continue'}
             </Button>
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-muted-foreground">
-              Remembered your password?
-            </div>
-            <Button variant="link" size="sm" disabled={isLoading}>
-              Sign in
-            </Button>
+            <div className="text-sm text-muted-foreground">Remembered your password?</div>
+            <Link
+              to="/sign-in"
+              className="text-sm font-medium text-muted-foreground hover:opacity-75"
+              onClick={(e) => isLoading && e.preventDefault()}
+            >
+              Sign In
+            </Link>
           </div>
         </form>
       </Form>
     </div>
-  );
+  )
 }

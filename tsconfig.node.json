@@ -1,26 +1,10 @@
 {
-	"compilerOptions": {
-		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-		"target": "ES2022",
-		"lib": [
-			"ES2023"
-		],
-		"module": "ESNext",
-		"skipLibCheck": true,
-		/* Bundler mode */
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"isolatedModules": true,
-		"moduleDetection": "force",
-		"noEmit": true,
-		/* Linting */
-		"strict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedSideEffectImports": true
-	},
-	"include": [
-		"vite.config.ts"
-	]
+  "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
+  "include": ["electron.vite.config.*", "electron/main/**/*", "electron/preload/**/*"],
+  "compilerOptions": {
+    "composite": true,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "types": ["electron-vite/node"]
+  }
 }

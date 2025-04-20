@@ -1,20 +1,34 @@
-<h1 align="center">Electron + Vite + React + Typescript + TailWindCSS + ShadCN</h1>
+# sasuai-store
 
-This is an **Electron** template using **Vite, React, Typescript, TailWindCSS and ShadCN**. It includes hot reloading, IPC type-safety and general security.
+An Electron application with React and TypeScript
+
+## Recommended IDE Setup
+
+- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
 ## Project Setup
-#### It works on Windows but I haven't tested it on neither Linux nor Mac
-1. Clone the repository
-1. Run **```npm install```** inside the cloned repository
 
-## For development
-1. **Starting the application** - Run **```npm run dev```** - This starts the application as well as a local server on port **```3524```**
-1. **Changing the port** - You can change the server port at the **```vite.config.ts```**. After that you need to type the same port in the **```src/electron/util.ts```** folder in the **```validateEventFrame()```** function. You also have to change the port at **```src/electron/main.ts```** in the **```if(isDev())```**. 
+### Install
 
-## For production
-1. To create a production for Windows run **```npm run dist:win```**
-1. To create a production for Linux run **```npm run dist:linux```**
-1. To create a production for Mac run **```npm run dist:mac```**
+```bash
+$ npm install
+```
 
-## Licence
-Licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
+### Development
+
+```bash
+$ npm run dev
+```
+
+### Build
+
+```bash
+# For windows
+$ npm run build:win
+
+# For macOS
+$ npm run build:mac
+
+# For Linux
+$ npm run build:linux
+```
