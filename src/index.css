@@ -44,46 +44,46 @@
   /* Latar belakang utama - abu-abu sangat gelap dengan sedikit nuansa biru */
   --background: hsl(220, 8%, 10%);
   --foreground: hsl(0, 0%, 95%);
-  
+
   /* Kartu dan panel - sedikit lebih terang dari background */
   --card: hsl(220, 8%, 13%);
   --card-foreground: hsl(0, 0%, 95%);
-  
+
   /* Popover dan dialog */
   --popover: hsl(220, 8%, 15%);
   --popover-foreground: hsl(0, 0%, 95%);
-  
+
   /* Warna primer - hijau WhatsApp */
   --primary: hsl(142, 70%, 45%);
   --primary-foreground: hsl(0, 0%, 100%);
-  
+
   /* Warna sekunder - abu-abu lebih terang */
   --secondary: hsl(220, 8%, 20%);
   --secondary-foreground: hsl(0, 0%, 95%);
-  
+
   /* Muted - elemen yang kurang menonjol */
   --muted: hsl(220, 8%, 17%);
   --muted-foreground: hsl(0, 0%, 70%);
-  
+
   /* Accent - untuk hover dan highlight */
   --accent: hsl(220, 8%, 17%);
   --accent-foreground: hsl(0, 0%, 95%);
-  
+
   /* Destructive - merah untuk peringatan/hapus */
   --destructive: hsl(0, 65%, 52%);
-  
+
   /* Border dan input */
   --border: hsla(220, 8%, 24%, 0.8);
   --input: hsla(220, 8%, 24%, 0.8);
   --ring: hsla(142, 70%, 45%, 0.5);
-  
+
   /* Chart colors */
   --chart-1: hsl(142, 70%, 45%);
   --chart-2: hsl(180, 70%, 45%);
   --chart-3: hsl(200, 70%, 50%);
   --chart-4: hsl(160, 70%, 40%);
   --chart-5: hsl(30, 80%, 50%);
-  
+
   /* Sidebar khusus - lebih gelap dari area utama (seperti di WhatsApp) */
   --sidebar: hsl(220, 8%, 8%);
   --sidebar-foreground: hsl(0, 0%, 95%);
@@ -162,18 +162,18 @@
       font-size: 16px !important;
     }
   }
-  
+
   /* WhatsApp-like scrollbar styling for dark mode */
   .dark ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   .dark ::-webkit-scrollbar-thumb {
     background-color: hsla(220, 8%, 30%, 0.8);
     border-radius: 6px;
   }
-  
+
   .dark ::-webkit-scrollbar-track {
     background-color: transparent;
   }
