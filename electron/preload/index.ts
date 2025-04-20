@@ -36,7 +36,14 @@ if (process.contextIsolated) {
       }
     })
 
-    contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('api', {
+      fetchApi: (...args) => ipcRenderer.invoke('fetch-api', ...args),
+      store: {
+        get: (key) => ipcRenderer.invoke('store:get', key),
+        set: (key, value) => ipcRenderer.invoke('store:set', key, value),
+        delete: (key) => ipcRenderer.invoke('store:delete', key)
+      }
+    })
   } catch (error) {
     console.error(error)
   }

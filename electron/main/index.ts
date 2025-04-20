@@ -3,6 +3,9 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
+import Store from 'electron-store'
+
+const store = new Store()
 
 let mainWindow: BrowserWindow | null = null
 
@@ -117,4 +120,19 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Handlers untuk session
+ipcMain.handle('store:get', (_event, key) => {
+  return store.get(key)
+})
+
+ipcMain.handle('store:set', (_event, key, value) => {
+  store.set(key, value)
+  return true
+})
+
+ipcMain.handle('store:delete', (_event, key) => {
+  store.delete(key)
+  return true
 })

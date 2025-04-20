@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import { create } from 'zustand'
 
 // Nama cookies dari response
@@ -31,7 +30,7 @@ interface AuthState {
   initialize: () => void
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isLoading: false,
@@ -44,9 +43,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const response = (await window.api.fetchApi('http://localhost:3000/api/auth/sign-in/email', {
         method: 'POST',
         data: { email, password },
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         withCredentials: true
       })) as AuthResponse
 
@@ -56,8 +53,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false
       })
 
-      Cookies.set(SESSION_TOKEN, response.token)
-      Cookies.set(SESSION_DATA, JSON.stringify(response.user))
+      // Simpan di electron-store, tidak menggunakan cookies
+      await window.api.store.set(SESSION_TOKEN, response.token)
+      await window.api.store.set(SESSION_DATA, response.user)
     } catch (error) {
       console.error('Sign in failed:', error)
       set({
@@ -68,9 +66,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signOut: (): void => {
-    Cookies.remove(SESSION_TOKEN)
-    Cookies.remove(SESSION_DATA)
+  signOut: async (): Promise<void> => {
+    await window.api.store.delete(SESSION_TOKEN)
+    await window.api.store.delete(SESSION_DATA)
     set({
       user: null,
       token: null,
@@ -79,20 +77,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     })
   },
 
-  initialize: (): void => {
-    const token = Cookies.get(SESSION_TOKEN)
-    const userData = Cookies.get(SESSION_DATA)
+  initialize: async (): Promise<void> => {
+    const token = await window.api.store.get(SESSION_TOKEN)
+    const userData = await window.api.store.get(SESSION_DATA)
 
     if (token && userData) {
-      try {
-        set({
-          token,
-          user: JSON.parse(userData)
-        })
-      } catch (e) {
-        console.error('Failed to parse user data:', e)
-        get().signOut()
-      }
+      set({
+        token,
+        user: userData
+      })
     }
   }
 }))
