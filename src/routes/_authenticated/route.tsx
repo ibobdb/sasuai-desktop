@@ -38,12 +38,15 @@ function RouteComponent() {
           >
             <Header className="bg-background z-20 header-container" fixed={true}>
               <div className="flex w-full items-center justify-between header-content">
+                {/* Tambahkan titlebar-drag-region yang tidak menutupi elemen interaktif */}
+                <div className="absolute left-0 top-0 h-4 w-full titlebar-drag-region" />
+
                 <div className="flex-shrink-0 pl-4">{/* Optional: Left-side components */}</div>
-                <div className="mx-auto flex-grow flex items-center justify-center">
+                <div className="mx-auto flex-grow flex items-center justify-center z-10">
                   <Search />
                 </div>
 
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-end z-10">
                   <div className="flex items-center space-x-4 header-right-section">
                     <ThemeSwitch />
                     <ProfileDropdown />
@@ -52,7 +55,7 @@ function RouteComponent() {
                 </div>
               </div>
             </Header>
-            <Main>
+            <Main className="pt-0 mt-14">
               <Outlet />
             </Main>
           </div>
