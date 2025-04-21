@@ -21,12 +21,14 @@ interface AuthResponse {
   user: AuthUser
 }
 
+type LoginMethod = 'email' | 'username'
+
 interface AuthState {
   user: AuthUser | null
   token: string | null
   isLoading: boolean
   error: string | null
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (identifier: string, password: string, method?: LoginMethod) => Promise<void>
   signOut: () => void
   initialize: () => void
 }
@@ -37,13 +39,24 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-  signIn: async (email: string, password: string): Promise<void> => {
+  signIn: async (
+    identifier: string,
+    password: string,
+    method: LoginMethod = 'email'
+  ): Promise<void> => {
     set({ isLoading: true, error: null })
 
     try {
-      const response = (await window.api.fetchApi(API_ENDPOINTS.AUTH.SIGN_IN, {
+      const data =
+        method === 'email' ? { email: identifier, password } : { username: identifier, password }
+
+      // Choose correct endpoint based on method
+      const endpoint =
+        method === 'email' ? API_ENDPOINTS.AUTH.SIGN_IN_EMAIL : API_ENDPOINTS.AUTH.SIGN_IN_USERNAME
+
+      const response = (await window.api.fetchApi(endpoint, {
         method: 'POST',
-        data: { email, password },
+        data,
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true
       })) as AuthResponse
