@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { API_ENDPOINTS } from '@/config/api'
 
 // Nama cookies dari response
 const SESSION_TOKEN = 'better-auth.session_token'
@@ -40,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null })
 
     try {
-      const response = (await window.api.fetchApi('http://localhost:3000/api/auth/sign-in/email', {
+      const response = (await window.api.fetchApi(API_ENDPOINTS.AUTH.SIGN_IN, {
         method: 'POST',
         data: { email, password },
         headers: { 'Content-Type': 'application/json' },
