@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as auth500Import } from './routes/(auth)/500'
 
@@ -25,26 +26,28 @@ const errors500LazyImport = createFileRoute('/(errors)/500')()
 const errors404LazyImport = createFileRoute('/(errors)/404')()
 const errors403LazyImport = createFileRoute('/(errors)/403')()
 const errors401LazyImport = createFileRoute('/(errors)/401')()
-const authForgotPasswordLazyImport = createFileRoute('/(auth)/forgot-password')()
+const authForgotPasswordLazyImport = createFileRoute(
+  '/(auth)/forgot-password',
+)()
 
 // Create/Update Routes
 
 const AuthenticatedRouteRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 const errors503LazyRoute = errors503LazyImport
   .update({
     id: '/(errors)/503',
     path: '/503',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/503.lazy').then((d) => d.Route))
 
@@ -52,7 +55,7 @@ const errors500LazyRoute = errors500LazyImport
   .update({
     id: '/(errors)/500',
     path: '/500',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/500.lazy').then((d) => d.Route))
 
@@ -60,7 +63,7 @@ const errors404LazyRoute = errors404LazyImport
   .update({
     id: '/(errors)/404',
     path: '/404',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/404.lazy').then((d) => d.Route))
 
@@ -68,7 +71,7 @@ const errors403LazyRoute = errors403LazyImport
   .update({
     id: '/(errors)/403',
     path: '/403',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/403.lazy').then((d) => d.Route))
 
@@ -76,7 +79,7 @@ const errors401LazyRoute = errors401LazyImport
   .update({
     id: '/(errors)/401',
     path: '/401',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
 
@@ -84,20 +87,28 @@ const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   .update({
     id: '/(auth)/forgot-password',
     path: '/forgot-password',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
-  .lazy(() => import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route))
+  .lazy(() =>
+    import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 const authSignInRoute = authSignInImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 const auth500Route = auth500Import.update({
   id: '/(auth)/500',
   path: '/500',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -124,6 +135,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInImport
       parentRoute: typeof rootRoute
+    }
+    '/_authenticated/transactions': {
+      id: '/_authenticated/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedTransactionsImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/(auth)/forgot-password': {
       id: '/(auth)/forgot-password'
@@ -180,21 +198,23 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute
+  AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(
-  AuthenticatedRouteRouteChildren
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteRouteWithChildren
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
@@ -206,6 +226,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
@@ -219,6 +240,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/(auth)/500': typeof auth500Route
   '/(auth)/sign-in': typeof authSignInRoute
+  '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
   '/(errors)/403': typeof errors403LazyRoute
@@ -230,14 +252,34 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/500' | '/sign-in' | '/forgot-password' | '/401' | '/403' | '/404' | '/503' | '/'
+  fullPaths:
+    | ''
+    | '/500'
+    | '/sign-in'
+    | '/transactions'
+    | '/forgot-password'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/503'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/500' | '/sign-in' | '/forgot-password' | '/401' | '/403' | '/404' | '/503' | '/'
+  to:
+    | '/500'
+    | '/sign-in'
+    | '/transactions'
+    | '/forgot-password'
+    | '/401'
+    | '/403'
+    | '/404'
+    | '/503'
+    | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/(auth)/500'
     | '/(auth)/sign-in'
+    | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
     | '/(errors)/401'
     | '/(errors)/403'
@@ -269,7 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors403LazyRoute: errors403LazyRoute,
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
-  errors503LazyRoute: errors503LazyRoute
+  errors503LazyRoute: errors503LazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -296,6 +338,7 @@ export const routeTree = rootRoute
     "/_authenticated": {
       "filePath": "_authenticated/route.tsx",
       "children": [
+        "/_authenticated/transactions",
         "/_authenticated/"
       ]
     },
@@ -304,6 +347,10 @@ export const routeTree = rootRoute
     },
     "/(auth)/sign-in": {
       "filePath": "(auth)/sign-in.tsx"
+    },
+    "/_authenticated/transactions": {
+      "filePath": "_authenticated/transactions.tsx",
+      "parent": "/_authenticated"
     },
     "/(auth)/forgot-password": {
       "filePath": "(auth)/forgot-password.lazy.tsx"

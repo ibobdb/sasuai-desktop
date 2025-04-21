@@ -4,59 +4,60 @@ import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
-import { ProtectedRoute } from '@/components/protected-route'
 import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { ProfileDropdown } from '@/components/profile-dropdown'
+import { ProtectedRoute } from '@/components/protected-route'
+import { WindowControls } from '@/components/window-controls'
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent
 })
 
 function RouteComponent() {
-  const defaultOpen = Cookies.get('sidebar:state') !== 'false'
+  const defaultOpen = Cookies.get('sidebar_state') !== 'false'
 
   return (
-    <SearchProvider>
-      <SidebarProvider defaultOpen={defaultOpen}>
-        <div className="flex flex-col h-svh">
-          {/* Header with window controls */}
-          <Header fixed showWindowControls>
-            {/* Center section - Search with extreme width */}
-            <div className="flex-1 max-w-full">
-              <Search className="w-full max-w-[1000px] mx-auto" placeholder="Search..." />
-            </div>
+    <ProtectedRoute>
+      <SearchProvider>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <AppSidebar className="app-sidebar-wrapper" />
+          <div
+            id="content"
+            className={cn(
+              'ml-auto w-full max-w-full',
+              'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
+              'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
+              'sm:transition-[width] sm:duration-200 sm:ease-linear',
+              'flex h-svh flex-col',
+              'group-data-[scroll-locked=1]/body:h-full',
+              'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh'
+            )}
+          >
+            <Header className="bg-background z-20 header-container" fixed={true}>
+              <div className="flex w-full items-center justify-between header-content">
+                <div className="flex-shrink-0 pl-4">{/* Optional: Left-side components */}</div>
+                <div className="mx-auto flex-grow flex items-center justify-center">
+                  <Search />
+                </div>
 
-            {/* Right section */}
-            <div className="flex items-center space-x-4">
-              <ThemeSwitch />
-              <ProfileDropdown />
-            </div>
-          </Header>
-
-          {/* Main content area with sidebar and content */}
-          <div className="flex flex-1 overflow-hidden">
-            <AppSidebar />
-            <div
-              id="content"
-              className={cn(
-                'ml-auto w-full max-w-full',
-                'peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
-                'peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
-                'transition-[width] duration-200 ease-linear',
-                'flex flex-col',
-                'overflow-y-auto',
-                'mt-12'
-              )}
-            >
-              <ProtectedRoute>
-                <Outlet />
-              </ProtectedRoute>
-            </div>
+                <div className="flex items-center justify-end">
+                  <div className="flex items-center space-x-4 header-right-section">
+                    <ThemeSwitch />
+                    <ProfileDropdown />
+                  </div>
+                  <WindowControls className="window-controls" />
+                </div>
+              </div>
+            </Header>
+            <Main>
+              <Outlet />
+            </Main>
           </div>
-        </div>
-      </SidebarProvider>
-    </SearchProvider>
+        </SidebarProvider>
+      </SearchProvider>
+    </ProtectedRoute>
   )
 }

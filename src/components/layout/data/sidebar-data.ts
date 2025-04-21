@@ -23,6 +23,12 @@ export const sidebarData: SidebarData = {
           title: 'Dashboard',
           url: '/',
           icon: IconLayoutDashboard
+        },
+
+        {
+          title: 'Transactions',
+          url: '/transactions',
+          icon: Command
         }
       ]
     }
