@@ -25,4 +25,4 @@
  * }
  * ```
  */
-export const fonts = ['inter', 'manrope', 'system'] as const
+export const fonts = ['opensans', 'inter', 'manrope', 'system'] as const
