@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
+import { API_ENDPOINTS } from '@/config/api'
 
 type ForgotFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -38,7 +39,7 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
     try {
       // Panggil API forgot password melalui Electron
-      const response = await window.api.fetchApi('http://localhost:3000/api/auth/forgot-password', {
+      const response = await window.api.fetchApi(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
         method: 'POST',
         data: { email: data.email },
         headers: {

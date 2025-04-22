@@ -3,6 +3,9 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
+import Store from 'electron-store'
+
+const store = new Store()
 
 let mainWindow: BrowserWindow | null = null
 
@@ -75,6 +78,25 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('fetch-api-with-auth', async (_event, url, options = {}) => {
+    const token = store.get('authToken')
+    try {
+      const response = await axios({
+        url,
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`
+        },
+        timeout: 60000
+      })
+      return response.data
+    } catch (error) {
+      console.error('API request failed:', error)
+      throw error
+    }
+  })
+
   // Custom titlebar window control handlers
   ipcMain.handle('window:minimize', () => {
     if (mainWindow) {
@@ -117,4 +139,19 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Handlers untuk session
+ipcMain.handle('store:get', (_event, key) => {
+  return store.get(key)
+})
+
+ipcMain.handle('store:set', (_event, key, value) => {
+  store.set(key, value)
+  return true
+})
+
+ipcMain.handle('store:delete', (_event, key) => {
+  store.delete(key)
+  return true
 })

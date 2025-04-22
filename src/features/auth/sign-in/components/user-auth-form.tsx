@@ -20,11 +20,22 @@ import { toast } from 'sonner'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
+// A combined schema that accepts either email or username
 const formSchema = z.object({
-  email: z
+  identifier: z
     .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
+    .min(1, { message: 'Please enter your email or username' })
+    .refine(
+      (value) => {
+        // Either valid email or username with minimum length
+        const isEmail = value.includes('@') && value.includes('.')
+        const isUsername = !value.includes('@') && value.length >= 3
+        return isEmail || isUsername
+      },
+      {
+        message: 'Please enter a valid email or username (min 3 characters)'
+      }
+    ),
   password: z
     .string()
     .min(1, { message: 'Please enter your password' })
@@ -36,7 +47,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', password: '' }
+    defaultValues: { identifier: '', password: '' }
   })
 
   // Auto-redirect jika sudah login
@@ -48,7 +59,10 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
-      const promise = signIn(data.email, data.password)
+      // Determine login method based on identifier format
+      const loginMethod = data.identifier.includes('@') ? 'email' : 'username'
+
+      const promise = signIn(data.identifier, data.password, loginMethod)
 
       toast.promise(promise, {
         loading: 'Logging in...',
@@ -74,12 +88,16 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           <div className="grid gap-2">
             <FormField
               control={form.control}
-              name="email"
+              name="identifier"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email or Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} disabled={isLoading} />
+                    <Input
+                      placeholder="name@example.com or username"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

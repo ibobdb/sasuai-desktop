@@ -85,17 +85,17 @@ export function WindowControls({ className }: WindowControlsProps) {
   }
 
   return (
-    <div className={cn('fixed top-0 right-0 z-50 flex items-center titlebar-no-drag', className)}>
+    <div className={cn('flex items-center titlebar-no-drag', className)}>
       <div className="flex">
         {/* Minimize Button */}
         <div className="group relative">
           <button
             onClick={handleMinimizeClick}
-            className="h-10 w-12 inline-flex items-center justify-center hover:bg-muted transition-colors duration-150 focus:outline-none"
+            className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label="Minimize"
             type="button"
           >
-            <Minus size={14} className="text-foreground/70" />
+            <Minus size={12} className="text-foreground/70" />
           </button>
           <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
             Minimize
@@ -106,14 +106,14 @@ export function WindowControls({ className }: WindowControlsProps) {
         <div className="group relative">
           <button
             onClick={handleMaximizeClick}
-            className="h-10 w-12 inline-flex items-center justify-center hover:bg-muted transition-colors duration-150 focus:outline-none"
+            className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label={isMaximized ? 'Restore' : 'Maximize'}
             type="button"
           >
             {isMaximized ? (
-              <Square size={12} className="text-foreground/70" />
+              <Square size={10} className="text-foreground/70" />
             ) : (
-              <Maximize2 size={12} className="text-foreground/70" />
+              <Maximize2 size={10} className="text-foreground/70" />
             )}
           </button>
           <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
@@ -125,11 +125,11 @@ export function WindowControls({ className }: WindowControlsProps) {
         <div className="group relative">
           <button
             onClick={handleCloseClick}
-            className="h-10 w-12 inline-flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors duration-150 focus:outline-none"
+            className="h-8 w-10 inline-flex items-center justify-center hover:bg-destructive/80 hover:text-destructive-foreground transition-colors duration-150 focus:outline-none"
             aria-label="Close"
             type="button"
           >
-            <X size={14} />
+            <X size={12} />
           </button>
           <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
             Close

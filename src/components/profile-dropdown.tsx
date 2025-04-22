@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,6 +9,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { LogOut } from 'lucide-react'

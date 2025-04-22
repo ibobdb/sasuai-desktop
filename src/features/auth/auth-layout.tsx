@@ -7,14 +7,14 @@ interface Props {
 export default function AuthLayout({ children }: Props) {
   return (
     <div className="h-svh flex flex-col">
-      {/* Title bar - draggable area */}
-      <div className="h-10 w-full titlebar-drag-region" />
-
-      {/* Window controls - positioned absolutely */}
-      <WindowControls />
+      {/* Title bar with controls properly positioned */}
+      <div className="h-10 w-full titlebar-drag-region flex items-center justify-between">
+        <div className="flex-1"></div>
+        <WindowControls />
+      </div>
 
       {/* Content area */}
-      <div className="flex-1 container grid items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
+      <div className="flex-1 container grid items-center justify-center lg:max-w-none lg:px-0">
         <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
           <div className="mb-4 flex items-center justify-center">
             <svg
