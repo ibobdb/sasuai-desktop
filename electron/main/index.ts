@@ -78,6 +78,25 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('fetch-api-with-auth', async (_event, url, options = {}) => {
+    const token = store.get('authToken')
+    try {
+      const response = await axios({
+        url,
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`
+        },
+        timeout: 60000
+      })
+      return response.data
+    } catch (error) {
+      console.error('API request failed:', error)
+      throw error
+    }
+  })
+
   // Custom titlebar window control handlers
   ipcMain.handle('window:minimize', () => {
     if (mainWindow) {

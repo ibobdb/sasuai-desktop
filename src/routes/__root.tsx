@@ -13,7 +13,7 @@ export const Route = createRootRouteWithContext<{
       <>
         <NavigationProgress />
         <Outlet />
-        <Toaster duration={50000} />
+        <Toaster duration={3000} />
       </>
     )
   },

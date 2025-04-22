@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Main } from '@/components/layout/main'
-import ProductSearch from './components/ProductSearch'
-import CartList from './components/CartList'
-import DiscountSection from './components/DiscountSection'
-import TransactionSummary from './components/TransactionSummary'
-import PaymentSection from './components/PaymentSection'
-import ActionButtons from './components/ActionButtons'
-import { MemberSection } from './components/MemberSection'
+import ProductSearch from './components/product-search'
+import CartList from './components/cart-list'
+import DiscountSection from './components/discount-section'
+import TransactionSummary from './components/summary'
+import PaymentSection from './components/payment-section'
+import ActionButtons from './components/action-buttons'
+import { MemberSection } from './components/member-section'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -25,7 +25,7 @@ type CartItem = Product & {
 type DiscountType = 'percentage' | 'fixed'
 type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
 
-export default function Transactions() {
+export default function Cashier() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [discount, setDiscount] = useState<number>(0)
   const [discountType, setDiscountType] = useState<DiscountType>('fixed')

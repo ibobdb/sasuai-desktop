@@ -1,4 +1,4 @@
-import { IconLayoutDashboard } from '@tabler/icons-react'
+import { IconLayoutDashboard, IconCashBanknote } from '@tabler/icons-react'
 import { Command } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -26,9 +26,9 @@ export const sidebarData: SidebarData = {
         },
 
         {
-          title: 'Transactions',
-          url: '/transactions',
-          icon: Command
+          title: 'Cashier',
+          url: '/cashier',
+          icon: IconCashBanknote
         }
       ]
     }

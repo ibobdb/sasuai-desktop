@@ -2,7 +2,9 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 const api = {
-  fetchApi: (url: string, options?: any) => ipcRenderer.invoke('fetch-api', url, options)
+  fetchApi: (url: string, options?: any) => ipcRenderer.invoke('fetch-api', url, options),
+  fetchWithAuth: (url: string, options?: any) =>
+    ipcRenderer.invoke('fetch-api-with-auth', url, options)
 }
 
 if (process.contextIsolated) {
@@ -38,6 +40,7 @@ if (process.contextIsolated) {
 
     contextBridge.exposeInMainWorld('api', {
       fetchApi: (...args) => ipcRenderer.invoke('fetch-api', ...args),
+      fetchWithAuth: (...args) => ipcRenderer.invoke('fetch-api-with-auth', ...args),
       store: {
         get: (key) => ipcRenderer.invoke('store:get', key),
         set: (key, value) => ipcRenderer.invoke('store:set', key, value),

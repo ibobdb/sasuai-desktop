@@ -7,8 +7,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/config/api'
+import { CreateMemberDialog } from './create-member-dialog'
 
-// Updated member type to match the actual API response
 export type Member = {
   id: string
   name: string
@@ -21,7 +21,6 @@ export type Member = {
   tier: { name?: string; level?: string } | null
 }
 
-// Updated response type to match the actual API structure
 type MemberResponse = {
   data: {
     members: Member[]
@@ -40,6 +39,7 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
   const [query, setQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [showMemberSearch, setShowMemberSearch] = useState(false)
+  const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { token } = useAuthStore()
 
@@ -60,9 +60,7 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
         }
       )) as MemberResponse
 
-      // Updated to handle the nested members array in the response
       if (response.success && response.data?.members?.length > 0) {
-        // Find exact match or use the first result
         const exactMatch = response.data.members.find(
           (m) => m.phone === query || m.name.toLowerCase() === query.toLowerCase()
         )
@@ -194,11 +192,10 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() =>
-                toast.info('New member registration', {
-                  description: 'This feature will be available soon'
-                })
-              }
+              onClick={() => {
+                setShowMemberSearch(false)
+                setShowCreateMemberDialog(true)
+              }}
             >
               <UserPlus className="h-3 w-3 mr-1" /> New Member
             </Button>
@@ -217,16 +214,18 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() =>
-              toast.info('New member registration', {
-                description: 'This feature will be available soon'
-              })
-            }
+            onClick={() => setShowCreateMemberDialog(true)}
           >
             <UserPlus className="h-4 w-4 mr-2" /> New Member
           </Button>
         </div>
       )}
+
+      <CreateMemberDialog
+        open={showCreateMemberDialog}
+        onOpenChange={setShowCreateMemberDialog}
+        onSuccess={handleMemberSelect}
+      />
     </div>
   )
 }
