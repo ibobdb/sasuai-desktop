@@ -9,6 +9,7 @@ import ActionButtons from './components/action-buttons'
 import { MemberSection } from './components/member-section'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
+import { Member } from './components/member-section'
 
 type Product = {
   id: string
@@ -31,15 +32,19 @@ export default function Cashier() {
   const [discountType, setDiscountType] = useState<DiscountType>('fixed')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [member, setMember] = useState<{ id: string; name: string; totalPoints: number } | null>(
-    null
-  )
+  const [member, setMember] = useState<Member | null>(null)
 
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
   const discountValue = discountType === 'percentage' ? subtotal * (discount / 100) : discount
   const tax = 0 // Implement tax calculation if needed
-  const total = subtotal - discountValue + tax
+
+  // Apply member discount if applicable (for example, 5% discount for members)
+  const memberDiscount = member ? subtotal * 0.05 : 0
+  const pointsToEarn = member ? Math.floor(subtotal / 1000) : 0
+
+  // Include member discount in the total discount calculation
+  const totalDiscount = discountValue + memberDiscount
+  const total = subtotal - totalDiscount + tax
   const change = paymentAmount - total
 
   const addToCart = (product: Product) => {
@@ -85,18 +90,42 @@ export default function Cashier() {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id))
   }
 
-  // Clear cart
+  // Clear cart and reset member
   const clearCart = () => {
     setCart([])
     setDiscount(0)
     setPaymentAmount(0)
+    setMember(null)
   }
 
   // Handle payment
   const handlePayment = () => {
     // Handle payment logic and API calls
+    if (member && pointsToEarn > 0) {
+      // Update member points based on purchase
+      console.log(`Updating points for member ${member.name}, adding ${pointsToEarn} points`)
+      // Here you would call an API to update member points
+    }
+
     alert('Payment successful!')
     clearCart()
+  }
+
+  // Custom footer to display member information and points to earn
+  const renderMemberInfo = () => {
+    if (!member) return null
+
+    return (
+      <div className="text-sm mt-2 text-muted-foreground">
+        <p>
+          Member: {member.name} ({member.tier?.name || 'Regular'})
+        </p>
+        {memberDiscount > 0 && (
+          <p className="text-green-600">Member discount: {memberDiscount.toLocaleString()}</p>
+        )}
+        <p>Points to earn: {pointsToEarn}</p>
+      </div>
+    )
   }
 
   return (
@@ -123,10 +152,11 @@ export default function Cashier() {
               <TransactionSummary
                 itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 subtotal={subtotal}
-                discount={discountValue}
+                discount={totalDiscount}
                 tax={tax}
                 total={total}
               />
+              {renderMemberInfo()}
             </CardContent>
           </Card>
 

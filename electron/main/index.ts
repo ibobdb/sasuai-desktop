@@ -79,7 +79,7 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('fetch-api-with-auth', async (_event, url, options = {}) => {
-    const token = store.get('authToken')
+    const token = store.get('SESSION_TOKEN')
     try {
       const response = await axios({
         url,

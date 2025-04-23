@@ -34,8 +34,6 @@ type PaymentSectionProps = {
 }
 
 export default function PaymentSection({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  total,
   paymentMethod,
   paymentAmount,
   change,
