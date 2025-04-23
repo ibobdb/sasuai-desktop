@@ -38,12 +38,8 @@ export default function Cashier() {
   const discountValue = discountType === 'percentage' ? subtotal * (discount / 100) : discount
   const tax = 0 // Implement tax calculation if needed
 
-  // Apply member discount if applicable (for example, 5% discount for members)
-  const memberDiscount = member ? subtotal * 0.05 : 0
-  const pointsToEarn = member ? Math.floor(subtotal / 1000) : 0
-
-  // Include member discount in the total discount calculation
-  const totalDiscount = discountValue + memberDiscount
+  // Total discount is just the discount value (no member discount)
+  const totalDiscount = discountValue
   const total = subtotal - totalDiscount + tax
   const change = paymentAmount - total
 
@@ -101,9 +97,9 @@ export default function Cashier() {
   // Handle payment
   const handlePayment = () => {
     // Handle payment logic and API calls
-    if (member && pointsToEarn > 0) {
-      // Update member points based on purchase
-      console.log(`Updating points for member ${member.name}, adding ${pointsToEarn} points`)
+    if (member) {
+      // The points update logic can remain here as this is the payment handler
+      console.log(`Updating points for member ${member.name}`)
       // Here you would call an API to update member points
     }
 
@@ -111,7 +107,7 @@ export default function Cashier() {
     clearCart()
   }
 
-  // Custom footer to display member information and points to earn
+  // Custom footer to display member information only
   const renderMemberInfo = () => {
     if (!member) return null
 
@@ -120,10 +116,7 @@ export default function Cashier() {
         <p>
           Member: {member.name} ({member.tier?.name || 'Regular'})
         </p>
-        {memberDiscount > 0 && (
-          <p className="text-green-600">Member discount: {memberDiscount.toLocaleString()}</p>
-        )}
-        <p>Points to earn: {pointsToEarn}</p>
+        {/* Member discount display removed */}
       </div>
     )
   }
@@ -137,7 +130,7 @@ export default function Cashier() {
         </div>
 
         <div className="space-y-4">
-          <MemberSection onMemberSelect={setMember} />
+          <MemberSection onMemberSelect={setMember} subtotal={subtotal} />
 
           <Card>
             <CardContent>

@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Search, Loader2, UserPlus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useAuthStore } from '@/stores/authStore'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/config/api'
 import { CreateMemberDialog } from './create-member-dialog'
+import { Card } from '@/components/ui/card'
+import { useAuthStore } from '@/stores/authStore'
 
 export type Member = {
   id: string
@@ -19,6 +20,7 @@ export type Member = {
   totalPointsEarned: number
   joinDate: string
   tier: { name?: string; level?: string } | null
+  cardId?: string | null
 }
 
 type MemberResponse = {
@@ -33,18 +35,57 @@ type MemberResponse = {
 
 type MemberSectionProps = {
   onMemberSelect?: (member: Member | null) => void
+  subtotal?: number
 }
 
-export function MemberSection({ onMemberSelect }: MemberSectionProps) {
+export function MemberSection({ onMemberSelect, subtotal = 0 }: MemberSectionProps) {
   const [query, setQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-  const [showMemberSearch, setShowMemberSearch] = useState(false)
-  const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchResults, setSearchResults] = useState<Member[]>([])
+  const [showResults, setShowResults] = useState(false)
+  const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
   const { token } = useAuthStore()
 
-  const handleSearch = async () => {
-    if (!query.trim()) return
+  const inputRef = useRef<HTMLInputElement>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
+
+  // Calculate points to earn (moved from index.tsx)
+  const pointsToEarn = selectedMember ? Math.floor(subtotal / 1000) : 0
+
+  // Close results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        resultsRef.current &&
+        !resultsRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowResults(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Debounced search function
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (query.trim().length >= 2) {
+        searchMembers(query)
+      } else if (query.trim() === '') {
+        setSearchResults([])
+        setShowResults(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [query])
+
+  const searchMembers = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return
 
     setIsLoading(true)
 
@@ -61,22 +102,30 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
       )) as MemberResponse
 
       if (response.success && response.data?.members?.length > 0) {
-        const exactMatch = response.data.members.find(
-          (m) => m.phone === query || m.name.toLowerCase() === query.toLowerCase()
-        )
-        const member = exactMatch || response.data.members[0]
+        setSearchResults(response.data.members)
+        setShowResults(true)
 
-        handleMemberSelect(member)
+        // Auto-select if there's an exact match
+        const exactMatch = response.data.members.find(
+          (m) =>
+            m.phone === searchQuery ||
+            m.cardId === searchQuery ||
+            m.name.toLowerCase() === searchQuery.toLowerCase()
+        )
+        if (exactMatch) {
+          handleMemberSelect(exactMatch)
+        }
       } else {
-        toast.error('No member found', {
-          description: 'Please try a different name or phone number'
-        })
+        setSearchResults([])
+        setShowResults(false)
       }
     } catch (error) {
       console.error('Failed to search for member:', error)
       toast.error('Failed to search for member', {
         description: 'Please try again later'
       })
+      setSearchResults([])
+      setShowResults(false)
     } finally {
       setIsLoading(false)
     }
@@ -84,7 +133,7 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
 
   const handleMemberSelect = (member: Member) => {
     setSelectedMember(member)
-    setShowMemberSearch(false)
+    setShowResults(false)
     setQuery('')
     if (onMemberSelect) {
       onMemberSelect(member)
@@ -96,6 +145,19 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
     if (onMemberSelect) {
       onMemberSelect(null)
     }
+  }
+
+  const handleInputFocus = () => {
+    if (searchResults.length > 0) {
+      setShowResults(true)
+    }
+  }
+
+  const clearSearch = () => {
+    setQuery('')
+    setSearchResults([])
+    setShowResults(false)
+    inputRef.current?.focus()
   }
 
   return (
@@ -131,93 +193,135 @@ export function MemberSection({ onMemberSelect }: MemberSectionProps) {
               </div>
 
               <div className="flex justify-between items-center mt-1">
-                <p className="text-xs text-muted-foreground">{selectedMember.phone}</p>
+                <div className="text-xs text-muted-foreground">
+                  <p>{selectedMember.phone}</p>
+                  {selectedMember.cardId && (
+                    <p className="mt-1">Card ID: {selectedMember.cardId}</p>
+                  )}
+                </div>
                 <div className="flex items-center text-xs">
                   <span className="font-medium text-amber-500">{selectedMember.totalPoints}</span>
                   <span className="text-muted-foreground ml-1">points</span>
                 </div>
               </div>
+
+              {/* Points to earn display */}
+              {subtotal > 0 && (
+                <div className="mt-2 text-xs border-t pt-2 text-muted-foreground">
+                  <div className="flex justify-between font-medium text-green-600">
+                    <span>Points to earn:</span>
+                    <span>{pointsToEarn}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      ) : showMemberSearch ? (
+      ) : (
         <div className="space-y-2">
           <div className="relative">
             <Input
-              placeholder="Search by phone or name..."
+              ref={inputRef}
+              placeholder="Search member ..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim() !== '') {
+                  searchMembers(query)
+                }
+              }}
+              onFocus={handleInputFocus}
               disabled={isLoading}
               className="pr-8"
-              autoFocus
             />
+
             {query && !isLoading && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="absolute right-8 top-0 h-full w-8"
-                onClick={() => setQuery('')}
+                onClick={clearSearch}
               >
                 <X className="h-3 w-3" />
               </Button>
             )}
-            {isLoading ? (
-              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+
+            <Button
+              size="icon"
+              className="absolute right-0 top-0 h-full rounded-l-none"
+              onClick={() => searchMembers(query)}
+              disabled={query.trim() === '' || isLoading}
+            >
+              {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              <Button
-                size="icon"
-                className="absolute right-0 top-0 h-full rounded-l-none"
-                onClick={handleSearch}
-                disabled={query.trim() === ''}
-              >
+              ) : (
                 <Search className="h-4 w-4" />
-              </Button>
+              )}
+            </Button>
+
+            {/* Search results dropdown */}
+            {showResults && searchResults.length > 0 && (
+              <Card
+                className="absolute z-50 w-[100%] left-0 right-0 mt-1 max-h-64 overflow-auto"
+                ref={resultsRef}
+              >
+                <ul className="py-1 divide-y divide-border">
+                  {searchResults.map((member) => (
+                    <li
+                      key={member.id}
+                      className="px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+                      onClick={() => handleMemberSelect(member)}
+                    >
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <div className="text-xs text-muted-foreground">
+                            <span>Phone: {member.phone}</span>
+                            {member.cardId && (
+                              <span className="ml-2">Card ID: {member.cardId}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge
+                            variant={member.tier?.name ? 'default' : 'outline'}
+                            className="ml-2"
+                          >
+                            {member.tier?.name || 'Regular'}
+                          </Badge>
+                          <p className="text-xs text-amber-500 mt-1">
+                            Points: {member.totalPoints}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => setShowMemberSearch(false)}
-            >
-              Cancel
-            </Button>
+          {/* Move these outside the relative div */}
+          {/* Loading state */}
+          {isLoading && query.trim() !== '' && (
+            <div className="text-sm text-muted-foreground">Searching members...</div>
+          )}
 
+          {/* No results message */}
+          {!isLoading && query.trim().length >= 2 && searchResults.length === 0 && (
+            <div className="text-sm text-muted-foreground">No members found</div>
+          )}
+
+          <div className="flex items-center justify-between gap-2 mt-2">
             <Button
               variant="outline"
               size="sm"
               className="flex-1"
-              onClick={() => {
-                setShowMemberSearch(false)
-                setShowCreateMemberDialog(true)
-              }}
+              onClick={() => setShowCreateMemberDialog(true)}
             >
               <UserPlus className="h-3 w-3 mr-1" /> New Member
             </Button>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-2">
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => setShowMemberSearch(true)}
-          >
-            <Search className="h-4 w-4 mr-2" /> Find Member
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => setShowCreateMemberDialog(true)}
-          >
-            <UserPlus className="h-4 w-4 mr-2" /> New Member
-          </Button>
         </div>
       )}
 

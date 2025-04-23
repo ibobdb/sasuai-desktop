@@ -34,7 +34,7 @@ type ProductSearchProps = {
   autoFocus?: boolean
 }
 
-export default function ProductSearch({ onProductSelect, autoFocus }: ProductSearchProps) {
+export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Product[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -155,57 +155,57 @@ export default function ProductSearch({ onProductSelect, autoFocus }: ProductSea
       <h2 className="font-bold">Product Search</h2>
 
       <div className="relative">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Input
-              ref={inputRef}
-              placeholder="Search by name, barcode or SKU..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={handleInputFocus}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && query.trim() !== '') {
-                  const exactMatch = results.find((p) => p.barcode === query || p.skuCode === query)
-                  if (exactMatch) {
-                    handleSelect(exactMatch)
-                  } else {
-                    fetchProducts(query)
-                  }
-                  e.preventDefault()
-                }
-              }}
-              className="pr-8"
-              autoFocus={autoFocus}
-            />
-            {query && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-8 w-8"
-                onClick={clearSearch}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+        <Input
+          ref={inputRef}
+          placeholder="Search by name, barcode or SKU..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={handleInputFocus}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && query.trim() !== '') {
+              const exactMatch = results.find((p) => p.barcode === query || p.skuCode === query)
+              if (exactMatch) {
+                handleSelect(exactMatch)
+              } else {
+                fetchProducts(query)
+              }
+              e.preventDefault()
+            }
+          }}
+          className="pr-8"
+          autoFocus={autoFocus}
+        />
 
+        {query && !isLoading && (
           <Button
+            variant="ghost"
             size="icon"
-            onClick={() => fetchProducts(query)}
-            disabled={isLoading || query.trim().length < 2}
-            className="h-10 w-10"
+            className="absolute right-8 top-0 h-full w-8"
+            onClick={clearSearch}
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="h-4 w-4" />
-            )}
+            <X className="h-3 w-3" />
           </Button>
-        </div>
+        )}
+
+        <Button
+          size="icon"
+          className="absolute right-0 top-0 h-full rounded-l-none"
+          onClick={() => fetchProducts(query)}
+          disabled={query.trim() === '' || isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Search className="h-4 w-4" />
+          )}
+        </Button>
 
         {/* Search results dropdown */}
         {showResults && results.length > 0 && (
-          <Card className="absolute z-50 w-full mt-1 max-h-64 overflow-auto" ref={resultsRef}>
+          <Card
+            className="absolute z-50 w-[100%] left-0 right-0 mt-1 max-h-64 overflow-auto"
+            ref={resultsRef}
+          >
             <ul className="py-1 divide-y divide-border">
               {results.map((product) => (
                 <li
@@ -239,7 +239,7 @@ export default function ProductSearch({ onProductSelect, autoFocus }: ProductSea
         )}
       </div>
 
-      {/* Show loading state */}
+      {/* Loading state */}
       {isLoading && query.trim() !== '' && (
         <div className="text-sm text-muted-foreground">Searching products...</div>
       )}
