@@ -191,7 +191,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           size="icon"
           className="absolute right-0 top-0 h-full rounded-l-none"
           onClick={() => fetchProducts(query)}
-          disabled={query.trim() === '' || isLoading}
+          disabled={query.trim().length < 2 || isLoading}
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
