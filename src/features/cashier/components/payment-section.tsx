@@ -21,17 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-
-type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
-
-type PaymentSectionProps = {
-  total: number
-  paymentMethod: PaymentMethod
-  paymentAmount: number
-  change: number
-  onPaymentMethodChange: (method: PaymentMethod) => void
-  onPaymentAmountChange: (amount: number) => void
-}
+import { PaymentMethod, PaymentSectionProps } from '@/types/cashier'
 
 export default function PaymentSection({
   paymentMethod,

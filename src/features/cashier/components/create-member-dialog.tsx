@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/config/api'
-import { Member } from './member-section'
 import {
   Dialog,
   DialogContent,
@@ -15,12 +14,7 @@ import {
   DialogClose
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-
-type CreateMemberDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: (member: Member) => void
-}
+import { Member, CreateMemberDialogProps } from '@/types/cashier'
 
 const REQUIRED_FIELDS = ['name', 'cardId', 'phone'] as const
 

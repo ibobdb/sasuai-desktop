@@ -1,5 +1,14 @@
 import { useState } from 'react'
-import { Minus, Plus, Trash2, ShoppingCart, AlertCircle } from 'lucide-react'
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingCart,
+  AlertCircle,
+  ChevronDown,
+  Barcode,
+  X
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -12,22 +21,21 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { Discount, CartListProps } from '@/types/cashier'
 
-type CartItem = {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  subtotal: number
-}
-
-type CartListProps = {
-  items: CartItem[]
-  onUpdateQuantity: (id: string, quantity: number) => void
-  onRemoveItem: (id: string) => void
-}
-
-export default function CartList({ items, onUpdateQuantity, onRemoveItem }: CartListProps) {
+export default function CartList({
+  items,
+  onUpdateQuantity,
+  onRemoveItem,
+  onUpdateDiscount
+}: CartListProps) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [editingQuantity, setEditingQuantity] = useState<string | null>(null)
   const [quantityInput, setQuantityInput] = useState<string>('')
@@ -76,6 +84,13 @@ export default function CartList({ items, onUpdateQuantity, onRemoveItem }: Cart
 
   const selectedCount = selectedItems.size
 
+  // Format discount for display
+  const formatDiscount = (discount: Discount) => {
+    return discount.valueType === 'percentage'
+      ? `${discount.value}%`
+      : `Rp ${discount.value.toLocaleString()}`
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -119,6 +134,7 @@ export default function CartList({ items, onUpdateQuantity, onRemoveItem }: Cart
                   <TableHead>Product</TableHead>
                   <TableHead className="text-right">Price</TableHead>
                   <TableHead className="text-center">Qty</TableHead>
+                  <TableHead className="text-left">Discount</TableHead>
                   <TableHead className="text-right">Subtotal</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -136,7 +152,17 @@ export default function CartList({ items, onUpdateQuantity, onRemoveItem }: Cart
                         aria-label={`Select ${item.name}`}
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span>{item.name}</span>
+                        {item.barcode && (
+                          <span className="text-xs text-muted-foreground flex items-center mt-1">
+                            <Barcode className="h-3 w-3 mr-1" />
+                            {item.barcode}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right">Rp {item.price.toLocaleString()}</TableCell>
                     <TableCell>
                       {editingQuantity === item.id ? (
@@ -183,8 +209,70 @@ export default function CartList({ items, onUpdateQuantity, onRemoveItem }: Cart
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      Rp {item.subtotal.toLocaleString()}
+                    <TableCell className="text-left">
+                      {item.discountRelationProduct && item.discountRelationProduct.length > 0 ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={
+                                item.selectedDiscount
+                                  ? 'text-green-600 border-green-200 hover:bg-green-50'
+                                  : ''
+                              }
+                            >
+                              {item.selectedDiscount
+                                ? `${item.selectedDiscount.name} (${formatDiscount(item.selectedDiscount)})`
+                                : 'Select'}{' '}
+                              <ChevronDown className="h-3 w-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {item.discountRelationProduct.map((relation) => (
+                              <DropdownMenuItem
+                                key={relation.discountId}
+                                onClick={() => onUpdateDiscount(item.id, relation.discount)}
+                                className={
+                                  item.selectedDiscount?.id === relation.discountId
+                                    ? 'bg-accent'
+                                    : ''
+                                }
+                              >
+                                {relation.discount.name} ({formatDiscount(relation.discount)})
+                              </DropdownMenuItem>
+                            ))}
+                            {item.selectedDiscount && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => onUpdateDiscount(item.id, null)}
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 font-medium"
+                                >
+                                  <X className="h-3.5 w-3.5 mr-1" />
+                                  Remove Discount
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <span className="text-muted-foreground">No discount</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div>
+                        {item.discountAmount > 0 && (
+                          <div className="line-through text-muted-foreground text-xs">
+                            Rp {item.subtotal.toLocaleString()}
+                          </div>
+                        )}
+                        <div
+                          className={`font-medium ${item.discountAmount > 0 ? 'text-green-600' : ''}`}
+                        >
+                          Rp {item.finalPrice.toLocaleString()}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Button

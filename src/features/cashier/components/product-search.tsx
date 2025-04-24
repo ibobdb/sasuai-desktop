@@ -1,38 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Loader2, X } from 'lucide-react'
+import { Search, Loader2, X, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-
-type Product = {
-  id: string
-  name: string
-  price: number
-  barcode?: string
-  currentStock: number
-  skuCode?: string | null
-}
-
-type ProductResponse = {
-  data: Array<{
-    id: string
-    name: string
-    price: number
-    barcode: string | null
-    currentStock: number
-    skuCode: string | null
-    [key: string]: any
-  }>
-  success: boolean
-}
-
-type ProductSearchProps = {
-  onProductSelect: (product: Product) => void
-  autoFocus?: boolean
-}
+import { Badge } from '@/components/ui/badge'
+import { Product, Discount, ProductResponse, ProductSearchProps } from '@/types/cashier'
 
 export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
   const [query, setQuery] = useState('')
@@ -100,7 +75,9 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           price: item.price,
           barcode: item.barcode || undefined,
           currentStock: item.currentStock,
-          skuCode: item.skuCode
+          skuCode: item.skuCode || undefined,
+          batches: item.batches,
+          discountRelationProduct: item.discountRelationProduct
         }))
 
         setResults(products)
@@ -148,6 +125,36 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     if (results.length > 0) {
       setShowResults(true)
     }
+  }
+
+  // Helper to check if product has active discounts
+  const hasActiveDiscounts = (product: Product): boolean => {
+    return (
+      !!product.discountRelationProduct &&
+      product.discountRelationProduct.filter((d) => d.discount.isActive).length > 0
+    )
+  }
+
+  // Helper to get best discount (highest percentage or value)
+  const getBestDiscount = (product: Product): Discount | null => {
+    if (!product.discountRelationProduct || product.discountRelationProduct.length === 0) {
+      return null
+    }
+
+    const activeDiscounts = product.discountRelationProduct
+      .filter((d) => d.discount.isActive)
+      .map((d) => d.discount)
+
+    if (activeDiscounts.length === 0) return null
+
+    // Sort by value (higher first)
+    return activeDiscounts.sort((a, b) => b.value - a.value)[0]
+  }
+
+  const formatDiscountLabel = (discount: Discount): string => {
+    return discount.valueType === 'percentage'
+      ? `${discount.value}%`
+      : `Rp ${discount.value.toLocaleString()}`
   }
 
   return (
@@ -207,33 +214,47 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
             ref={resultsRef}
           >
             <ul className="py-1 divide-y divide-border">
-              {results.map((product) => (
-                <li
-                  key={product.id}
-                  className="px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
-                  onClick={() => handleSelect(product)}
-                >
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <div className="text-xs text-muted-foreground flex gap-2">
-                        {product.barcode && <span>Barcode: {product.barcode}</span>}
-                        {product.skuCode && <span>SKU: {product.skuCode}</span>}
+              {results.map((product) => {
+                const bestDiscount = getBestDiscount(product)
+                return (
+                  <li
+                    key={product.id}
+                    className="px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+                    onClick={() => handleSelect(product)}
+                  >
+                    <div className="flex justify-between">
+                      <div>
+                        <div className="flex items-center">
+                          <p className="font-medium">{product.name}</p>
+                          {hasActiveDiscounts(product) && (
+                            <Badge
+                              variant="outline"
+                              className="ml-2 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                            >
+                              <Ticket className="h-3 w-3 mr-1" />
+                              {bestDiscount && formatDiscountLabel(bestDiscount)}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex gap-2">
+                          {product.barcode && <span>Barcode: {product.barcode}</span>}
+                          {product.skuCode && <span>SKU: {product.skuCode}</span>}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p>Rp {product.price.toLocaleString()}</p>
+                        <p
+                          className={`text-xs ${
+                            product.currentStock > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}
+                        >
+                          Stock: {product.currentStock}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p>Rp {product.price.toLocaleString()}</p>
-                      <p
-                        className={`text-xs ${
-                          product.currentStock > 0 ? 'text-green-600' : 'text-red-600'
-                        }`}
-                      >
-                        Stock: {product.currentStock}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                )
+              })}
             </ul>
           </Card>
         )}
@@ -254,7 +275,19 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         <div className="rounded-md border p-3">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">{selectedProduct.name}</h4>
+              <div className="flex items-center">
+                <h4 className="font-medium">{selectedProduct.name}</h4>
+                {hasActiveDiscounts(selectedProduct) && (
+                  <Badge
+                    variant="outline"
+                    className="ml-2 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                  >
+                    <Ticket className="h-3 w-3 mr-1" />
+                    {getBestDiscount(selectedProduct) &&
+                      formatDiscountLabel(getBestDiscount(selectedProduct)!)}
+                  </Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">
                 Rp {selectedProduct.price.toLocaleString()} • Stock: {selectedProduct.currentStock}
               </p>
