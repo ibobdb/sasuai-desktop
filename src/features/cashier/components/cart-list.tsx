@@ -79,7 +79,7 @@ export default function CartList({ items, onUpdateQuantity, onRemoveItem }: Cart
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg flex items-center">
+        <h2 className="font-bold flex items-center">
           <ShoppingCart className="mr-2 h-5 w-5" />
           Shopping Cart
           {items.length > 0 && (
