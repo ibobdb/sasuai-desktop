@@ -3,10 +3,11 @@ import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
 import CartList from './components/cart-list'
 import TransactionSummary from './components/summary'
-import PaymentSection from './components/payment-section'
-import ActionButtons from './components/action-buttons'
+import PaymentDialog from './components/payment-dialog'
 import { MemberSection } from './components/member-section'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { CreditCard, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/config/api'
 import { useAuthStore } from '@/stores/authStore'
@@ -29,6 +30,7 @@ export default function Cashier() {
   >(null)
   const [selectedMemberDiscount, setSelectedMemberDiscount] = useState<Discount | null>(null)
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const { user } = useAuthStore()
 
   // Calculate cart totals with discounts
@@ -44,9 +46,21 @@ export default function Cashier() {
 
   const totalDiscount = productDiscountsTotal + memberDiscountAmount
   const tax = 0 // Implement tax calculation if needed
-  const total = subtotal - totalDiscount + tax
-  const change = paymentAmount - total
+  const total = subtotal - totalDiscount
 
+  // When opening the payment dialog, set payment amount to match the total for non-cash methods
+  const handleOpenPaymentDialog = () => {
+    // For non-cash payment methods, set the amount equal to the total
+    if (paymentMethod !== 'cash') {
+      setPaymentAmount(total)
+    } else if (paymentAmount < total) {
+      // For cash, set a minimum amount if it's less than total
+      setPaymentAmount(total)
+    }
+    setPaymentDialogOpen(true)
+  }
+
+  // Add to cart function
   const addToCart = (product: Product) => {
     // Get best batch (could improve with FIFO logic)
     const batch =
@@ -221,7 +235,7 @@ export default function Cashier() {
       return false
     }
 
-    // Validate payment amount
+    // Validate payment amount against the total after discounts
     if (paymentAmount < total) {
       toast.error('Insufficient payment amount', {
         description: `Payment amount must be at least Rp ${total.toLocaleString()}`
@@ -300,20 +314,22 @@ export default function Cashier() {
 
         // Clear cart after successful payment
         clearCart()
-        return Promise.resolve() // Explicitly resolve to signal success to the dialog
+        // Close payment dialog
+        setPaymentDialogOpen(false)
+        return Promise.resolve()
       } else {
         // Handle transaction failure
         toast.error('Transaction failed', {
           description: response.message || 'Please try again'
         })
-        return Promise.reject(new Error(response.message || 'Transaction failed')) // Reject to keep dialog open
+        return Promise.reject(new Error(response.message || 'Transaction failed'))
       }
     } catch (error) {
       console.error('Payment error:', error)
       toast.error('Payment processing error', {
         description: 'An unexpected error occurred. Please try again.'
       })
-      return Promise.reject(error) // Reject to keep dialog open
+      return Promise.reject(error)
     } finally {
       setIsProcessingTransaction(false)
     }
@@ -370,25 +386,37 @@ export default function Cashier() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent>
-              <PaymentSection
-                total={total}
-                paymentMethod={paymentMethod}
-                paymentAmount={paymentAmount}
-                change={change}
-                onPaymentMethodChange={setPaymentMethod}
-                onPaymentAmountChange={setPaymentAmount}
-              />
-            </CardContent>
-          </Card>
+          {/* Payment and Clear buttons in a flex container */}
+          <div className="flex gap-2">
+            {/* Payment Button */}
+            <Button
+              className="flex-[3]"
+              size="lg"
+              onClick={handleOpenPaymentDialog}
+              disabled={cart.length === 0}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Payment
+            </Button>
 
-          <ActionButtons
+            {/* Clear Button - inlined from ActionButtons component */}
+            <Button variant="destructive" size="lg" onClick={clearCart} className="flex-1">
+              <X className="mr-2 h-4 w-4" /> Clear
+            </Button>
+          </div>
+
+          {/* Payment dialog */}
+          <PaymentDialog
+            open={paymentDialogOpen}
+            onOpenChange={setPaymentDialogOpen}
+            total={total}
+            paymentMethod={paymentMethod}
+            paymentAmount={paymentAmount}
+            onPaymentMethodChange={setPaymentMethod}
+            onPaymentAmountChange={setPaymentAmount}
             onPay={handlePayment}
-            onClear={clearCart}
-            onPrint={() => alert('Printing receipt...')}
             isPayEnabled={cart.length > 0 && paymentAmount >= total}
-            isPrintEnabled={false}
+            isProcessing={isProcessingTransaction}
           />
         </div>
       </div>
