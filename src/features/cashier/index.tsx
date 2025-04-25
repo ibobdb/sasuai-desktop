@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
 import CartList from './components/cart-list'
@@ -18,7 +18,8 @@ import {
   Product,
   TransactionData,
   Member,
-  MemberDiscount
+  MemberDiscount,
+  TransactionItem
 } from '@/types/cashier'
 
 export default function Cashier() {
@@ -31,7 +32,8 @@ export default function Cashier() {
   const [selectedMemberDiscount, setSelectedMemberDiscount] = useState<Discount | null>(null)
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
-  const { user } = useAuthStore()
+  const [pointsToEarn, setPointsToEarn] = useState<number>(0)
+  const { user, token } = useAuthStore()
 
   // Calculate cart totals with discounts
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
@@ -47,6 +49,33 @@ export default function Cashier() {
   const totalDiscount = productDiscountsTotal + memberDiscountAmount
   const tax = 0 // Implement tax calculation if needed
   const total = subtotal - totalDiscount
+
+  // Function to calculate points
+  const calculatePoints = async (amount: number, memberId?: string) => {
+    try {
+      const data = await window.api.fetchApi(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        data: {
+          amount,
+          memberId
+        }
+      })
+
+      if (data.points !== undefined) {
+        setPointsToEarn(data.points)
+      }
+    } catch (error) {
+      console.error('Error calculating points:', error)
+      setPointsToEarn(0)
+      toast.error('Failed to calculate points', {
+        description: 'Please try again later'
+      })
+    }
+  }
 
   // When opening the payment dialog, set payment amount to match the total for non-cash methods
   const handleOpenPaymentDialog = () => {
@@ -101,6 +130,7 @@ export default function Cashier() {
           quantity: 1,
           subtotal: product.price,
           batchId: batch?.id,
+          unitId: product.unitId || '', // Ensure unit ID is provided in product data
           selectedDiscount: null,
           discountAmount: 0,
           finalPrice: product.price
@@ -256,28 +286,49 @@ export default function Cashier() {
 
   // Handle payment with proper processing
   const handlePayment = async (): Promise<void> => {
-    // Prevent multiple submissions
     if (isProcessingTransaction) return
 
-    // Validate transaction
     if (!validateTransaction()) return
 
     setIsProcessingTransaction(true)
 
     try {
-      // Prepare transaction data according to backend structure
+      // Calculate total amount before discounts
+      const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
+
+      // Calculate final amount after all discounts (both product and member discounts)
+      const finalAmount = totalAmount - totalDiscount
+
+      // Prepare transaction items according to backend structure
+      const transactionItems: TransactionItem[] = cart.map((item) => {
+        const batch = item.batches?.find((b) => b.id === item.batchId)
+
+        if (!batch) {
+          throw new Error(`No valid batch found for product ${item.name}`)
+        }
+
+        return {
+          productId: item.id,
+          quantity: item.quantity,
+          unitId: item.unitId || '', // Ensure unit ID is provided in product data
+          cost: batch.buyPrice,
+          pricePerUnit: item.price,
+          subtotal: item.finalPrice, // Price after product-specific discount
+          batchId: batch.id,
+          discountId: item.selectedDiscount?.id || null
+        }
+      })
+
+      // Prepare complete transaction data
       const transactionData: TransactionData = {
         cashierId: user?.id || '',
         memberId: member?.id,
-        items: cart.map((item) => ({
-          productId: item.id,
-          quantity: item.quantity,
-          batchId: item.batchId,
-          discountId: item.selectedDiscount?.id || null
-        })),
+        selectedMemberDiscountId: selectedMemberDiscount?.id || null,
+        totalAmount,
+        finalAmount,
         paymentMethod,
         cashAmount: paymentMethod === 'cash' ? paymentAmount : undefined,
-        selectedMemberDiscountId: selectedMemberDiscount?.id || null
+        items: transactionItems
       }
 
       // Call transaction processing endpoint
@@ -318,7 +369,6 @@ export default function Cashier() {
         setPaymentDialogOpen(false)
         return Promise.resolve()
       } else {
-        // Handle transaction failure
         toast.error('Transaction failed', {
           description: response.message || 'Please try again'
         })
@@ -335,21 +385,13 @@ export default function Cashier() {
     }
   }
 
-  // Custom footer to display member discount information
-  const renderMemberInfo = () => {
-    if (!member) return null
-
-    return (
-      <div className="text-sm mt-2 text-muted-foreground">
-        {/* Show points to earn information */}
-        {subtotal > 0 && (
-          <p className="text-green-600 dark:text-green-400">
-            Points to earn: {Math.floor(subtotal / 1000)}
-          </p>
-        )}
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (member && total > 0) {
+      calculatePoints(total, member.id)
+    } else {
+      setPointsToEarn(0)
+    }
+  }, [total, member])
 
   return (
     <Main>
@@ -381,8 +423,16 @@ export default function Cashier() {
                 memberDiscount={memberDiscountAmount}
                 tax={tax}
                 total={total}
+                pointsToEarn={pointsToEarn}
+                memberTier={
+                  member?.tier
+                    ? {
+                        name: member.tier.name || '',
+                        multiplier: member.tier.multiplier || 1
+                      }
+                    : null
+                }
               />
-              {renderMemberInfo()}
             </CardContent>
           </Card>
 

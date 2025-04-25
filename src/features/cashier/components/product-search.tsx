@@ -77,7 +77,8 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           currentStock: item.currentStock,
           skuCode: item.skuCode || undefined,
           batches: item.batches,
-          discountRelationProduct: item.discountRelationProduct
+          discountRelationProduct: item.discountRelationProduct,
+          unitId: item.unitId || ''
         }))
 
         setResults(products)

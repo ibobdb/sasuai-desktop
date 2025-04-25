@@ -7,8 +7,7 @@ export default function TransactionSummary({
   productDiscounts,
   memberDiscount,
   total,
-  pointsToEarn = 0,
-  memberTier = null
+  pointsToEarn = 0
 }: TransactionSummaryProps) {
   // Calculate if we have any special values
   const hasProductDiscount = productDiscounts > 0
@@ -71,11 +70,6 @@ export default function TransactionSummary({
               <span className="font-medium text-amber-600 dark:text-amber-400">
                 {pointsToEarn.toLocaleString()}
               </span>
-              {memberTier && (
-                <div className="text-xs text-muted-foreground">
-                  ({memberTier.name} x{memberTier.multiplier})
-                </div>
-              )}
             </div>
           </div>
         )}

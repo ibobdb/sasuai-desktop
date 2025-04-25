@@ -27,6 +27,7 @@ export type Product = {
   barcode?: string
   currentStock: number
   skuCode?: string
+  unitId: string // Add this field
   batches?: Array<{
     id: string
     buyPrice: number
@@ -54,6 +55,7 @@ export type CartItem = Product & {
   selectedDiscount?: Discount | null
   discountAmount: number
   finalPrice: number
+  // unitId is inherited from Product
 }
 
 // Member related types
@@ -66,7 +68,11 @@ export type Member = {
   totalPoints: number
   totalPointsEarned: number
   joinDate: string
-  tier: { name?: string; level?: string } | null
+  tier: {
+    name?: string
+    level?: string
+    multiplier?: number // Add multiplier to tier type
+  } | null
   cardId?: string | null
   discountRelationsMember?: MemberDiscount[]
 }
@@ -90,18 +96,26 @@ export type MemberResponse = {
 // Payment related types
 export type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
 
+export type TransactionItem = {
+  productId: string
+  quantity: number
+  unitId: string
+  cost: number
+  pricePerUnit: number
+  subtotal: number
+  batchId: string
+  discountId: string | null
+}
+
 export type TransactionData = {
   cashierId: string
   memberId?: string | null
-  items: Array<{
-    productId: string
-    quantity: number
-    batchId?: string
-    discountId?: string | null
-  }>
+  selectedMemberDiscountId?: string | null
+  totalAmount: number
+  finalAmount: number
   paymentMethod: PaymentMethod
   cashAmount?: number
-  selectedMemberDiscountId?: string | null
+  items: TransactionItem[]
 }
 
 // Component props types
