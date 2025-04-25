@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
 import { Route as AuthenticatedCashierImport } from './routes/_authenticated/cashier'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as auth500Import } from './routes/(auth)/500'
@@ -89,6 +90,12 @@ const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   } as any)
   .lazy(() => import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route))
 
+const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AuthenticatedRouteRoute
+} as any)
+
 const AuthenticatedCashierRoute = AuthenticatedCashierImport.update({
   id: '/cashier',
   path: '/cashier',
@@ -137,6 +144,13 @@ declare module '@tanstack/react-router' {
       path: '/cashier'
       fullPath: '/cashier'
       preLoaderRoute: typeof AuthenticatedCashierImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/transactions': {
+      id: '/_authenticated/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedTransactionsImport
       parentRoute: typeof AuthenticatedRouteImport
     }
     '/(auth)/forgot-password': {
@@ -195,11 +209,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCashierRoute: typeof AuthenticatedCashierRoute
+  AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCashierRoute: AuthenticatedCashierRoute,
+  AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute
 }
 
@@ -212,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
   '/cashier': typeof AuthenticatedCashierRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
@@ -224,6 +241,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
   '/cashier': typeof AuthenticatedCashierRoute
+  '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
   '/403': typeof errors403LazyRoute
@@ -238,6 +256,7 @@ export interface FileRoutesById {
   '/(auth)/500': typeof auth500Route
   '/(auth)/sign-in': typeof authSignInRoute
   '/_authenticated/cashier': typeof AuthenticatedCashierRoute
+  '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
   '/(errors)/403': typeof errors403LazyRoute
@@ -254,6 +273,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/sign-in'
     | '/cashier'
+    | '/transactions'
     | '/forgot-password'
     | '/401'
     | '/403'
@@ -265,6 +285,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/sign-in'
     | '/cashier'
+    | '/transactions'
     | '/forgot-password'
     | '/401'
     | '/403'
@@ -277,6 +298,7 @@ export interface FileRouteTypes {
     | '/(auth)/500'
     | '/(auth)/sign-in'
     | '/_authenticated/cashier'
+    | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
     | '/(errors)/401'
     | '/(errors)/403'
@@ -336,6 +358,7 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/route.tsx",
       "children": [
         "/_authenticated/cashier",
+        "/_authenticated/transactions",
         "/_authenticated/"
       ]
     },
@@ -347,6 +370,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/cashier": {
       "filePath": "_authenticated/cashier.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/transactions": {
+      "filePath": "_authenticated/transactions.tsx",
       "parent": "/_authenticated"
     },
     "/(auth)/forgot-password": {
