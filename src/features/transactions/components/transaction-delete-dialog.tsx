@@ -1,11 +1,20 @@
 import { useState } from 'react'
-import { IconAlertTriangle } from '@tabler/icons-react'
-import { showSubmittedData } from '@/utils/show-submitted-data'
+import { IconAlertTriangle, IconLoader2 } from '@tabler/icons-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ConfirmDialog } from '@/components/confirm-dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog'
 import { Transaction } from '../data/schema'
+import { formatCurrency } from '@/utils/format'
+import { useTransactions } from '../context/transactions-context'
+import { Card } from '@/components/ui/card'
 
 interface Props {
   open: boolean
@@ -14,58 +23,129 @@ interface Props {
 }
 
 export function TransactionDeleteDialog({ open, onOpenChange, currentTransaction }: Props) {
-  const [value, setValue] = useState('')
-  const confirmationId = currentTransaction.id
+  const [reason, setReason] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { voidTransaction } = useTransactions()
 
-  const handleDelete = () => {
-    if (value.trim() !== confirmationId) return
+  const handleVoid = async () => {
+    if (!reason.trim()) return
 
-    onOpenChange(false)
-    showSubmittedData(currentTransaction, 'The following transaction has been voided:')
+    setIsSubmitting(true)
+    try {
+      const success = await voidTransaction(currentTransaction.id, reason.trim())
+      if (success) {
+        onOpenChange(false)
+        setReason('')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
+  const isConfirmDisabled = !reason.trim() || isSubmitting
+
   return (
-    <ConfirmDialog
+    <Dialog
       open={open}
-      onOpenChange={onOpenChange}
-      handleConfirm={handleDelete}
-      disabled={value.trim() !== confirmationId}
-      title={
-        <span className="text-destructive">
-          <IconAlertTriangle className="stroke-destructive mr-1 inline-block" size={18} />
-          Void Transaction
-        </span>
-      }
-      desc={
+      onOpenChange={(isOpen) => {
+        if (!isSubmitting || !isOpen) {
+          onOpenChange(isOpen)
+          if (!isOpen) {
+            setReason('')
+          }
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <IconAlertTriangle className="h-5 w-5 stroke-destructive" />
+                Void Transaction
+              </DialogTitle>
+              <DialogDescription className="mt-1">
+                Transaction ID: <span className="font-mono">{currentTransaction.id}</span>
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
         <div className="space-y-4">
-          <p className="mb-2">
-            Are you sure you want to void transaction{' '}
-            <span className="font-bold">{confirmationId}</span>?
-            <br />
-            This action will permanently invalidate this transaction and may trigger refunds if
-            applicable. This cannot be undone.
-          </p>
+          <Card className="bg-muted/50 p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Amount</p>
+                <p className="font-medium">
+                  {formatCurrency(currentTransaction.pricing.finalAmount)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Customer</p>
+                <p className="font-medium">{currentTransaction.member?.name || 'Guest'}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Date</p>
+                <p className="font-medium">
+                  {new Date(currentTransaction.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Cashier</p>
+                <p className="font-medium">{currentTransaction.cashier.name}</p>
+              </div>
+            </div>
+          </Card>
 
-          <Label className="my-2">
-            Confirm by typing: <span className="font-mono font-medium">{confirmationId}</span>
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder={`Enter ${confirmationId} to confirm`}
-              className="mt-1"
+          <div className="space-y-3">
+            <Label htmlFor="void-reason">
+              Reason for voiding <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="void-reason"
+              placeholder="Please explain why this transaction needs to be voided..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="resize-none min-h-[120px]"
+              disabled={isSubmitting}
+              autoFocus
             />
-          </Label>
+            {!reason.trim() && (
+              <p className="text-sm text-destructive">Please provide a reason for voiding</p>
+            )}
+          </div>
 
-          <Alert variant="destructive">
-            <AlertTitle>Warning!</AlertTitle>
+          <Alert variant="destructive" className="border-destructive/50">
+            <IconAlertTriangle className="h-4 w-4" />
+            <AlertTitle>Important Notice</AlertTitle>
             <AlertDescription>
-              This operation cannot be reversed and may have financial implications.
+              Voiding a transaction is irreversible and will be recorded in the audit log.
             </AlertDescription>
           </Alert>
         </div>
-      }
-      confirmText="Void Transaction"
-      destructive
-    />
+
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleVoid} disabled={isConfirmDisabled}>
+            {isSubmitting ? (
+              <>
+                <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Confirm Void'
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

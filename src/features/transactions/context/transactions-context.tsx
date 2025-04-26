@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { Transaction } from '../data/schema'
+import { Transaction, TransactionDetail } from '../data/schema'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/authStore'
@@ -48,11 +48,20 @@ interface TransactionsContextType {
   updateFilters: (newFilters: Partial<TransactionFilterParams>) => void
   applyFilters: () => void
   totalCount: number
+  totalPages: number
+  currentPage: number
+  pageSize: number
   setTotalCount: React.Dispatch<React.SetStateAction<number>>
   filterUIState: TransactionFilterUIState
   setFilterUIState: React.Dispatch<React.SetStateAction<TransactionFilterUIState>>
   resetFilters: () => void
   debouncedSearch: (searchTerm: string) => void
+  fetchTransactionDetail: (id: string) => Promise<TransactionDetail | null>
+  transactionDetail: TransactionDetail | null
+  setTransactionDetail: React.Dispatch<React.SetStateAction<TransactionDetail | null>>
+  isLoadingDetail: boolean
+  voidTransaction: (id: string, reason: string) => Promise<boolean>
+  isVoiding: boolean
 }
 
 const TransactionsContext = React.createContext<TransactionsContextType | null>(null)
@@ -67,7 +76,14 @@ export default function TransactionsProvider({ children }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [totalCount, setTotalCount] = useState<number>(0)
+  const [totalPages, setTotalPages] = useState<number>(0)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
   const { token } = useAuthStore()
+
+  // Transaction detail states
+  const [transactionDetail, setTransactionDetail] = useState<TransactionDetail | null>(null)
+  const [isLoadingDetail, setIsLoadingDetail] = useState<boolean>(false)
 
   // Flag to track if filters need to be applied
   const shouldFetchRef = useRef(false)
@@ -89,6 +105,8 @@ export default function TransactionsProvider({ children }: Props) {
     search: '',
     paymentMethods: []
   })
+
+  const [isVoiding, setIsVoiding] = useState<boolean>(false)
 
   // Function to build URL with query parameters
   const buildUrl = useCallback((params: TransactionFilterParams): string => {
@@ -137,12 +155,22 @@ export default function TransactionsProvider({ children }: Props) {
       })
 
       if (response.success && response.data) {
-        // Handle response data
-        const transactionData = response.data.transactions || response.data
-        setTransactions(transactionData)
+        // Handle response data with new structure
+        if (response.data.transactions) {
+          setTransactions(response.data.transactions)
+        } else {
+          setTransactions(response.data)
+        }
 
-        // Update total count if available
-        if (response.data.totalCount !== undefined) {
+        // Update pagination data if available
+        if (response.data.pagination) {
+          const { totalCount, totalPages, currentPage, pageSize } = response.data.pagination
+          setTotalCount(totalCount)
+          setTotalPages(totalPages)
+          setCurrentPage(currentPage)
+          setPageSize(pageSize)
+        } else if (response.data.totalCount !== undefined) {
+          // Fallback for older API response format
           setTotalCount(response.data.totalCount)
         }
       } else {
@@ -172,6 +200,106 @@ export default function TransactionsProvider({ children }: Props) {
       fetchTransactions()
     }
   }, [fetchTransactions, filters])
+
+  // Fetch transaction details by ID
+  const fetchTransactionDetail = useCallback(
+    async (id: string) => {
+      setIsLoadingDetail(true)
+      setTransactionDetail(null)
+
+      try {
+        const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
+        console.log('Fetching transaction detail from:', url)
+
+        const response = await window.api.fetchApi(url, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (response.success && response.data) {
+          // Handle both old and new response formats
+          const detail = response.data.transactionDetails || response.data.transactionDetail
+          if (detail) {
+            setTransactionDetail(detail)
+            return detail
+          }
+        }
+
+        toast.error('Failed to load transaction details', {
+          description: response.message || 'Please try again later'
+        })
+        return null
+      } catch (error) {
+        console.error('Error fetching transaction detail:', error)
+        toast.error('Failed to load transaction details', {
+          description: 'Please try again later'
+        })
+        return null
+      } finally {
+        setIsLoadingDetail(false)
+      }
+    },
+    [token]
+  )
+
+  // Void a transaction with a given reason
+  const voidTransaction = useCallback(
+    async (id: string, reason: string) => {
+      setIsVoiding(true)
+
+      try {
+        // Use a specific void endpoint instead of the general one
+        // Many APIs use a dedicated endpoint for voiding transactions
+        const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
+        console.log('Voiding transaction:', url)
+        console.log('Request payload:', { reason })
+
+        // Ensure we're sending properly formatted JSON data
+        const payload = JSON.stringify({ reason: reason.trim() })
+        console.log('Stringified payload:', payload)
+
+        // Make the API call with explicit content length header
+        const response = await window.api.fetchApi(url, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Content-Length': payload.length.toString()
+          },
+          body: payload
+        })
+
+        console.log('Void response:', response)
+
+        if (response && response.success === true) {
+          toast.success('Transaction voided successfully')
+          fetchTransactions()
+          return true
+        } else {
+          const errorMsg = response?.message || 'Unknown server error'
+          const errorDetails = response?.error || 'Please try again later'
+
+          toast.error('Failed to void transaction', {
+            description: `${errorMsg}. ${errorDetails}`
+          })
+          console.error('Void error details:', response)
+          return false
+        }
+      } catch (error) {
+        console.error('Error voiding transaction:', error)
+        toast.error('Failed to void transaction', {
+          description: error instanceof Error ? error.message : 'An unexpected error occurred'
+        })
+        return false
+      } finally {
+        setIsVoiding(false)
+      }
+    },
+    [token, fetchTransactions]
+  )
 
   // Debounced search function to prevent excessive API calls
   const debouncedSearch = useDebouncedCallback((searchTerm: string) => {
@@ -234,11 +362,20 @@ export default function TransactionsProvider({ children }: Props) {
       updateFilters,
       applyFilters,
       totalCount,
+      totalPages,
+      currentPage,
+      pageSize,
       setTotalCount,
       filterUIState,
       setFilterUIState,
       resetFilters,
-      debouncedSearch
+      debouncedSearch,
+      fetchTransactionDetail,
+      transactionDetail,
+      setTransactionDetail,
+      isLoadingDetail,
+      voidTransaction,
+      isVoiding
     }),
     [
       open,
@@ -250,10 +387,18 @@ export default function TransactionsProvider({ children }: Props) {
       updateFilters,
       applyFilters,
       totalCount,
+      totalPages,
+      currentPage,
+      pageSize,
       filterUIState,
       setFilterUIState,
       resetFilters,
-      debouncedSearch
+      debouncedSearch,
+      fetchTransactionDetail,
+      transactionDetail,
+      isLoadingDetail,
+      voidTransaction,
+      isVoiding
     ]
   )
 

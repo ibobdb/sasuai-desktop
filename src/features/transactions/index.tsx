@@ -8,7 +8,16 @@ import TransactionsProvider, { useTransactions } from './context/transactions-co
 import { FilterToolbar } from './components/filter-toolbar'
 
 function TransactionsContent() {
-  const { isLoading, transactions, filters, updateFilters, totalCount } = useTransactions()
+  const {
+    isLoading,
+    transactions,
+    filters,
+    updateFilters,
+    totalCount,
+    totalPages,
+    currentPage,
+    pageSize
+  } = useTransactions()
 
   // Handle page change - now this will trigger data fetch via useEffect
   const handlePageChange = useCallback(
@@ -42,7 +51,6 @@ function TransactionsContent() {
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
           {isLoading ? (
             <div className="space-y-4">
-              {/* Removed button skeleton since View button is no longer present */}
               <Skeleton className="h-[300px] w-full" />
               <Skeleton className="h-8 w-full" />
             </div>
@@ -50,16 +58,16 @@ function TransactionsContent() {
             <TransactionsTable
               data={transactions}
               columns={columns}
-              pageCount={Math.ceil(totalCount / (filters.pageSize || 10))}
+              pageCount={totalPages}
               pagination={{
-                pageIndex: (filters.page || 1) - 1,
-                pageSize: filters.pageSize || 10
+                pageIndex: (currentPage || filters.page || 1) - 1,
+                pageSize: pageSize || filters.pageSize || 10
               }}
               onPaginationChange={{
                 onPageChange: handlePageChange,
                 onPageSizeChange: handlePageSizeChange
               }}
-              totalCount={totalCount} // Pass the totalCount from context
+              totalCount={totalCount}
             />
           )}
         </div>
