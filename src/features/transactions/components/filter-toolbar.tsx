@@ -154,86 +154,86 @@ function FilterToolbarComponent() {
             />
           </div>
 
+          {/* Advanced filters */}
+          <div className="flex flex-wrap gap-2">
+            {/* Date range filters */}
+            <div className="flex gap-2 items-center">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn('h-8 border-dashed', startDate && 'bg-primary/20')}
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                    {startDate ? format(startDate, 'PPP') : 'Start Date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={handleStartDateChange}
+                    autoFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn('h-8 border-dashed', endDate && 'bg-primary/20')}
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                    {endDate ? format(endDate, 'PPP') : 'End Date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={handleEndDateChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Button variant="secondary" size="sm" className="h-8" onClick={applyDateFilter}>
+                Apply Dates
+              </Button>
+            </div>
+
+            {/* Amount range filters */}
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="Min amount"
+                value={minAmount}
+                onChange={(e) => handleMinAmountChange(e.target.value)}
+                type="number"
+                className="h-8 w-30"
+              />
+              <span>to</span>
+              <Input
+                placeholder="Max amount"
+                value={maxAmount}
+                onChange={(e) => handleMaxAmountChange(e.target.value)}
+                type="number"
+                className="h-8 w-30"
+              />
+              <Button variant="secondary" size="sm" className="h-8" onClick={applyAmountFilter}>
+                Apply Amount
+              </Button>
+            </div>
+          </div>
+
           {hasFilters && (
             <Button variant="ghost" onClick={resetAllFilters} className="h-8 px-2 lg:px-3">
               Reset
               <Cross2Icon className="ml-2 h-4 w-4" />
             </Button>
           )}
-        </div>
-      </div>
-
-      {/* Advanced filters */}
-      <div className="flex flex-wrap gap-2">
-        {/* Date range filters */}
-        <div className="flex gap-2 items-center">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn('h-8 border-dashed', startDate && 'bg-primary/20')}
-              >
-                <CalendarIcon className="h-3.5 w-3.5 mr-2" />
-                {startDate ? format(startDate, 'PPP') : 'Start Date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={handleStartDateChange}
-                autoFocus
-              />
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn('h-8 border-dashed', endDate && 'bg-primary/20')}
-              >
-                <CalendarIcon className="h-3.5 w-3.5 mr-2" />
-                {endDate ? format(endDate, 'PPP') : 'End Date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={handleEndDateChange}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-
-          <Button variant="secondary" size="sm" className="h-8" onClick={applyDateFilter}>
-            Apply Dates
-          </Button>
-        </div>
-
-        {/* Amount range filters */}
-        <div className="flex gap-2 items-center">
-          <Input
-            placeholder="Min amount"
-            value={minAmount}
-            onChange={(e) => handleMinAmountChange(e.target.value)}
-            type="number"
-            className="h-8 w-30"
-          />
-          <span>to</span>
-          <Input
-            placeholder="Max amount"
-            value={maxAmount}
-            onChange={(e) => handleMaxAmountChange(e.target.value)}
-            type="number"
-            className="h-8 w-30"
-          />
-          <Button variant="secondary" size="sm" className="h-8" onClick={applyAmountFilter}>
-            Apply Amount
-          </Button>
         </div>
       </div>
     </div>
