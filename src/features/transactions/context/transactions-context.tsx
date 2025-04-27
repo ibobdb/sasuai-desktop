@@ -3,7 +3,6 @@ import useDialogState from '@/hooks/use-dialog-state'
 import { Transaction, TransactionDetail } from '../data/schema'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/authStore'
 import { useDebouncedCallback } from '@/hooks/use-debounced-callback'
 
 // Change the type to include both 'delete' and 'view'
@@ -79,7 +78,6 @@ export default function TransactionsProvider({ children }: Props) {
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
-  const { token } = useAuthStore()
 
   // Transaction detail states
   const [transactionDetail, setTransactionDetail] = useState<TransactionDetail | null>(null)
@@ -146,12 +144,8 @@ export default function TransactionsProvider({ children }: Props) {
       const url = buildUrl(filters)
       console.log('Fetching transactions from:', url)
 
-      const response = await window.api.fetchApi(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await window.api.request(url, {
+        method: 'GET'
       })
 
       if (response.success && response.data) {
@@ -186,7 +180,7 @@ export default function TransactionsProvider({ children }: Props) {
     } finally {
       setIsLoading(false)
     }
-  }, [token, filters, buildUrl])
+  }, [filters, buildUrl])
 
   // Effect to handle fetching data when filters change
   useEffect(() => {
@@ -202,48 +196,41 @@ export default function TransactionsProvider({ children }: Props) {
   }, [fetchTransactions, filters])
 
   // Fetch transaction details by ID
-  const fetchTransactionDetail = useCallback(
-    async (id: string) => {
-      setIsLoadingDetail(true)
-      setTransactionDetail(null)
+  const fetchTransactionDetail = useCallback(async (id: string) => {
+    setIsLoadingDetail(true)
+    setTransactionDetail(null)
 
-      try {
-        const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
-        console.log('Fetching transaction detail from:', url)
+    try {
+      const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
+      console.log('Fetching transaction detail from:', url)
 
-        const response = await window.api.fetchApi(url, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
+      const response = await window.api.request(url, {
+        method: 'GET'
+      })
 
-        if (response.success && response.data) {
-          // Handle both old and new response formats
-          const detail = response.data.transactionDetails || response.data.transactionDetail
-          if (detail) {
-            setTransactionDetail(detail)
-            return detail
-          }
+      if (response.success && response.data) {
+        // Handle both old and new response formats
+        const detail = response.data.transactionDetails || response.data.transactionDetail
+        if (detail) {
+          setTransactionDetail(detail)
+          return detail
         }
-
-        toast.error('Failed to load transaction details', {
-          description: response.message || 'Please try again later'
-        })
-        return null
-      } catch (error) {
-        console.error('Error fetching transaction detail:', error)
-        toast.error('Failed to load transaction details', {
-          description: 'Please try again later'
-        })
-        return null
-      } finally {
-        setIsLoadingDetail(false)
       }
-    },
-    [token]
-  )
+
+      toast.error('Failed to load transaction details', {
+        description: response.message || 'Please try again later'
+      })
+      return null
+    } catch (error) {
+      console.error('Error fetching transaction detail:', error)
+      toast.error('Failed to load transaction details', {
+        description: 'Please try again later'
+      })
+      return null
+    } finally {
+      setIsLoadingDetail(false)
+    }
+  }, [])
 
   // Void a transaction with a given reason
   const voidTransaction = useCallback(
@@ -259,11 +246,8 @@ export default function TransactionsProvider({ children }: Props) {
         }
 
         // Make the API call with proper JSON data format
-        const response = await window.api.fetchWithAuth(url, {
+        const response = await window.api.request(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
           data: voidData
         })
 

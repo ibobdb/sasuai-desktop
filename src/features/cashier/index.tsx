@@ -33,7 +33,7 @@ export default function Cashier() {
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [pointsToEarn, setPointsToEarn] = useState<number>(0)
-  const { user, token } = useAuthStore()
+  const { user } = useAuthStore()
 
   // Calculate cart totals with discounts
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
@@ -53,12 +53,8 @@ export default function Cashier() {
   // Function to calculate points
   const calculatePoints = async (amount: number, memberId?: string) => {
     try {
-      const data = await window.api.fetchApi(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
+      const data = await window.api.request(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         data: {
           amount,
           memberId
@@ -332,11 +328,8 @@ export default function Cashier() {
       }
 
       // Call transaction processing endpoint
-      const response = await window.api.fetchWithAuth(API_ENDPOINTS.TRANSACTIONS.CHECKOUT, {
+      const response = await window.api.request(API_ENDPOINTS.TRANSACTIONS.CHECKOUT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         data: transactionData
       })
 
@@ -386,12 +379,12 @@ export default function Cashier() {
   }
 
   useEffect(() => {
-    if (member && total > 0) {
-      calculatePoints(total, member.id)
+    if (member && subtotal > 0) {
+      calculatePoints(subtotal, member.id)
     } else {
       setPointsToEarn(0)
     }
-  }, [total, member])
+  }, [subtotal, member])
 
   return (
     <Main>

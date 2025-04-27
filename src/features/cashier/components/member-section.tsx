@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { API_ENDPOINTS } from '@/config/api'
 import { CreateMemberDialog } from './create-member-dialog'
 import { Card } from '@/components/ui/card'
-import { useAuthStore } from '@/stores/authStore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,7 +29,6 @@ export function MemberSection({
   const [searchResults, setSearchResults] = useState<Member[]>([])
   const [showResults, setShowResults] = useState(false)
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
-  const { token } = useAuthStore()
 
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
@@ -72,14 +70,10 @@ export function MemberSection({
     setIsLoading(true)
 
     try {
-      const response = (await window.api.fetchApi(
+      const response = (await window.api.request(
         `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(query)}`,
         {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          method: 'GET'
         }
       )) as MemberResponse
 

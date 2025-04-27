@@ -72,11 +72,8 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
         address: newMember.address.trim() === '' ? null : newMember.address
       }
 
-      const response = (await window.api.fetchWithAuth(API_ENDPOINTS.MEMBERS.BASE, {
+      const response = (await window.api.request(API_ENDPOINTS.MEMBERS.BASE, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         data: memberData
       })) as { success: boolean; data: Member; message?: string }
 

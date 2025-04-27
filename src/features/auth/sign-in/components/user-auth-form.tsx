@@ -62,22 +62,33 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       // Determine login method based on identifier format
       const loginMethod = data.identifier.includes('@') ? 'email' : 'username'
 
-      const promise = signIn(data.identifier, data.password, loginMethod)
-
-      toast.promise(promise, {
+      toast.promise(signIn(data.identifier, data.password, loginMethod), {
         loading: 'Logging in...',
         success: () => {
           navigate({ to: '/' })
           return 'Logged in successfully'
         },
         error: (error) => {
-          form.reset()
-          return error.message || 'Login failed. Please try again.'
+          // Reset form but preserve username/email
+          form.reset({
+            identifier: data.identifier,
+            password: ''
+          })
+
+          // Display the proper error message to user
+          if (error && typeof error === 'object') {
+            if (typeof error.message === 'string') {
+              return error.message
+            }
+          }
+
+          return 'Login failed. Please check your credentials.'
         }
       })
     } catch (error) {
-      console.error('Login error:', error)
-      toast.error('An unexpected error occurred')
+      // This should rarely be reached as toast.promise handles the error
+      console.error('Unhandled login error:', error)
+      toast.error('An unexpected error occurred during login')
     }
   }
 

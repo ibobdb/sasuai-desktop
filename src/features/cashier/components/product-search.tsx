@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Search, Loader2, X, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/authStore'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
@@ -15,7 +14,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
   const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const { token } = useAuthStore()
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
@@ -57,14 +55,10 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     setIsLoading(true)
 
     try {
-      const data = (await window.api.fetchApi(
+      const data = (await window.api.request(
         `${API_ENDPOINTS.PRODUCTS.BASE}?search=${encodeURIComponent(searchQuery)}`,
         {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          method: 'GET'
         }
       )) as ProductResponse
 
