@@ -251,25 +251,20 @@ export default function TransactionsProvider({ children }: Props) {
       setIsVoiding(true)
 
       try {
-        // Use a specific void endpoint instead of the general one
-        // Many APIs use a dedicated endpoint for voiding transactions
         const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
-        console.log('Voiding transaction:', url)
-        console.log('Request payload:', { reason })
 
-        // Ensure we're sending properly formatted JSON data
-        const payload = JSON.stringify({ reason: reason.trim() })
-        console.log('Stringified payload:', payload)
+        // Prepare the data object
+        const voidData = {
+          reason: reason
+        }
 
-        // Make the API call with explicit content length header
-        const response = await window.api.fetchApi(url, {
+        // Make the API call with proper JSON data format
+        const response = await window.api.fetchWithAuth(url, {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Content-Length': payload.length.toString()
+            'Content-Type': 'application/json'
           },
-          body: payload
+          data: voidData
         })
 
         console.log('Void response:', response)
@@ -298,7 +293,7 @@ export default function TransactionsProvider({ children }: Props) {
         setIsVoiding(false)
       }
     },
-    [token, fetchTransactions]
+    [fetchTransactions]
   )
 
   // Debounced search function to prevent excessive API calls
@@ -307,22 +302,17 @@ export default function TransactionsProvider({ children }: Props) {
     setFilters((prev) => ({
       ...prev,
       search: searchTerm || undefined,
-      page: 1 // Reset to first page on search
+      page: 1
     }))
   }, 500)
 
-  // Update filters - all filter changes now immediately apply via the useEffect
   const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
     setFilters((prevFilters) => {
       return { ...prevFilters, ...newFilters }
     })
   }, [])
 
-  // Apply current filters and fetch data (now redundant but kept for backward compatibility)
-  const applyFilters = useCallback(() => {
-    // This is now a no-op as filters are applied automatically via useEffect
-    // but we'll leave it for backward compatibility
-  }, [])
+  const applyFilters = useCallback(() => {}, [])
 
   // Reset all filters and immediately apply
   const resetFilters = useCallback(() => {
@@ -343,8 +333,6 @@ export default function TransactionsProvider({ children }: Props) {
       sortField: 'createdAt',
       sortDirection: 'desc'
     })
-
-    // No need to call fetchTransactions() explicitly as the useEffect will handle it
   }, [])
 
   // Expose the context value

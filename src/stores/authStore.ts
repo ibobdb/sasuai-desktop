@@ -1,27 +1,10 @@
 import { create } from 'zustand'
 import { API_ENDPOINTS } from '@/config/api'
+import { AuthResponse, AuthUser, LoginMethod } from '@/types/auth'
 
 // Nama cookies dari response
 const SESSION_TOKEN = 'better-auth.session_token'
 const SESSION_DATA = 'better-auth.session_data'
-
-interface AuthUser {
-  id: string
-  email: string
-  name: string
-  image: string
-  emailVerified: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-interface AuthResponse {
-  redirect: boolean
-  token: string
-  user: AuthUser
-}
-
-type LoginMethod = 'email' | 'username'
 
 interface AuthState {
   user: AuthUser | null
@@ -81,6 +64,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async (): Promise<void> => {
+    await window.api.fetchWithAuth(API_ENDPOINTS.AUTH.SIGN_OUT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: {}
+    })
     await window.api.store.delete(SESSION_TOKEN)
     await window.api.store.delete(SESSION_DATA)
     set({
@@ -92,14 +80,44 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   initialize: async (): Promise<void> => {
-    const token = await window.api.store.get(SESSION_TOKEN)
-    const userData = await window.api.store.get(SESSION_DATA)
+    set({ isLoading: true })
 
-    if (token && userData) {
-      set({
-        token,
-        user: userData
-      })
+    try {
+      const token = await window.api.store.get(SESSION_TOKEN)
+      const userData = await window.api.store.get(SESSION_DATA)
+
+      if (token) {
+        try {
+          // validate session
+          await window.api.fetchWithAuth(API_ENDPOINTS.AUTH.VALIDATE_SESSION, {
+            method: 'GET',
+            headers: token,
+            data: {}
+          })
+
+          // Only set state if validation succeeded and we have user data
+          if (userData) {
+            set({
+              token,
+              user: userData,
+              isLoading: false
+            })
+          } else {
+            await window.api.store.delete(SESSION_TOKEN)
+            set({ isLoading: false })
+          }
+        } catch (error) {
+          console.error('Session validation failed:', error)
+          await window.api.store.delete(SESSION_TOKEN)
+          await window.api.store.delete(SESSION_DATA)
+          set({ isLoading: false })
+        }
+      } else {
+        set({ isLoading: false })
+      }
+    } catch (error) {
+      console.error('Failed to initialize auth store:', error)
+      set({ isLoading: false })
     }
   }
 }))
