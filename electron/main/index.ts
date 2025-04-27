@@ -15,8 +15,22 @@ const PERSIST_PARTITION = 'persist:sasuai-store-app'
 // Reference to the persistent session
 let persistentSession: Electron.Session
 
+// Store keys for authentication backup
+const AUTH_STORE_TOKEN_KEY = 'auth.token'
+const AUTH_STORE_USER_KEY = 'auth.user'
+
 let mainWindow: BrowserWindow | null = null
 const store = new Store()
+
+// Create a typed schema for better TypeScript support
+interface StoreSchema {
+  [AUTH_STORE_TOKEN_KEY]?: string
+  [AUTH_STORE_USER_KEY]?: string
+  [key: string]: unknown
+}
+
+// Use the typed store
+const typedStore = store as Store<StoreSchema>
 
 function createWindow(): void {
   // Create the browser window.
@@ -24,14 +38,13 @@ function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
-    frame: false, // Using custom titlebar
+    frame: false,
     titleBarStyle: 'hidden',
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      // Use a persistent partition for session data
       partition: PERSIST_PARTITION
     }
   })
@@ -41,15 +54,11 @@ function createWindow(): void {
 
   // Add navigation event handlers to flush cookies
   mainWindow.webContents.on('did-start-navigation', () => {
-    persistentSession.cookies.flushStore().catch((err) => {
-      console.error('Failed to flush cookie store on navigation start:', err)
-    })
+    persistentSession.cookies.flushStore().catch(() => {})
   })
 
   mainWindow.webContents.on('did-navigate', () => {
-    persistentSession.cookies.flushStore().catch((err) => {
-      console.error('Failed to flush cookie store after navigation:', err)
-    })
+    persistentSession.cookies.flushStore().catch(() => {})
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -87,7 +96,7 @@ function createWindow(): void {
 const createApiClient = () => {
   const instance = axios.create({
     timeout: 60000,
-    withCredentials: true // Enable sending/receiving cookies with requests
+    withCredentials: true
   })
 
   // Request interceptor to add auth token
@@ -98,14 +107,34 @@ const createApiClient = () => {
         name: AUTH_COOKIE_NAME
       })
 
+      // Try to get auth token (first from cookies, then from store)
+      let authToken: string | null = null
       if (cookies.length > 0) {
+        authToken = cookies[0].value
+      } else {
+        // Fallback to electron-store
+        authToken = typedStore.get(AUTH_STORE_TOKEN_KEY) || null
+        if (authToken) {
+          // Restore the cookie from the store value
+          await persistentSession.cookies
+            .set({
+              url: `http://${COOKIE_DOMAIN}`,
+              name: AUTH_COOKIE_NAME,
+              value: authToken,
+              domain: COOKIE_DOMAIN
+            })
+            .catch(() => {})
+        }
+      }
+
+      if (authToken) {
         config.headers = config.headers || {}
-        config.headers.Authorization = `Bearer ${cookies[0].value}`
+        config.headers.Authorization = `Bearer ${authToken}`
       }
 
       return config
     } catch (error) {
-      console.error('Error adding auth token:', error)
+      console.error('Error during API request:', error)
       return config
     }
   })
@@ -127,22 +156,14 @@ app.whenReady().then(() => {
   // API request handler
   ipcMain.handle('api:request', async (_event, url: string, options = {}) => {
     try {
-      const requestOptions = { ...options }
-
-      // Make the request
       const response = await apiClient({
         url,
-        ...requestOptions
+        ...options
       })
 
       return response.data
     } catch (error: any) {
-      // Proper error handling with status codes
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('API request failed with status:', error.response.status)
-
         // For auth errors, clear cookies
         if (error.response.status === 401 || error.response.status === 403) {
           await clearAuthCookies()
@@ -154,15 +175,11 @@ app.whenReady().then(() => {
           data: error.response.data
         }
       } else if (error.request) {
-        // The request was made but no response was received
-        console.error('API request failed, no response received')
         throw {
           status: 0,
           message: 'No response from server'
         }
       } else {
-        // Something happened in setting up the request
-        console.error('API request setup error:', error.message)
         throw {
           status: 0,
           message: error.message
@@ -174,25 +191,37 @@ app.whenReady().then(() => {
   // Helper function to clear auth cookies
   async function clearAuthCookies() {
     try {
-      // Use persistent session
       await persistentSession.cookies.remove(`http://${COOKIE_DOMAIN}`, AUTH_COOKIE_NAME)
       await persistentSession.cookies.remove(`http://${COOKIE_DOMAIN}`, USER_DATA_COOKIE_NAME)
       await persistentSession.cookies.flushStore()
+      typedStore.delete(AUTH_STORE_TOKEN_KEY)
+      typedStore.delete(AUTH_STORE_USER_KEY)
     } catch (err) {
-      console.error('Error clearing auth cookies:', err)
+      console.log('Error clearing auth cookies:', err)
     }
   }
 
-  // Cookie management handlers with improved security based on Electron docs
+  // Cookie management handlers
   ipcMain.handle('cookies:get', async (_event, filter) => {
     try {
-      // Allow getting cookies by name or with additional filters
       const cookieFilter = typeof filter === 'string' ? { name: filter } : filter
-
-      // Use persistent session
       const cookies = await persistentSession.cookies.get(cookieFilter)
-      console.log(`Getting cookie ${JSON.stringify(cookieFilter)}, found: ${cookies.length}`)
-      return cookies.length > 0 ? cookies[0].value : null
+
+      // If cookie exists, return its value
+      if (cookies.length > 0) {
+        return cookies[0].value
+      }
+
+      // Fallback to electron-store for auth cookies
+      if (typeof filter === 'string') {
+        if (filter === AUTH_COOKIE_NAME) {
+          return typedStore.get(AUTH_STORE_TOKEN_KEY) || null
+        } else if (filter === USER_DATA_COOKIE_NAME) {
+          return typedStore.get(AUTH_STORE_USER_KEY) || null
+        }
+      }
+
+      return null
     } catch (error) {
       console.error('Error getting cookie:', error)
       return null
@@ -201,12 +230,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('cookies:set', async (_event, details) => {
     try {
-      // Ensure we always have a valid URL parameter
       let cookieDetails
 
       if (typeof details === 'object') {
         if (details.name && details.value !== undefined) {
-          // It's likely {name, value} pair
           cookieDetails = {
             url: `http://${COOKIE_DOMAIN}`,
             name: details.name,
@@ -223,27 +250,27 @@ app.whenReady().then(() => {
             cookieDetails.secure = true
             cookieDetails.httpOnly = true
           }
-          cookieDetails.sameSite = 'lax' // Match the observed sameSite value
+          cookieDetails.sameSite = 'lax'
         } else if (details.url && details.name) {
-          // It's a complete cookie object
           cookieDetails = details
         } else {
-          throw new Error(
-            'Invalid cookie details: must provide name and value or complete cookie object'
-          )
+          throw new Error('Invalid cookie details')
         }
       } else {
-        throw new Error('Invalid cookie details: must be an object')
+        throw new Error('Invalid cookie details')
       }
-
-      console.log(
-        `Setting cookie: ${cookieDetails.name}=${cookieDetails.value.substring(0, 20)}...`
-      )
 
       // Use persistent session
       await persistentSession.cookies.set(cookieDetails)
 
-      // Force write cookies to disk immediately for auth cookies
+      // Store auth data in electron-store as backup
+      if (cookieDetails.name === AUTH_COOKIE_NAME) {
+        typedStore.set(AUTH_STORE_TOKEN_KEY, cookieDetails.value)
+      } else if (cookieDetails.name === USER_DATA_COOKIE_NAME) {
+        typedStore.set(AUTH_STORE_USER_KEY, cookieDetails.value)
+      }
+
+      // Force write cookies to disk for auth cookies
       if (cookieDetails.name === AUTH_COOKIE_NAME || cookieDetails.name === USER_DATA_COOKIE_NAME) {
         await persistentSession.cookies.flushStore()
       }
@@ -256,11 +283,8 @@ app.whenReady().then(() => {
 
   ipcMain.handle('cookies:remove', async (_event, url, name) => {
     try {
-      // Handle both simple name and url+name pairs
       const cookieUrl = typeof url === 'string' && name ? url : `http://${COOKIE_DOMAIN}`
       const cookieName = name || url // If only one arg, it's the name
-
-      // Use persistent session
       await persistentSession.cookies.remove(cookieUrl, cookieName)
       await persistentSession.cookies.flushStore()
       return true
@@ -273,10 +297,7 @@ app.whenReady().then(() => {
   // Handles removal of all auth-related cookies
   ipcMain.handle('cookies:clearAuth', async () => {
     try {
-      // Use persistent session
-      await persistentSession.cookies.remove(`http://${COOKIE_DOMAIN}`, AUTH_COOKIE_NAME)
-      await persistentSession.cookies.remove(`http://${COOKIE_DOMAIN}`, USER_DATA_COOKIE_NAME)
-      await persistentSession.cookies.flushStore()
+      await clearAuthCookies()
       return true
     } catch (error) {
       console.error('Error clearing auth cookies:', error)
@@ -286,9 +307,7 @@ app.whenReady().then(() => {
 
   // Custom titlebar window control handlers
   ipcMain.handle('window:minimize', () => {
-    if (mainWindow) {
-      mainWindow.minimize()
-    }
+    if (mainWindow) mainWindow.minimize()
     return null
   })
 
@@ -305,9 +324,7 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('window:close', () => {
-    if (mainWindow) {
-      mainWindow.close()
-    }
+    if (mainWindow) mainWindow.close()
     return null
   })
 
