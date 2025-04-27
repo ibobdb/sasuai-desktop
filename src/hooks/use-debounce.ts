@@ -30,6 +30,11 @@ export function useDebounce(initialValue: string = '', options: UseDebounceOptio
       setDebouncedValue('')
       setIsDebouncing(false)
     }
+
+    // Return a no-op cleanup function for all other cases
+    return () => {
+      /* no-op cleanup */
+    }
   }, [value, delay, minLength, callback])
 
   return {
