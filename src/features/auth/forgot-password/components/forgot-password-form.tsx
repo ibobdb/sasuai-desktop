@@ -39,12 +39,9 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
 
     try {
       // Panggil API forgot password melalui Electron
-      const response = await window.api.fetchApi(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
+      const response = await window.api.request(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
         method: 'POST',
-        data: { email: data.email },
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        data: { email: data.email }
       })
 
       if (response.success) {
