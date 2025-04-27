@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { Transaction, TransactionDetail } from '../data/schema'
+import { Transaction, TransactionDetail } from '@/types/transactions'
 import { formatCurrency } from '@/utils/format'
 import { Separator } from '@/components/ui/separator'
 import { useTransactions } from '../context/transactions-context'

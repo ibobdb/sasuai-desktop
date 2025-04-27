@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogDescription
 } from '@/components/ui/dialog'
-import { Transaction } from '../data/schema'
+import { Transaction } from '@/types/transactions'
 import { formatCurrency } from '@/utils/format'
 import { useTransactions } from '../context/transactions-context'
 import { Card } from '@/components/ui/card'

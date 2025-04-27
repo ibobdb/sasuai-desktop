@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/utils/format'
 import { paymentMethods } from '../data/data'
-import { Transaction, TransactionPaymentMethod } from '../data/schema'
+import { Transaction, TransactionPaymentMethod } from '@/types/transactions'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 

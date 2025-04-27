@@ -1,38 +1,15 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import { Transaction, TransactionDetail } from '../data/schema'
+import {
+  Transaction,
+  TransactionDetail,
+  TransactionFilterParams,
+  TransactionFilterUIState,
+  TransactionsDialogType
+} from '@/types/transactions'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/use-debounce'
-
-// Change the type to include both 'delete' and 'view'
-type TransactionsDialogType = 'delete' | 'view'
-
-// Filter parameters interface that matches the API
-export interface TransactionFilterParams {
-  page?: number
-  pageSize?: number
-  sortField?: string
-  sortDirection?: 'asc' | 'desc'
-  search?: string
-  cashierId?: string
-  memberId?: string
-  paymentMethod?: string
-  startDate?: Date
-  endDate?: Date
-  minAmount?: number
-  maxAmount?: number
-}
-
-// Interface for UI filter state that should persist
-export interface TransactionFilterUIState {
-  startDate?: Date
-  endDate?: Date
-  minAmount: string
-  maxAmount: string
-  search: string
-  paymentMethods: string[]
-}
 
 interface TransactionsContextType {
   open: TransactionsDialogType | null

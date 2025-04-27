@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { useTransactions } from '../context/transactions-context'
-import { Transaction } from '../data/schema'
+import { Transaction } from '@/types/transactions'
 
 interface DataTableRowActionsProps {
   row: Row<Transaction>

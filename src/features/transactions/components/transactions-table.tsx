@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { Transaction } from '../data/schema'
+import { Transaction } from '@/types/transactions'
 import { DataTablePagination } from './data-table-pagination'
 
 declare module '@tanstack/react-table' {
