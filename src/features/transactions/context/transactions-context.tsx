@@ -3,7 +3,7 @@ import useDialogState from '@/hooks/use-dialog-state'
 import { Transaction, TransactionDetail } from '../data/schema'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
-import { useDebouncedCallback } from '@/hooks/use-debounced-callback'
+import { useDebounce } from '@/hooks/use-debounce'
 
 // Change the type to include both 'delete' and 'view'
 type TransactionsDialogType = 'delete' | 'view'
@@ -55,6 +55,7 @@ interface TransactionsContextType {
   setFilterUIState: React.Dispatch<React.SetStateAction<TransactionFilterUIState>>
   resetFilters: () => void
   debouncedSearch: (searchTerm: string) => void
+  executeSearch: (searchTerm: string) => void
   fetchTransactionDetail: (id: string) => Promise<TransactionDetail | null>
   transactionDetail: TransactionDetail | null
   setTransactionDetail: React.Dispatch<React.SetStateAction<TransactionDetail | null>>
@@ -78,6 +79,7 @@ export default function TransactionsProvider({ children }: Props) {
   const [totalPages, setTotalPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(10)
+  const [lastSearchedQuery, setLastSearchedQuery] = useState<string>('')
 
   // Transaction detail states
   const [transactionDetail, setTransactionDetail] = useState<TransactionDetail | null>(null)
@@ -105,6 +107,55 @@ export default function TransactionsProvider({ children }: Props) {
   })
 
   const [isVoiding, setIsVoiding] = useState<boolean>(false)
+
+  // Create a search callback function that checks if the query has changed
+  const searchCallback = useCallback(
+    (value: string) => {
+      // Only update filters and trigger API call if value has changed
+      if (value !== lastSearchedQuery) {
+        setLastSearchedQuery(value)
+        setFilterUIState((prev) => ({ ...prev, search: value }))
+        setFilters((prev) => ({
+          ...prev,
+          search: value || undefined,
+          page: 1
+        }))
+      }
+    },
+    [lastSearchedQuery]
+  )
+
+  // Setup debounced search using the useDebounce hook
+  const { setValue: setSearchTerm } = useDebounce('', {
+    delay: 500,
+    callback: searchCallback
+  })
+
+  // Wrapper function to debounce search input
+  const debouncedSearch = useCallback(
+    (searchTerm: string) => {
+      setSearchTerm(searchTerm)
+      // Update UI state immediately, but don't trigger API call until debounced
+      setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
+    },
+    [setSearchTerm]
+  )
+
+  // Function to explicitly execute a search (for search button)
+  const executeSearch = useCallback(
+    (searchTerm: string) => {
+      if (searchTerm !== lastSearchedQuery) {
+        setLastSearchedQuery(searchTerm)
+        setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
+        setFilters((prev) => ({
+          ...prev,
+          search: searchTerm || undefined,
+          page: 1
+        }))
+      }
+    },
+    [lastSearchedQuery]
+  )
 
   // Function to build URL with query parameters
   const buildUrl = useCallback((params: TransactionFilterParams): string => {
@@ -280,16 +331,6 @@ export default function TransactionsProvider({ children }: Props) {
     [fetchTransactions]
   )
 
-  // Debounced search function to prevent excessive API calls
-  const debouncedSearch = useDebouncedCallback((searchTerm: string) => {
-    setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
-    setFilters((prev) => ({
-      ...prev,
-      search: searchTerm || undefined,
-      page: 1
-    }))
-  }, 500)
-
   const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
     setFilters((prevFilters) => {
       return { ...prevFilters, ...newFilters }
@@ -317,6 +358,9 @@ export default function TransactionsProvider({ children }: Props) {
       sortField: 'createdAt',
       sortDirection: 'desc'
     })
+
+    // Reset last searched query
+    setLastSearchedQuery('')
   }, [])
 
   // Expose the context value
@@ -342,6 +386,7 @@ export default function TransactionsProvider({ children }: Props) {
       setFilterUIState,
       resetFilters,
       debouncedSearch,
+      executeSearch,
       fetchTransactionDetail,
       transactionDetail,
       setTransactionDetail,
@@ -366,6 +411,7 @@ export default function TransactionsProvider({ children }: Props) {
       setFilterUIState,
       resetFilters,
       debouncedSearch,
+      executeSearch,
       fetchTransactionDetail,
       transactionDetail,
       isLoadingDetail,

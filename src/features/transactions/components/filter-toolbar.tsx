@@ -18,7 +18,8 @@ function FilterToolbarComponent() {
     setFilterUIState,
     updateFilters,
     resetFilters: contextResetFilters,
-    debouncedSearch
+    debouncedSearch,
+    executeSearch
   } = useTransactions()
 
   // Destructure UI filter state for easier access
@@ -33,17 +34,12 @@ function FilterToolbarComponent() {
 
   // Handle search input change - use debounced search
   const handleSearchChange = (value: string) => {
-    setFilterUIState((prev) => ({ ...prev, search: value }))
     debouncedSearch(value)
   }
 
   // Handle search submit (explicit search button click)
   const handleSearchSubmit = () => {
-    // Update API filter directly - data fetching is handled by effect in context
-    updateFilters({
-      search: search || undefined,
-      page: 1
-    })
+    executeSearch(search)
   }
 
   // Apply date range filter

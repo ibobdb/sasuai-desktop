@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Loader2, X, Ticket } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { API_ENDPOINTS } from '@/config/api'
@@ -7,47 +7,54 @@ import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Product, Discount, ProductResponse, ProductSearchProps } from '@/types/cashier'
+import { useDebounce } from '@/hooks/use-debounce'
+import { useClickOutside } from '@/hooks/use-click-outside'
 
 export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
-  const [query, setQuery] = useState('')
   const [results, setResults] = useState<Product[]>([])
   const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [lastSearchedQuery, setLastSearchedQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Close results when clicking outside
+  // Create a memoized search function that avoids duplicate API calls
+  const searchCallback = useCallback(
+    (value: string) => {
+      if (value.trim() && value !== lastSearchedQuery) {
+        fetchProducts(value)
+        setLastSearchedQuery(value)
+      }
+    },
+    [lastSearchedQuery]
+  )
+
+  // Use the debounce hook with our controlled search callback
+  const {
+    value: query,
+    setValue: setQuery,
+    isDebouncing,
+    isTooShort
+  } = useDebounce('', {
+    minLength: 3,
+    callback: searchCallback
+  })
+
+  // Use click outside hook
+  useClickOutside([resultsRef, inputRef], () => {
+    setShowResults(false)
+  })
+
+  // Auto-select if there's an exact match when manually searching
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        resultsRef.current &&
-        !resultsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowResults(false)
+    if (results.length > 0) {
+      const exactMatch = results.find((p) => p.barcode === query || p.skuCode === query)
+      if (exactMatch) {
+        handleSelect(exactMatch)
       }
     }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Debounced search function
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        fetchProducts(query)
-      } else if (query.trim() === '') {
-        setResults([])
-        setSelectedProduct(null)
-        setShowResults(false)
-      }
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [query])
+  }, [results, query])
 
   const fetchProducts = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -77,14 +84,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
         setResults(products)
         setShowResults(products.length > 0)
-
-        // Auto-select if there's an exact match
-        const exactMatch = products.find(
-          (p) => p.barcode === searchQuery || p.skuCode === searchQuery
-        )
-        if (exactMatch) {
-          handleSelect(exactMatch)
-        }
       } else {
         setResults([])
         setShowResults(false)
@@ -105,7 +104,9 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     onProductSelect(product)
     setSelectedProduct(product)
     setQuery('')
+    setResults([])
     setShowResults(false)
+    setLastSearchedQuery('')
   }
 
   const clearSearch = () => {
@@ -113,12 +114,20 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     setResults([])
     setSelectedProduct(null)
     setShowResults(false)
+    setLastSearchedQuery('')
     inputRef.current?.focus()
   }
 
   const handleInputFocus = () => {
     if (results.length > 0) {
       setShowResults(true)
+    }
+  }
+
+  const handleManualSearch = () => {
+    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
+      fetchProducts(query)
+      setLastSearchedQuery(query)
     }
   }
 
@@ -165,11 +174,8 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           onFocus={handleInputFocus}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && query.trim() !== '') {
-              const exactMatch = results.find((p) => p.barcode === query || p.skuCode === query)
-              if (exactMatch) {
-                handleSelect(exactMatch)
-              } else {
-                fetchProducts(query)
+              if (query.trim().length >= 3) {
+                handleManualSearch()
               }
               e.preventDefault()
             }
@@ -178,7 +184,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           autoFocus={autoFocus}
         />
 
-        {query && !isLoading && (
+        {query && !isLoading && !isDebouncing && (
           <Button
             variant="ghost"
             size="icon"
@@ -192,10 +198,10 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         <Button
           size="icon"
           className="absolute right-0 top-0 h-full rounded-l-none"
-          onClick={() => fetchProducts(query)}
-          disabled={query.trim().length < 2 || isLoading}
+          onClick={handleManualSearch}
+          disabled={query.trim().length < 3 || isLoading || isDebouncing}
         >
-          {isLoading ? (
+          {isLoading || isDebouncing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Search className="h-4 w-4" />
@@ -256,13 +262,26 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       </div>
 
       {/* Loading state */}
-      {isLoading && query.trim() !== '' && (
-        <div className="text-sm text-muted-foreground">Searching products...</div>
+      {(isLoading || isDebouncing) && query.trim() !== '' && (
+        <div className="text-sm text-muted-foreground flex items-center">
+          <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+          Searching products...
+        </div>
       )}
 
       {/* No results message */}
-      {!isLoading && query.trim().length >= 2 && results.length === 0 && (
-        <div className="text-sm text-muted-foreground">No products found</div>
+      {!isLoading && !isDebouncing && query.trim().length >= 3 && results.length === 0 && (
+        <div className="text-sm text-muted-foreground flex items-center">
+          <X className="h-3 w-3 mr-2" />
+          No products found
+        </div>
+      )}
+
+      {/* Minimum character hint */}
+      {isTooShort && (
+        <div className="text-sm text-muted-foreground flex items-center">
+          Enter at least 3 characters to search
+        </div>
       )}
 
       {/* Selected product display */}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Search, Loader2, UserPlus, X, Ticket, Check } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,8 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Member, MemberResponse, MemberSectionProps, Discount } from '@/types/cashier'
+import { useDebounce } from '@/hooks/use-debounce'
+import { useClickOutside } from '@/hooks/use-click-outside'
 
 export function MemberSection({
   onMemberSelect,
@@ -23,46 +25,42 @@ export function MemberSection({
   selectedDiscount,
   subtotal = 0
 }: MemberSectionProps) {
-  const [query, setQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [searchResults, setSearchResults] = useState<Member[]>([])
   const [showResults, setShowResults] = useState(false)
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
+  const [lastSearchedQuery, setLastSearchedQuery] = useState('')
 
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Close results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        resultsRef.current &&
-        !resultsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowResults(false)
+  // Create a memoized search function that avoids duplicate API calls
+  const searchCallback = useCallback(
+    (value: string) => {
+      if (value.trim() && value !== lastSearchedQuery) {
+        searchMembers(value)
+        setLastSearchedQuery(value)
       }
-    }
+    },
+    [lastSearchedQuery]
+  )
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  // Use the debounce hook
+  const {
+    value: query,
+    setValue: setQuery,
+    isDebouncing,
+    isTooShort
+  } = useDebounce('', {
+    minLength: 3,
+    callback: searchCallback
+  })
 
-  // Debounced search function
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        searchMembers(query)
-      } else if (query.trim() === '') {
-        setSearchResults([])
-        setShowResults(false)
-      }
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [query])
+  // Use click outside hook
+  useClickOutside([resultsRef, inputRef], () => {
+    setShowResults(false)
+  })
 
   const searchMembers = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -71,7 +69,7 @@ export function MemberSection({
 
     try {
       const response = (await window.api.request(
-        `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(query)}`,
+        `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(searchQuery)}`,
         {
           method: 'GET'
         }
@@ -111,6 +109,7 @@ export function MemberSection({
     setSelectedMember(member)
     setShowResults(false)
     setQuery('')
+    setLastSearchedQuery('')
     if (onMemberSelect) {
       onMemberSelect(member)
     }
@@ -118,6 +117,7 @@ export function MemberSection({
 
   const clearMember = () => {
     setSelectedMember(null)
+    setLastSearchedQuery('')
     if (onMemberSelect) {
       onMemberSelect(null)
     }
@@ -136,7 +136,15 @@ export function MemberSection({
     setQuery('')
     setSearchResults([])
     setShowResults(false)
+    setLastSearchedQuery('')
     inputRef.current?.focus()
+  }
+
+  const handleManualSearch = () => {
+    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
+      searchMembers(query)
+      setLastSearchedQuery(query)
+    }
   }
 
   // Format discount for display
@@ -312,16 +320,16 @@ export function MemberSection({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && query.trim() !== '') {
-                  searchMembers(query)
+                if (e.key === 'Enter' && query.trim().length >= 3) {
+                  handleManualSearch()
+                  e.preventDefault()
                 }
               }}
               onFocus={handleInputFocus}
-              disabled={isLoading}
               className="pr-16"
             />
 
-            {query && !isLoading && (
+            {query && !isLoading && !isDebouncing && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -335,10 +343,10 @@ export function MemberSection({
             <Button
               size="icon"
               className="absolute right-0 top-0 h-full rounded-l-none w-10"
-              onClick={() => searchMembers(query)}
-              disabled={query.trim() === '' || isLoading}
+              onClick={handleManualSearch}
+              disabled={query.trim().length < 3 || isLoading || isDebouncing}
             >
-              {isLoading ? (
+              {isLoading || isDebouncing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Search className="h-4 w-4" />
@@ -400,7 +408,7 @@ export function MemberSection({
           </div>
 
           {/* Loading state */}
-          {isLoading && query.trim() !== '' && (
+          {(isLoading || isDebouncing) && query.trim() !== '' && (
             <div className="text-sm text-muted-foreground flex items-center">
               <Loader2 className="h-3 w-3 mr-2 animate-spin" />
               Searching members...
@@ -408,10 +416,20 @@ export function MemberSection({
           )}
 
           {/* No results message */}
-          {!isLoading && query.trim().length >= 2 && searchResults.length === 0 && (
+          {!isLoading &&
+            !isDebouncing &&
+            query.trim().length >= 3 &&
+            searchResults.length === 0 && (
+              <div className="text-sm text-muted-foreground flex items-center">
+                <X className="h-3 w-3 mr-2" />
+                No members found
+              </div>
+            )}
+
+          {/* Minimum character hint */}
+          {isTooShort && (
             <div className="text-sm text-muted-foreground flex items-center">
-              <X className="h-3 w-3 mr-2" />
-              No members found
+              Enter at least 3 characters to search
             </div>
           )}
 
