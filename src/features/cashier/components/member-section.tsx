@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Ticket, Check, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,11 +18,16 @@ export function MemberSection({
   onMemberSelect,
   onMemberDiscountSelect,
   selectedDiscount,
-  subtotal = 0
+  subtotal = 0,
+  member
 }: MemberSectionProps) {
   const [selectedMember, setSelectedMember] = useState<
     (Member & { discountRelationsMember?: MemberDiscount[] }) | null
   >(null)
+
+  useEffect(() => {
+    setSelectedMember(member)
+  }, [member])
 
   // Handle member selection and their available discounts
   const handleMemberSelect = (

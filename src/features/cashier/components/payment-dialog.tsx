@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,6 @@ import {
   CreditCard,
   Loader2,
   Wallet,
-  DollarSign,
   Banknote,
   ArrowRight,
   MoreHorizontal,
@@ -58,28 +57,49 @@ export default function PaymentDialog({
   isProcessing
 }: PaymentDialogProps) {
   const [inputFocused, setInputFocused] = useState(false)
+  const [formattedAmount, setFormattedAmount] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const change = paymentAmount - total
   const isPaid = change >= 0
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0
-    onPaymentAmountChange(value)
+  // Format number with thousands separator
+  const formatNumber = (value: number): string => {
+    return value.toLocaleString('id-ID')
   }
 
-  // Generate quick cash selection buttons
-  const generateCashOptions = (total: number): number[] => {
-    const roundUp = (num: number, precision: number) => {
-      return Math.ceil(num / precision) * precision
+  // Parse formatted string to number
+  const parseFormattedNumber = (value: string): number => {
+    // Remove non-numeric characters except for decimal point
+    const numericValue = value.replace(/[^\d]/g, '')
+    return parseInt(numericValue, 10) || 0
+  }
+
+  // Update formatted amount when paymentAmount changes
+  useEffect(() => {
+    setFormattedAmount(formatNumber(paymentAmount))
+  }, [paymentAmount])
+
+  // Auto-focus payment input when dialog opens, but don't auto-select
+  useEffect(() => {
+    if (open && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
     }
+  }, [open])
 
-    // Get the nearest 5000 increment
-    const base = roundUp(total, 5000)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value
+    // Remove any non-numeric characters
+    const numericValue = parseFormattedNumber(rawValue)
 
-    // Generate options: nearest and a few more increments
-    return [base, base + 5000, base + 10000, base + 15000, base + 20000, 100000]
+    // Update both the formatted display and the actual numeric value
+    setFormattedAmount(formatNumber(numericValue))
+    onPaymentAmountChange(numericValue)
   }
 
-  const cashOptions = generateCashOptions(total)
+  // Static quick cash options
+  const cashOptions = [20000, 50000, 100000, 200000]
 
   // Get icon for payment method
   const getPaymentIcon = (method: PaymentMethod) => {
@@ -110,6 +130,12 @@ export default function PaymentDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Total to be paid */}
+          <div className="bg-primary/10 rounded-md p-3 flex justify-between items-center">
+            <span className="font-medium">Total to be paid:</span>
+            <span className="font-bold text-lg">Rp {formatNumber(total)}</span>
+          </div>
+
           <h2 className="font-bold">Payment Method</h2>
 
           {/* Payment Method Dropdown */}
@@ -172,7 +198,7 @@ export default function PaymentDialog({
           {paymentMethod === 'cash' && (
             <div className="space-y-2">
               <Label>Quick cash selection</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {cashOptions.map((amount) => (
                   <Button
                     key={amount}
@@ -181,7 +207,7 @@ export default function PaymentDialog({
                     onClick={() => onPaymentAmountChange(amount)}
                     className="text-sm"
                   >
-                    Rp {amount.toLocaleString()}
+                    Rp {formatNumber(amount)}
                   </Button>
                 ))}
               </div>
@@ -194,27 +220,16 @@ export default function PaymentDialog({
               <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
                 Payment Amount
               </Label>
-              {paymentAmount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onPaymentAmountChange(0)}
-                  className="h-6 px-2"
-                >
-                  Clear
-                </Button>
-              )}
             </div>
 
             <div className="relative">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
-                <DollarSign className="h-4 w-4" />
+                Rp
               </div>
               <Input
+                ref={inputRef}
                 id="paymentAmount"
-                type="number"
-                min={0}
-                value={paymentAmount || ''}
+                value={formattedAmount}
                 onChange={handleInputChange}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
@@ -227,7 +242,7 @@ export default function PaymentDialog({
           {/* Change calculation display */}
           <div
             className={cn(
-              'rounded-md px-3 py-3 flex items-center justify-between',
+              'rounded-md px-2 py-2 flex items-center justify-between',
               change >= 0
                 ? 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800'
                 : 'bg-muted border'
@@ -239,10 +254,10 @@ export default function PaymentDialog({
               ) : (
                 <ArrowRight className="h-4 w-4 mr-2" />
               )}
-              <span className="font-medium">{isPaid ? 'Change' : 'Still needed'}:</span>
+              <span className="font-normal">{isPaid ? 'Change' : 'Still needed'}:</span>
             </div>
-            <span className="font-bold text-lg">
-              Rp {(isPaid ? change : Math.abs(change)).toLocaleString()}
+            <span className="font-normal">
+              Rp {formatNumber(isPaid ? change : Math.abs(change))}
             </span>
           </div>
         </div>

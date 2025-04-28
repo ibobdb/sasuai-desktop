@@ -22,11 +22,9 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
   const [showResults, setShowResults] = useState(false)
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
   const [lastSearchedQuery, setLastSearchedQuery] = useState('')
-
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Create a memoized search function that avoids duplicate API calls
   const searchCallback = useCallback(
     (value: string) => {
       if (value.trim() && value !== lastSearchedQuery) {
@@ -48,18 +46,17 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
     callback: searchCallback
   })
 
-  // Define member select handler before it's used
   const handleMemberSelect = useCallback(
     (member: Member) => {
       setShowResults(false)
       setQuery('')
       setLastSearchedQuery('')
+      setSearchResults([])
       onMemberSelect(member)
     },
     [onMemberSelect, setQuery, setLastSearchedQuery]
   )
 
-  // Define manual search handler before it's used
   const handleManualSearch = useCallback(() => {
     if (query.trim().length >= 3 && query !== lastSearchedQuery) {
       searchMembers(query)
@@ -67,7 +64,6 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
     }
   }, [query, lastSearchedQuery])
 
-  // Define searchMembers before it's used
   const searchMembers = useCallback(
     async (searchQuery: string) => {
       if (!searchQuery.trim()) return
@@ -114,7 +110,6 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
     [handleMemberSelect]
   )
 
-  // Now use the useKeyboardNavigation hook
   const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
     {
       items: searchResults,
@@ -157,6 +152,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
           className="pr-16"
+          tabIndex={2}
         />
 
         {query && !isLoading && !isDebouncing && (

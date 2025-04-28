@@ -152,6 +152,7 @@ export type MemberSectionProps = {
   onMemberDiscountSelect?: (discount: Discount | null) => void
   selectedDiscount: Discount | null
   subtotal?: number
+  member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null // Add this prop
 }
 
 export type PaymentSectionProps = {

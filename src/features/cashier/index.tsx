@@ -4,6 +4,7 @@ import ProductSearch from './components/product-search'
 import CartList from './components/cart-list'
 import TransactionSummary from './components/summary'
 import PaymentDialog from './components/payment-dialog'
+import { PaymentStatusDialog } from './components/payment-status-dialog'
 import { MemberSection } from './components/member-section'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,15 @@ export default function Cashier() {
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [pointsToEarn, setPointsToEarn] = useState<number>(0)
+  const [paymentStatusDialogOpen, setPaymentStatusDialogOpen] = useState(false)
+  const [paymentStatus, setPaymentStatus] = useState<{
+    success: boolean
+    transactionId?: string
+    change?: number
+    errorMessage?: string
+  }>({
+    success: false
+  })
   const { user } = useAuthStore()
 
   // Calculate cart totals with discounts
@@ -73,21 +83,12 @@ export default function Cashier() {
     }
   }
 
-  // When opening the payment dialog, set payment amount to match the total for non-cash methods
   const handleOpenPaymentDialog = () => {
-    // For non-cash payment methods, set the amount equal to the total
-    if (paymentMethod !== 'cash') {
-      setPaymentAmount(total)
-    } else if (paymentAmount < total) {
-      // For cash, set a minimum amount if it's less than total
-      setPaymentAmount(total)
-    }
     setPaymentDialogOpen(true)
   }
 
   // Add to cart function - modify to accept quantity parameter
   const addToCart = (product: Product, quantity: number = 1) => {
-    // Get best batch (could improve with FIFO logic)
     const batch =
       product.batches && product.batches.length > 0
         ? product.batches.find((b) => b.remainingQuantity > 0)
@@ -101,7 +102,7 @@ export default function Cashier() {
           item.id === product.id
             ? {
                 ...item,
-                quantity: item.quantity + quantity, // Use the provided quantity
+                quantity: item.quantity + quantity,
                 subtotal: (item.quantity + quantity) * item.price,
                 finalPrice: calculateFinalPrice(
                   item.price,
@@ -123,13 +124,13 @@ export default function Cashier() {
         ...prevCart,
         {
           ...product,
-          quantity: quantity, // Use the provided quantity
-          subtotal: product.price * quantity, // Multiply by quantity
+          quantity: quantity,
+          subtotal: product.price * quantity,
           batchId: batch?.id,
-          unitId: product.unitId || '', // Ensure unit ID is provided in product data
+          unitId: product.unitId || '',
           selectedDiscount: null,
           discountAmount: 0,
-          finalPrice: product.price * quantity // Multiply by quantity
+          finalPrice: product.price * quantity
         }
       ]
     })
@@ -148,7 +149,7 @@ export default function Cashier() {
     if (discount.valueType === 'percentage') {
       return itemTotal * (discount.value / 100)
     } else {
-      return Math.min(discount.value, itemTotal) // Fixed discount can't exceed item total
+      return Math.min(discount.value, itemTotal)
     }
   }
 
@@ -289,13 +290,9 @@ export default function Cashier() {
     setIsProcessingTransaction(true)
 
     try {
-      // Calculate total amount before discounts
       const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
-
-      // Calculate final amount after all discounts (both product and member discounts)
       const finalAmount = totalAmount - totalDiscount
 
-      // Prepare transaction items according to backend structure
       const transactionItems: TransactionItem[] = cart.map((item) => {
         const batch = item.batches?.find((b) => b.id === item.batchId)
 
@@ -306,10 +303,10 @@ export default function Cashier() {
         return {
           productId: item.id,
           quantity: item.quantity,
-          unitId: item.unitId || '', // Ensure unit ID is provided in product data
+          unitId: item.unitId || '',
           cost: batch.buyPrice,
           pricePerUnit: item.price,
-          subtotal: item.finalPrice, // Price after product-specific discount
+          subtotal: item.finalPrice,
           batchId: batch.id,
           discountId: item.selectedDiscount?.id || null
         }
@@ -334,47 +331,59 @@ export default function Cashier() {
       })
 
       if (response.success) {
-        // Handle successful transaction
-        const { data, change, information } = response
+        const { data, change } = response
 
-        // Show success message with transaction details
-        toast.success('Payment successful!', {
-          description: `Transaction #${data.id} completed`
+        // Set payment status for the dialog
+        setPaymentStatus({
+          success: true,
+          transactionId: data.id,
+          change
         })
 
-        // Show change if paying with cash
-        if (paymentMethod === 'cash' && change > 0) {
-          toast.info(`Change: Rp ${change.toLocaleString()}`, {
-            duration: 5000
-          })
-        }
-
-        // Show member points information if applicable
-        if (member && information?.member) {
-          toast.info(information.member, {
-            duration: 5000
-          })
-        }
-
-        // Clear cart after successful payment
-        clearCart()
-        // Close payment dialog
+        // Close payment dialog and show status dialog
         setPaymentDialogOpen(false)
+        setPaymentStatusDialogOpen(true)
+
         return Promise.resolve()
       } else {
-        toast.error('Transaction failed', {
-          description: response.message || 'Please try again'
+        // Handle failed transaction
+        setPaymentStatus({
+          success: false,
+          errorMessage: response.message || 'Transaction failed. Please try again.'
         })
+
+        // Close payment dialog and show status dialog
+        setPaymentDialogOpen(false)
+        setPaymentStatusDialogOpen(true)
+
         return Promise.reject(new Error(response.message || 'Transaction failed'))
       }
     } catch (error) {
       console.error('Payment error:', error)
-      toast.error('Payment processing error', {
-        description: 'An unexpected error occurred. Please try again.'
+
+      // Handle error
+      setPaymentStatus({
+        success: false,
+        errorMessage: 'An unexpected error occurred. Please try again.'
       })
+
+      // Close payment dialog and show status dialog
+      setPaymentDialogOpen(false)
+      setPaymentStatusDialogOpen(true)
+
       return Promise.reject(error)
     } finally {
       setIsProcessingTransaction(false)
+    }
+  }
+
+  // Handle close of payment status dialog
+  const handleStatusDialogClose = () => {
+    setPaymentStatusDialogOpen(false)
+
+    // If payment was successful, clear the cart
+    if (paymentStatus.success) {
+      clearCart()
     }
   }
 
@@ -385,6 +394,29 @@ export default function Cashier() {
       setPointsToEarn(0)
     }
   }, [subtotal, member])
+
+  // Add global keyboard shortcut for payment (Ctrl+P)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Ctrl+P is pressed
+      if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault()
+
+        // Only open payment dialog if cart is not empty
+        if (cart.length > 0) {
+          handleOpenPaymentDialog()
+        }
+      }
+    }
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown)
+
+    // Clean up
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [cart.length])
 
   return (
     <Main>
@@ -405,6 +437,7 @@ export default function Cashier() {
             onMemberDiscountSelect={handleMemberDiscountSelect}
             selectedDiscount={selectedMemberDiscount}
             subtotal={subtotal}
+            member={member}
           />
 
           <Card>
@@ -434,16 +467,17 @@ export default function Cashier() {
       {/* Fixed payment buttons */}
       <div className="fixed bottom-6 right-6 flex gap-2 z-10">
         <Button
-          className="w-105"
+          className="w-103"
           size="lg"
           onClick={handleOpenPaymentDialog}
           disabled={cart.length === 0}
+          tabIndex={3}
         >
           <CreditCard className="mr-2 h-4 w-4" />
           Payment
         </Button>
 
-        <Button variant="destructive" size="lg" onClick={clearCart}>
+        <Button variant="destructive" size="lg" onClick={clearCart} tabIndex={4}>
           <X className="mr-2 h-4 w-4" /> Clear
         </Button>
       </div>
@@ -460,6 +494,18 @@ export default function Cashier() {
         onPay={handlePayment}
         isPayEnabled={cart.length > 0 && paymentAmount >= total}
         isProcessing={isProcessingTransaction}
+      />
+
+      {/* Payment status dialog */}
+      <PaymentStatusDialog
+        open={paymentStatusDialogOpen}
+        onClose={handleStatusDialogClose}
+        success={paymentStatus.success}
+        transactionId={paymentStatus.transactionId}
+        paymentMethod={paymentMethod}
+        change={paymentStatus.change}
+        finalAmount={total}
+        errorMessage={paymentStatus.errorMessage}
       />
     </Main>
   )

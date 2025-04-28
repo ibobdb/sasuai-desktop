@@ -14,7 +14,6 @@ import { useClickOutside } from '@/hooks/use-click-outside'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 import { QuantityInputDialog } from './quantity-input-dialog'
 
-// Update the ProductSearchProps interface to include quantity
 interface ProductSearchProps {
   onProductSelect: (product: Product, quantity?: number) => void
   autoFocus?: boolean
@@ -31,29 +30,23 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
   const [quantityDialogOpen, setQuantityDialogOpen] = useState(false)
   const [quickAddMode, setQuickAddMode] = useState<boolean>(false)
 
-  // Define handleSelect function first, before it's used in the hook
   const handleSelect = useCallback(
     (product: Product) => {
       if (quickAddMode) {
-        // If quick add is enabled, add directly with quantity=1
         onProductSelect(product, 1)
-        // Also reset search field when using quick add
         setQuery('')
         setLastSearchedQuery('')
         inputRef.current?.focus()
       } else {
-        // Otherwise show the quantity dialog
         setSelectedProduct(product)
         setQuantityDialogOpen(true)
       }
-      // Always clear results
       setResults([])
       setShowResults(false)
     },
     [quickAddMode, onProductSelect]
   )
 
-  // Create a memoized search function that avoids duplicate API calls
   const searchCallback = useCallback(
     (value: string) => {
       if (value.trim() && value !== lastSearchedQuery) {
@@ -64,7 +57,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     [lastSearchedQuery]
   )
 
-  // Use the debounce hook with our controlled search callback
   const {
     value: query,
     setValue: setQuery,
@@ -75,7 +67,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     callback: searchCallback
   })
 
-  // Define handleManualSearch here AFTER query is defined
   const handleManualSearch = useCallback(() => {
     if (query.trim().length >= 3 && query !== lastSearchedQuery) {
       fetchProducts(query)
@@ -83,7 +74,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     }
   }, [query, lastSearchedQuery])
 
-  // Now use the handleSelect function in the hook - AFTER query and handleManualSearch are defined
   const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
     {
       items: results,
@@ -220,6 +210,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
             onKeyDown={handleKeyDown}
             className="pr-8"
             autoFocus={autoFocus}
+            tabIndex={1}
           />
 
           {query && !isLoading && !isDebouncing && (
