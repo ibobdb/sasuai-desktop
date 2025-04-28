@@ -1,27 +1,10 @@
 import { create } from 'zustand'
 import { API_ENDPOINTS } from '@/config/api'
+import { AuthResponse, AuthUser, LoginMethod } from '@/types/auth'
 
-// Nama cookies dari response
+// Cookie names - should match the ones from Better Auth backend
 const SESSION_TOKEN = 'better-auth.session_token'
 const SESSION_DATA = 'better-auth.session_data'
-
-interface AuthUser {
-  id: string
-  email: string
-  name: string
-  image: string
-  emailVerified: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-interface AuthResponse {
-  redirect: boolean
-  token: string
-  user: AuthUser
-}
-
-type LoginMethod = 'email' | 'username'
 
 interface AuthState {
   user: AuthUser | null
@@ -30,10 +13,11 @@ interface AuthState {
   error: string | null
   signIn: (identifier: string, password: string, method?: LoginMethod) => Promise<void>
   signOut: () => void
-  initialize: () => void
+  initialize: () => Promise<boolean>
+  validateSession: () => Promise<boolean>
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   isLoading: false,
@@ -54,52 +38,108 @@ export const useAuthStore = create<AuthState>((set) => ({
       const endpoint =
         method === 'email' ? API_ENDPOINTS.AUTH.SIGN_IN_EMAIL : API_ENDPOINTS.AUTH.SIGN_IN_USERNAME
 
-      const response = (await window.api.fetchApi(endpoint, {
+      const response = (await window.api.request(endpoint, {
         method: 'POST',
-        data,
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true
+        data
       })) as AuthResponse
 
+      // Set state from response
       set({
         user: response.user,
         token: response.token,
         isLoading: false
       })
 
-      // Simpan di electron-store, tidak menggunakan cookies
-      await window.api.store.set(SESSION_TOKEN, response.token)
-      await window.api.store.set(SESSION_DATA, response.user)
+      // Store session data in persistent cookies
+      try {
+        await window.api.cookies.set(SESSION_TOKEN, response.token)
+        await window.api.cookies.set(SESSION_DATA, JSON.stringify(response.user))
+      } catch (error) {
+        console.error('Error storing session data locally:', error)
+      }
     } catch (error) {
-      console.error('Sign in failed:', error)
-      set({
-        error: 'Login failed. Please check your credentials.',
-        isLoading: false
-      })
+      set({ isLoading: false, error: (error as Error).message || 'Sign in failed' })
       throw error
     }
   },
 
   signOut: async (): Promise<void> => {
-    await window.api.store.delete(SESSION_TOKEN)
-    await window.api.store.delete(SESSION_DATA)
-    set({
-      user: null,
-      token: null,
-      isLoading: false,
-      error: null
-    })
+    try {
+      await window.api.request(API_ENDPOINTS.AUTH.SIGN_OUT, {
+        method: 'POST',
+        data: {}
+      })
+    } catch (error) {
+      console.error('Error during sign out:', error)
+    } finally {
+      await window.api.cookies.clearAuth()
+      set({
+        user: null,
+        token: null,
+        isLoading: false,
+        error: null
+      })
+    }
   },
 
-  initialize: async (): Promise<void> => {
-    const token = await window.api.store.get(SESSION_TOKEN)
-    const userData = await window.api.store.get(SESSION_DATA)
+  validateSession: async (): Promise<boolean> => {
+    const { token } = get()
+    if (!token) return false
 
-    if (token && userData) {
-      set({
-        token,
-        user: userData
+    try {
+      await window.api.request(API_ENDPOINTS.AUTH.VALIDATE_SESSION, {
+        method: 'GET'
       })
+      return true
+    } catch (error: any) {
+      // Only clear auth if it's an explicit auth error
+      if (error?.status === 401 || error?.status === 403) {
+        await window.api.cookies.clearAuth()
+        set({
+          user: null,
+          token: null,
+          isLoading: false
+        })
+      }
+      return false
+    }
+  },
+
+  initialize: async (): Promise<boolean> => {
+    set({ isLoading: true })
+
+    try {
+      // Get token and user data in one batch to reduce redundant lookups
+      const [token, userDataStr] = await Promise.all([
+        window.api.cookies.get(SESSION_TOKEN),
+        window.api.cookies.get(SESSION_DATA)
+      ])
+
+      if (token && userDataStr) {
+        try {
+          // Set user state to prevent flashing login screen
+          const userData = JSON.parse(userDataStr)
+          set({
+            token,
+            user: userData,
+            isLoading: false
+          })
+
+          // Validate session with server and return result
+          return await get().validateSession()
+        } catch (error) {
+          console.error('Error parsing user data:', error)
+          await window.api.cookies.clearAuth()
+        }
+      }
+
+      // No valid session found
+      set({ isLoading: false })
+      return false
+    } catch (error) {
+      console.error('Error during initialization:', error)
+      set({ isLoading: false })
+      return false
     }
   }
 }))

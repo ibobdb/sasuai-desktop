@@ -13,7 +13,8 @@
     "src/features",
     "src/context",
     "src/config",
-    "src/components"
+    "src/components",
+    "src/types/**/*.ts"
   ],
   "compilerOptions": {
     "composite": true,

@@ -1,12 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-const api = {
-  fetchApi: (url: string, options?: any) => ipcRenderer.invoke('fetch-api', url, options),
-  fetchWithAuth: (url: string, options?: any) =>
-    ipcRenderer.invoke('fetch-api-with-auth', url, options)
-}
-
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', {
@@ -39,12 +33,56 @@ if (process.contextIsolated) {
     })
 
     contextBridge.exposeInMainWorld('api', {
-      fetchApi: (...args) => ipcRenderer.invoke('fetch-api', ...args),
-      fetchWithAuth: (...args) => ipcRenderer.invoke('fetch-api-with-auth', ...args),
+      request: async (url: string, options = {}) => {
+        try {
+          return await ipcRenderer.invoke('api:request', url, options)
+        } catch (err) {
+          // Ensure error object is properly serialized - critical for display
+          const error = err as any
+
+          // This ensures error.toString() returns the actual message
+          if (error && typeof error === 'object') {
+            // Add proper toString method for better error display
+            Object.defineProperty(error, 'toString', {
+              value: function () {
+                return this.message || 'Unknown error'
+              },
+              enumerable: false
+            })
+          }
+
+          throw error
+        }
+      },
+
       store: {
         get: (key) => ipcRenderer.invoke('store:get', key),
         set: (key, value) => ipcRenderer.invoke('store:set', key, value),
         delete: (key) => ipcRenderer.invoke('store:delete', key)
+      },
+
+      cookies: {
+        // Get a cookie by name or with filter object
+        get: (filter) => ipcRenderer.invoke('cookies:get', filter),
+
+        // Set a cookie
+        set: (nameOrDetails, value) => {
+          if (typeof nameOrDetails === 'string' && value !== undefined) {
+            // Simple form: (name, value)
+            return ipcRenderer.invoke('cookies:set', {
+              name: nameOrDetails,
+              value: String(value)
+            })
+          } else {
+            // Full form: (cookieDetails)
+            return ipcRenderer.invoke('cookies:set', nameOrDetails)
+          }
+        },
+
+        // Remove a cookie
+        remove: (urlOrName, name) => ipcRenderer.invoke('cookies:remove', urlOrName, name),
+
+        clearAuth: () => ipcRenderer.invoke('cookies:clearAuth')
       }
     })
   } catch (error) {

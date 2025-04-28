@@ -29,6 +29,12 @@ export const sidebarData: SidebarData = {
           title: 'Cashier',
           url: '/cashier',
           icon: IconCashBanknote
+        },
+
+        {
+          title: 'Transactions',
+          url: '/transactions',
+          icon: IconCashBanknote
         }
       ]
     }

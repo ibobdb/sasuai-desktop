@@ -1,49 +1,98 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
 import CartList from './components/cart-list'
-import DiscountSection from './components/discount-section'
 import TransactionSummary from './components/summary'
-import PaymentSection from './components/payment-section'
-import ActionButtons from './components/action-buttons'
+import PaymentDialog from './components/payment-dialog'
 import { MemberSection } from './components/member-section'
-import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
-import { Member } from './components/member-section'
-
-type Product = {
-  id: string
-  name: string
-  price: number
-  barcode?: string
-}
-
-type CartItem = Product & {
-  quantity: number
-  subtotal: number
-}
-
-type DiscountType = 'percentage' | 'fixed'
-type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
+import { Button } from '@/components/ui/button'
+import { CreditCard, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { API_ENDPOINTS } from '@/config/api'
+import { useAuthStore } from '@/stores/authStore'
+import {
+  CartItem,
+  Discount,
+  PaymentMethod,
+  Product,
+  TransactionData,
+  Member,
+  MemberDiscount,
+  TransactionItem
+} from '@/types/cashier'
 
 export default function Cashier() {
   const [cart, setCart] = useState<CartItem[]>([])
-  const [discount, setDiscount] = useState<number>(0)
-  const [discountType, setDiscountType] = useState<DiscountType>('fixed')
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
-  const [member, setMember] = useState<Member | null>(null)
+  const [member, setMember] = useState<
+    (Member & { discountRelationsMember?: MemberDiscount[] }) | null
+  >(null)
+  const [selectedMemberDiscount, setSelectedMemberDiscount] = useState<Discount | null>(null)
+  const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
+  const [pointsToEarn, setPointsToEarn] = useState<number>(0)
+  const { user } = useAuthStore()
 
+  // Calculate cart totals with discounts
   const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
-  const discountValue = discountType === 'percentage' ? subtotal * (discount / 100) : discount
+  const productDiscountsTotal = cart.reduce((sum, item) => sum + item.discountAmount, 0)
+
+  // Calculate member discount amount if applicable
+  const memberDiscountAmount = selectedMemberDiscount
+    ? selectedMemberDiscount.valueType === 'percentage'
+      ? (subtotal - productDiscountsTotal) * (selectedMemberDiscount.value / 100)
+      : Math.min(selectedMemberDiscount.value, subtotal - productDiscountsTotal)
+    : 0
+
+  const totalDiscount = productDiscountsTotal + memberDiscountAmount
   const tax = 0 // Implement tax calculation if needed
+  const total = subtotal - totalDiscount
 
-  // Total discount is just the discount value (no member discount)
-  const totalDiscount = discountValue
-  const total = subtotal - totalDiscount + tax
-  const change = paymentAmount - total
+  // Function to calculate points
+  const calculatePoints = async (amount: number, memberId?: string) => {
+    try {
+      const data = await window.api.request(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
+        method: 'POST',
+        data: {
+          amount,
+          memberId
+        }
+      })
 
+      if (data.points !== undefined) {
+        setPointsToEarn(data.points)
+      }
+    } catch (error) {
+      console.error('Error calculating points:', error)
+      setPointsToEarn(0)
+      toast.error('Failed to calculate points', {
+        description: 'Please try again later'
+      })
+    }
+  }
+
+  // When opening the payment dialog, set payment amount to match the total for non-cash methods
+  const handleOpenPaymentDialog = () => {
+    // For non-cash payment methods, set the amount equal to the total
+    if (paymentMethod !== 'cash') {
+      setPaymentAmount(total)
+    } else if (paymentAmount < total) {
+      // For cash, set a minimum amount if it's less than total
+      setPaymentAmount(total)
+    }
+    setPaymentDialogOpen(true)
+  }
+
+  // Add to cart function
   const addToCart = (product: Product) => {
+    // Get best batch (could improve with FIFO logic)
+    const batch =
+      product.batches && product.batches.length > 0
+        ? product.batches.find((b) => b.remainingQuantity > 0)
+        : null
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id)
 
@@ -53,21 +102,65 @@ export default function Cashier() {
             ? {
                 ...item,
                 quantity: item.quantity + 1,
-                subtotal: (item.quantity + 1) * item.price
+                subtotal: (item.quantity + 1) * item.price,
+                finalPrice: calculateFinalPrice(
+                  item.price,
+                  item.quantity + 1,
+                  item.selectedDiscount
+                ),
+                discountAmount: calculateDiscountAmount(
+                  item.price,
+                  item.quantity + 1,
+                  item.selectedDiscount
+                )
               }
             : item
         )
       }
 
+      // Default to no discount selected
       return [
         ...prevCart,
         {
           ...product,
           quantity: 1,
-          subtotal: product.price
+          subtotal: product.price,
+          batchId: batch?.id,
+          unitId: product.unitId || '', // Ensure unit ID is provided in product data
+          selectedDiscount: null,
+          discountAmount: 0,
+          finalPrice: product.price
         }
       ]
     })
+  }
+
+  // Calculate discount amount based on price, quantity and selected discount
+  const calculateDiscountAmount = (
+    price: number,
+    quantity: number,
+    discount: Discount | null | undefined
+  ) => {
+    if (!discount) return 0
+
+    const itemTotal = price * quantity
+
+    if (discount.valueType === 'percentage') {
+      return itemTotal * (discount.value / 100)
+    } else {
+      return Math.min(discount.value, itemTotal) // Fixed discount can't exceed item total
+    }
+  }
+
+  // Calculate final price after discount
+  const calculateFinalPrice = (
+    price: number,
+    quantity: number,
+    discount: Discount | null | undefined
+  ) => {
+    const itemTotal = price * quantity
+    const discountAmount = calculateDiscountAmount(price, quantity, discount)
+    return itemTotal - discountAmount
   }
 
   // Update cart item quantity
@@ -75,9 +168,42 @@ export default function Cashier() {
     if (quantity < 1) return
 
     setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === id ? { ...item, quantity, subtotal: quantity * item.price } : item
-      )
+      prevCart.map((item) => {
+        if (item.id !== id) return item
+
+        const newSubtotal = quantity * item.price
+        const newDiscountAmount = calculateDiscountAmount(
+          item.price,
+          quantity,
+          item.selectedDiscount
+        )
+
+        return {
+          ...item,
+          quantity,
+          subtotal: newSubtotal,
+          discountAmount: newDiscountAmount,
+          finalPrice: newSubtotal - newDiscountAmount
+        }
+      })
+    )
+  }
+
+  // Update item discount
+  const updateItemDiscount = (id: string, discount: Discount | null) => {
+    setCart((prevCart) =>
+      prevCart.map((item) => {
+        if (item.id !== id) return item
+
+        const discountAmount = calculateDiscountAmount(item.price, item.quantity, discount)
+
+        return {
+          ...item,
+          selectedDiscount: discount,
+          discountAmount,
+          finalPrice: item.subtotal - discountAmount
+        }
+      })
     )
   }
 
@@ -86,92 +212,254 @@ export default function Cashier() {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id))
   }
 
-  // Clear cart and reset member
+  // Handle member selection and their available discounts
+  const handleMemberSelect = (
+    selectedMember: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
+  ) => {
+    setMember(selectedMember)
+
+    // Reset member discount when changing members
+    setSelectedMemberDiscount(null)
+
+    // Auto-select member discount if only one is available and meets minimum purchase
+    if (selectedMember?.discountRelationsMember?.length === 1) {
+      const memberDiscount = selectedMember.discountRelationsMember[0].discount
+      if (subtotal >= memberDiscount.minPurchase) {
+        setSelectedMemberDiscount(memberDiscount)
+      }
+    }
+  }
+
+  // Handle member discount selection
+  const handleMemberDiscountSelect = (discount: Discount | null) => {
+    setSelectedMemberDiscount(discount)
+  }
+
+  // Clear cart and reset transaction state
   const clearCart = () => {
     setCart([])
-    setDiscount(0)
     setPaymentAmount(0)
     setMember(null)
+    setSelectedMemberDiscount(null)
   }
 
-  // Handle payment
-  const handlePayment = () => {
-    // Handle payment logic and API calls
-    if (member) {
-      // The points update logic can remain here as this is the payment handler
-      console.log(`Updating points for member ${member.name}`)
-      // Here you would call an API to update member points
+  // Validate transaction before processing
+  const validateTransaction = (): boolean => {
+    // Check if cart has items
+    if (cart.length === 0) {
+      toast.error('Cart is empty', { description: 'Please add products to cart' })
+      return false
     }
 
-    alert('Payment successful!')
-    clearCart()
+    // Check stock levels
+    const invalidStockItem = cart.find((item) => item.quantity > (item.currentStock || 0))
+
+    if (invalidStockItem) {
+      toast.error('Insufficient stock', {
+        description: `Only ${invalidStockItem.currentStock} units of ${invalidStockItem.name} available`
+      })
+      return false
+    }
+
+    // Validate payment amount against the total after discounts
+    if (paymentAmount < total) {
+      toast.error('Insufficient payment amount', {
+        description: `Payment amount must be at least Rp ${total.toLocaleString()}`
+      })
+      return false
+    }
+
+    // Validate member discount minimum purchase
+    if (selectedMemberDiscount && subtotal < selectedMemberDiscount.minPurchase) {
+      toast.error('Cannot apply member discount', {
+        description: `Minimum purchase of Rp ${selectedMemberDiscount.minPurchase.toLocaleString()} required`
+      })
+      return false
+    }
+
+    return true
   }
 
-  // Custom footer to display member information only
-  const renderMemberInfo = () => {
-    if (!member) return null
+  // Handle payment with proper processing
+  const handlePayment = async (): Promise<void> => {
+    if (isProcessingTransaction) return
 
-    return (
-      <div className="text-sm mt-2 text-muted-foreground">
-        <p>
-          Member: {member.name} ({member.tier?.name || 'Regular'})
-        </p>
-        {/* Member discount display removed */}
-      </div>
-    )
+    if (!validateTransaction()) return
+
+    setIsProcessingTransaction(true)
+
+    try {
+      // Calculate total amount before discounts
+      const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
+
+      // Calculate final amount after all discounts (both product and member discounts)
+      const finalAmount = totalAmount - totalDiscount
+
+      // Prepare transaction items according to backend structure
+      const transactionItems: TransactionItem[] = cart.map((item) => {
+        const batch = item.batches?.find((b) => b.id === item.batchId)
+
+        if (!batch) {
+          throw new Error(`No valid batch found for product ${item.name}`)
+        }
+
+        return {
+          productId: item.id,
+          quantity: item.quantity,
+          unitId: item.unitId || '', // Ensure unit ID is provided in product data
+          cost: batch.buyPrice,
+          pricePerUnit: item.price,
+          subtotal: item.finalPrice, // Price after product-specific discount
+          batchId: batch.id,
+          discountId: item.selectedDiscount?.id || null
+        }
+      })
+
+      // Prepare complete transaction data
+      const transactionData: TransactionData = {
+        cashierId: user?.id || '',
+        memberId: member?.id,
+        selectedMemberDiscountId: selectedMemberDiscount?.id || null,
+        totalAmount,
+        finalAmount,
+        paymentMethod,
+        cashAmount: paymentMethod === 'cash' ? paymentAmount : undefined,
+        items: transactionItems
+      }
+
+      // Call transaction processing endpoint
+      const response = await window.api.request(API_ENDPOINTS.TRANSACTIONS.CHECKOUT, {
+        method: 'POST',
+        data: transactionData
+      })
+
+      if (response.success) {
+        // Handle successful transaction
+        const { data, change, information } = response
+
+        // Show success message with transaction details
+        toast.success('Payment successful!', {
+          description: `Transaction #${data.id} completed`
+        })
+
+        // Show change if paying with cash
+        if (paymentMethod === 'cash' && change > 0) {
+          toast.info(`Change: Rp ${change.toLocaleString()}`, {
+            duration: 5000
+          })
+        }
+
+        // Show member points information if applicable
+        if (member && information?.member) {
+          toast.info(information.member, {
+            duration: 5000
+          })
+        }
+
+        // Clear cart after successful payment
+        clearCart()
+        // Close payment dialog
+        setPaymentDialogOpen(false)
+        return Promise.resolve()
+      } else {
+        toast.error('Transaction failed', {
+          description: response.message || 'Please try again'
+        })
+        return Promise.reject(new Error(response.message || 'Transaction failed'))
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      toast.error('Payment processing error', {
+        description: 'An unexpected error occurred. Please try again.'
+      })
+      return Promise.reject(error)
+    } finally {
+      setIsProcessingTransaction(false)
+    }
   }
+
+  useEffect(() => {
+    if (member && subtotal > 0) {
+      calculatePoints(subtotal, member.id)
+    } else {
+      setPointsToEarn(0)
+    }
+  }, [subtotal, member])
 
   return (
     <Main>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2 space-y-4">
           <ProductSearch onProductSelect={addToCart} />
-          <CartList items={cart} onUpdateQuantity={updateQuantity} onRemoveItem={removeItem} />
+          <CartList
+            items={cart}
+            onUpdateQuantity={updateQuantity}
+            onRemoveItem={removeItem}
+            onUpdateDiscount={updateItemDiscount}
+          />
         </div>
 
         <div className="space-y-4">
-          <MemberSection onMemberSelect={setMember} subtotal={subtotal} />
+          <MemberSection
+            onMemberSelect={handleMemberSelect}
+            onMemberDiscountSelect={handleMemberDiscountSelect}
+            selectedDiscount={selectedMemberDiscount}
+            subtotal={subtotal}
+          />
 
           <Card>
-            <CardContent>
-              <DiscountSection
-                subtotal={subtotal}
-                discount={discount}
-                discountType={discountType}
-                onDiscountChange={setDiscount}
-                onDiscountTypeChange={setDiscountType}
-              />
-              <Separator className="my-4" />
+            <CardContent className="pt-6">
               <TransactionSummary
                 itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
                 subtotal={subtotal}
-                discount={totalDiscount}
+                productDiscounts={productDiscountsTotal}
+                memberDiscount={memberDiscountAmount}
                 tax={tax}
                 total={total}
-              />
-              {renderMemberInfo()}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent>
-              <PaymentSection
-                total={total}
-                paymentMethod={paymentMethod}
-                paymentAmount={paymentAmount}
-                change={change}
-                onPaymentMethodChange={setPaymentMethod}
-                onPaymentAmountChange={setPaymentAmount}
+                pointsToEarn={pointsToEarn}
+                memberTier={
+                  member?.tier
+                    ? {
+                        name: member.tier.name || '',
+                        multiplier: member.tier.multiplier || 1
+                      }
+                    : null
+                }
               />
             </CardContent>
           </Card>
 
-          <ActionButtons
+          {/* Payment and Clear buttons in a flex container */}
+          <div className="flex gap-2">
+            {/* Payment Button */}
+            <Button
+              className="flex-[3]"
+              size="lg"
+              onClick={handleOpenPaymentDialog}
+              disabled={cart.length === 0}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Payment
+            </Button>
+
+            {/* Clear Button - inlined from ActionButtons component */}
+            <Button variant="destructive" size="lg" onClick={clearCart} className="flex-1">
+              <X className="mr-2 h-4 w-4" /> Clear
+            </Button>
+          </div>
+
+          {/* Payment dialog */}
+          <PaymentDialog
+            open={paymentDialogOpen}
+            onOpenChange={setPaymentDialogOpen}
+            total={total}
+            paymentMethod={paymentMethod}
+            paymentAmount={paymentAmount}
+            onPaymentMethodChange={setPaymentMethod}
+            onPaymentAmountChange={setPaymentAmount}
             onPay={handlePayment}
-            onClear={clearCart}
-            onPrint={() => alert('Printing receipt...')}
             isPayEnabled={cart.length > 0 && paymentAmount >= total}
-            isPrintEnabled={false}
+            isProcessing={isProcessingTransaction}
           />
         </div>
       </div>
