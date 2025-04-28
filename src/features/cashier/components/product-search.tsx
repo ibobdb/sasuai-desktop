@@ -310,13 +310,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         </div>
       </div>
 
-      {(isLoading || isDebouncing) && query.trim() !== '' && (
-        <div className="text-sm text-muted-foreground flex items-center">
-          <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-          Searching products...
-        </div>
-      )}
-
       {!isLoading && !isDebouncing && query.trim().length >= 3 && results.length === 0 && (
         <div className="text-sm text-muted-foreground flex items-center">
           <X className="h-3 w-3 mr-2" />

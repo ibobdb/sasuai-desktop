@@ -142,7 +142,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="relative">
         <Input
           ref={inputRef}
@@ -151,7 +151,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
-          className="pr-16"
+          className="pr-16 h-9"
           tabIndex={2}
         />
 
@@ -235,25 +235,17 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
         )}
       </div>
 
-      {/* Loading state */}
-      {(isLoading || isDebouncing) && query.trim() !== '' && (
-        <div className="text-sm text-muted-foreground flex items-center">
-          <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-          Searching members...
-        </div>
-      )}
-
       {/* No results message */}
       {!isLoading && !isDebouncing && query.trim().length >= 3 && searchResults.length === 0 && (
-        <div className="text-sm text-muted-foreground flex items-center">
-          <X className="h-3 w-3 mr-2" />
+        <div className="text-xs text-muted-foreground flex items-center pt-0.5">
+          <X className="h-3 w-3 mr-1" />
           No members found
         </div>
       )}
 
       {/* Minimum character hint */}
       {isTooShort && (
-        <div className="text-sm text-muted-foreground flex items-center">
+        <div className="text-xs text-muted-foreground flex items-center pt-0.5">
           Enter at least 3 characters to search
         </div>
       )}
@@ -261,7 +253,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
       <Button
         variant="outline"
         size="sm"
-        className="w-full"
+        className="w-full h-7 mt-1"
         onClick={() => setShowCreateMemberDialog(true)}
       >
         <UserPlus className="h-3 w-3 mr-1" /> New Member

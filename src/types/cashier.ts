@@ -64,6 +64,7 @@ export type Member = {
   name: string
   phone: string
   email: string | null
+  address: string | null
   tierId: string | null
   totalPoints: number
   totalPointsEarned: number

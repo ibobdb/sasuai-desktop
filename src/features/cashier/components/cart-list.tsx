@@ -91,10 +91,10 @@ export default function CartList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold flex items-center">
-          <ShoppingCart className="mr-2 h-5 w-5" />
+        <h2 className="font-medium flex items-center text-base">
+          <ShoppingCart className="mr-1.5 h-4 w-4" />
           Shopping Cart
           {items.length > 0 && (
             <Badge variant="secondary" className="ml-2">
@@ -104,9 +104,9 @@ export default function CartList({
         </h2>
 
         {selectedCount > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleRemoveSelected}>
-            <Trash2 className="h-4 w-4 mr-1" />
-            Remove {selectedCount} selected
+          <Button variant="destructive" size="sm" onClick={handleRemoveSelected} className="h-7">
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            Remove {selectedCount}
           </Button>
         )}
       </div>

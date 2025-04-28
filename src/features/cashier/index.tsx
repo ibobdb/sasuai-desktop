@@ -420,8 +420,56 @@ export default function Cashier() {
 
   return (
     <Main>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
-        <div className="md:col-span-2 space-y-4">
+      {/* Mobile-specific layout (order: Product search → Cart → Member → Summary) */}
+      <div className="block lg:hidden space-y-4">
+        {/* 1. Product Search */}
+        <ProductSearch onProductSelect={addToCart} />
+
+        {/* 2. Shopping Cart */}
+        <CartList
+          items={cart}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeItem}
+          onUpdateDiscount={updateItemDiscount}
+        />
+
+        {/* 3. Member Section */}
+        <MemberSection
+          onMemberSelect={handleMemberSelect}
+          onMemberDiscountSelect={handleMemberDiscountSelect}
+          selectedDiscount={selectedMemberDiscount}
+          subtotal={subtotal}
+          member={member}
+        />
+
+        {/* 4. Transaction Summary */}
+        <Card>
+          <CardContent className="pt-4">
+            <TransactionSummary
+              itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+              subtotal={subtotal}
+              productDiscounts={productDiscountsTotal}
+              memberDiscount={memberDiscountAmount}
+              tax={tax}
+              total={total}
+              pointsToEarn={pointsToEarn}
+              memberTier={
+                member?.tier
+                  ? {
+                      name: member.tier.name || '',
+                      multiplier: member.tier.multiplier || 1
+                    }
+                  : null
+              }
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Desktop layout (unchanged) */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4">
+        {/* Left side - Products and Cart */}
+        <div className="lg:col-span-2 space-y-4">
           <ProductSearch onProductSelect={addToCart} />
           <CartList
             items={cart}
@@ -431,58 +479,74 @@ export default function Cashier() {
           />
         </div>
 
+        {/* Right side - Member and Summary */}
         <div className="space-y-4">
-          <MemberSection
-            onMemberSelect={handleMemberSelect}
-            onMemberDiscountSelect={handleMemberDiscountSelect}
-            selectedDiscount={selectedMemberDiscount}
-            subtotal={subtotal}
-            member={member}
-          />
+          <div className="sticky top-4">
+            <MemberSection
+              onMemberSelect={handleMemberSelect}
+              onMemberDiscountSelect={handleMemberDiscountSelect}
+              selectedDiscount={selectedMemberDiscount}
+              subtotal={subtotal}
+              member={member}
+            />
 
-          <Card>
-            <CardContent className="pt-6">
-              <TransactionSummary
-                itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-                subtotal={subtotal}
-                productDiscounts={productDiscountsTotal}
-                memberDiscount={memberDiscountAmount}
-                tax={tax}
-                total={total}
-                pointsToEarn={pointsToEarn}
-                memberTier={
-                  member?.tier
-                    ? {
-                        name: member.tier.name || '',
-                        multiplier: member.tier.multiplier || 1
-                      }
-                    : null
-                }
-              />
-            </CardContent>
-          </Card>
+            <Card className="mt-4">
+              <CardContent className="pt-6">
+                <TransactionSummary
+                  itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+                  subtotal={subtotal}
+                  productDiscounts={productDiscountsTotal}
+                  memberDiscount={memberDiscountAmount}
+                  tax={tax}
+                  total={total}
+                  pointsToEarn={pointsToEarn}
+                  memberTier={
+                    member?.tier
+                      ? {
+                          name: member.tier.name || '',
+                          multiplier: member.tier.multiplier || 1
+                        }
+                      : null
+                  }
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
 
-      {/* Fixed payment buttons */}
-      <div className="fixed bottom-6 right-6 flex gap-2 z-10">
-        <Button
-          className="w-103"
-          size="lg"
-          onClick={handleOpenPaymentDialog}
-          disabled={cart.length === 0}
-          tabIndex={3}
-        >
-          <CreditCard className="mr-2 h-4 w-4" />
-          Payment
-        </Button>
+      {/* Fixed payment buttons (unchanged) */}
+      <div className="fixed bottom-0 right-0 left-0 p-4 z-20 bg-background border-t shadow-lg md:bg-transparent md:border-none md:shadow-none md:left-auto md:p-6">
+        <div className="flex gap-2 justify-end">
+          <Button
+            variant="destructive"
+            size="lg"
+            onClick={clearCart}
+            tabIndex={4}
+            className="w-full md:w-auto"
+          >
+            <X className="mr-2 h-4 w-4" />
+            <span className="hidden md:inline">Clear</span>
+            <span className="md:hidden">Clear Cart</span>
+          </Button>
 
-        <Button variant="destructive" size="lg" onClick={clearCart} tabIndex={4}>
-          <X className="mr-2 h-4 w-4" /> Clear
-        </Button>
+          <Button
+            size="lg"
+            onClick={handleOpenPaymentDialog}
+            disabled={cart.length === 0}
+            tabIndex={3}
+            className="w-full md:w-auto bg-primary hover:bg-primary/90"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span className="hidden md:inline">Payment</span>
+            <span className="md:hidden">
+              Pay {total > 0 ? `(Rp ${total.toLocaleString('id-ID')})` : ''}
+            </span>
+          </Button>
+        </div>
       </div>
 
-      {/* Payment dialog */}
+      {/* Dialogs (unchanged) */}
       <PaymentDialog
         open={paymentDialogOpen}
         onOpenChange={setPaymentDialogOpen}
@@ -496,7 +560,6 @@ export default function Cashier() {
         isProcessing={isProcessingTransaction}
       />
 
-      {/* Payment status dialog */}
       <PaymentStatusDialog
         open={paymentStatusDialogOpen}
         onClose={handleStatusDialogClose}
@@ -506,6 +569,7 @@ export default function Cashier() {
         change={paymentStatus.change}
         finalAmount={total}
         errorMessage={paymentStatus.errorMessage}
+        memberInfo={member ? { member } : undefined}
       />
     </Main>
   )
