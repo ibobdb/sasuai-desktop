@@ -1,13 +1,9 @@
-import { useState, useRef, useCallback } from 'react'
-import { Search, Loader2, UserPlus, X, Ticket, Check } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { useState } from 'react'
+import { X, Ticket, Check, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/config/api'
-import { CreateMemberDialog } from './create-member-dialog'
-import { Card } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,10 +11,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
-import { Member, MemberResponse, MemberSectionProps, Discount } from '@/types/cashier'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useClickOutside } from '@/hooks/use-click-outside'
-import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
+import { Member, MemberSectionProps, Discount, MemberDiscount } from '@/types/cashier'
+import { MemberSearch } from './member-search'
 
 export function MemberSection({
   onMemberSelect,
@@ -26,149 +20,44 @@ export function MemberSection({
   selectedDiscount,
   subtotal = 0
 }: MemberSectionProps) {
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchResults, setSearchResults] = useState<Member[]>([])
-  const [showResults, setShowResults] = useState(false)
-  const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
-  const [lastSearchedQuery, setLastSearchedQuery] = useState('')
+  const [selectedMember, setSelectedMember] = useState<
+    (Member & { discountRelationsMember?: MemberDiscount[] }) | null
+  >(null)
 
-  const inputRef = useRef<HTMLInputElement>(null)
-  const resultsRef = useRef<HTMLDivElement>(null)
+  // Handle member selection and their available discounts
+  const handleMemberSelect = (
+    member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
+  ) => {
+    setSelectedMember(member)
 
-  // Create a memoized search function that avoids duplicate API calls
-  const searchCallback = useCallback(
-    (value: string) => {
-      if (value.trim() && value !== lastSearchedQuery) {
-        searchMembers(value)
-        setLastSearchedQuery(value)
-      }
-    },
-    [lastSearchedQuery]
-  )
-
-  // Use the debounce hook
-  const {
-    value: query,
-    setValue: setQuery,
-    isDebouncing,
-    isTooShort
-  } = useDebounce('', {
-    minLength: 3,
-    callback: searchCallback
-  })
-
-  // Define member select handler before it's used
-  const handleMemberSelect = useCallback(
-    (member: Member) => {
-      setSelectedMember(member)
-      setShowResults(false)
-      setQuery('')
-      setLastSearchedQuery('')
-      if (onMemberSelect) {
-        onMemberSelect(member)
-      }
-    },
-    [onMemberSelect, setQuery, setLastSearchedQuery]
-  )
-
-  // Define manual search handler before it's used
-  const handleManualSearch = useCallback(() => {
-    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
-      searchMembers(query)
-      setLastSearchedQuery(query)
+    // Pass to parent component
+    if (onMemberSelect) {
+      onMemberSelect(member)
     }
-  }, [query, lastSearchedQuery])
 
-  // Define searchMembers before it's used
-  const searchMembers = useCallback(
-    async (searchQuery: string) => {
-      if (!searchQuery.trim()) return
-
-      setIsLoading(true)
-
-      try {
-        const response = (await window.api.request(
-          `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(searchQuery)}`,
-          {
-            method: 'GET'
-          }
-        )) as MemberResponse
-
-        if (response.success && response.data?.members?.length > 0) {
-          setSearchResults(response.data.members)
-          setShowResults(true)
-
-          // Auto-select if there's an exact match
-          const exactMatch = response.data.members.find(
-            (m) =>
-              m.phone === searchQuery ||
-              m.cardId === searchQuery ||
-              m.name.toLowerCase() === searchQuery.toLowerCase()
-          )
-          if (exactMatch) {
-            handleMemberSelect(exactMatch)
-          }
-        } else {
-          setSearchResults([])
-          setShowResults(false)
-        }
-      } catch (error) {
-        console.error('Failed to search for member:', error)
-        toast.error('Failed to search for member', {
-          description: 'Please try again later'
-        })
-        setSearchResults([])
-        setShowResults(false)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [handleMemberSelect]
-  )
-
-  // Now use the useKeyboardNavigation hook - AFTER all its dependencies are defined
-  const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
-    {
-      items: searchResults,
-      onSelectItem: handleMemberSelect,
-      isDropdownVisible: showResults,
-      setDropdownVisible: setShowResults,
-      onSearch: handleManualSearch,
-      searchQuery: query,
-      minQueryLength: 3
+    // Reset member discount when changing members
+    if (onMemberDiscountSelect) {
+      onMemberDiscountSelect(null)
     }
-  )
 
-  // Use click outside hook
-  useClickOutside([resultsRef, inputRef], () => {
-    setShowResults(false)
-  })
+    // Auto-select member discount if only one is available and meets minimum purchase
+    if (member?.discountRelationsMember?.length === 1) {
+      const memberDiscount = member.discountRelationsMember[0].discount
+      if (subtotal >= memberDiscount.minPurchase && onMemberDiscountSelect) {
+        onMemberDiscountSelect(memberDiscount)
+      }
+    }
+  }
 
-  // These remaining functions don't need to be defined before the hooks
+  // Clear selected member
   const clearMember = () => {
     setSelectedMember(null)
-    setLastSearchedQuery('')
     if (onMemberSelect) {
       onMemberSelect(null)
     }
     if (onMemberDiscountSelect) {
       onMemberDiscountSelect(null)
     }
-  }
-
-  const handleInputFocus = () => {
-    if (searchResults.length > 0) {
-      setShowResults(true)
-    }
-  }
-
-  const clearSearch = () => {
-    setQuery('')
-    setSearchResults([])
-    setShowResults(false)
-    setLastSearchedQuery('')
-    inputRef.current?.focus()
   }
 
   // Format discount for display
@@ -204,13 +93,17 @@ export function MemberSection({
         </h3>
 
         {selectedMember && (
-          <Button variant="ghost" size="sm" onClick={clearMember} className="h-8 px-2">
+          <Button variant="ghost" size="sm" onClick={clearMember} className="h-6 px-2">
             <X className="h-3 w-3 mr-1" /> Clear
           </Button>
         )}
       </div>
 
-      {selectedMember ? (
+      {/* Always show the search component */}
+      <MemberSearch onMemberSelect={handleMemberSelect} />
+
+      {/* Only show member details when a member is selected */}
+      {selectedMember && (
         <div className="rounded-md border bg-card p-3 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex items-center gap-3">
@@ -335,145 +228,7 @@ export function MemberSection({
             </div>
           </div>
         </div>
-      ) : (
-        <div className="space-y-2">
-          <div className="relative">
-            <Input
-              ref={inputRef}
-              placeholder="Search member ..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              className="pr-16"
-            />
-
-            {query && !isLoading && !isDebouncing && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-10 top-0 h-full w-8"
-                onClick={clearSearch}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-
-            <Button
-              size="icon"
-              className="absolute right-0 top-0 h-full rounded-l-none w-10"
-              onClick={handleManualSearch}
-              disabled={query.trim().length < 3 || isLoading || isDebouncing}
-            >
-              {isLoading || isDebouncing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-
-            {/* Search results dropdown */}
-            {showResults && searchResults.length > 0 && (
-              <Card
-                className="absolute z-50 w-full left-0 right-0 mt-1 max-h-64 overflow-auto shadow-lg"
-                ref={resultsRef}
-              >
-                <ul className="py-1 divide-y divide-border">
-                  {searchResults.map((member, index) => (
-                    <li
-                      key={member.id}
-                      ref={(el) => {
-                        listItemsRef.current[index] = el
-                      }}
-                      className={`px-3 py-2 transition-colors cursor-pointer ${
-                        index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
-                      }`}
-                      onClick={() => handleMemberSelect(member)}
-                      onMouseEnter={() => handleItemMouseEnter(index)}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <div className="flex-1">
-                          <p className="font-medium">{member.name}</p>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            <span>Phone: {member.phone}</span>
-                            {member.cardId && (
-                              <span className="block sm:inline sm:ml-2">
-                                Card ID: {member.cardId}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="sm:text-right mt-2 sm:mt-0">
-                          <div className="flex sm:justify-end">
-                            <Badge
-                              variant={member.tier?.name ? 'default' : 'outline'}
-                              className="sm:ml-2"
-                            >
-                              {member.tier?.name || 'Regular'}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-amber-500 mt-1">
-                            Points: {member.totalPoints}
-                          </p>
-
-                          {member.discountRelationsMember &&
-                            member.discountRelationsMember.length > 0 && (
-                              <p className="text-xs text-green-600 mt-1">
-                                <Ticket className="h-3 w-3 inline mr-1" />
-                                {member.discountRelationsMember.length} discount(s)
-                              </p>
-                            )}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
-          </div>
-
-          {/* Loading state */}
-          {(isLoading || isDebouncing) && query.trim() !== '' && (
-            <div className="text-sm text-muted-foreground flex items-center">
-              <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-              Searching members...
-            </div>
-          )}
-
-          {/* No results message */}
-          {!isLoading &&
-            !isDebouncing &&
-            query.trim().length >= 3 &&
-            searchResults.length === 0 && (
-              <div className="text-sm text-muted-foreground flex items-center">
-                <X className="h-3 w-3 mr-2" />
-                No members found
-              </div>
-            )}
-
-          {/* Minimum character hint */}
-          {isTooShort && (
-            <div className="text-sm text-muted-foreground flex items-center">
-              Enter at least 3 characters to search
-            </div>
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() => setShowCreateMemberDialog(true)}
-          >
-            <UserPlus className="h-3 w-3 mr-1" /> New Member
-          </Button>
-        </div>
       )}
-
-      <CreateMemberDialog
-        open={showCreateMemberDialog}
-        onOpenChange={setShowCreateMemberDialog}
-        onSuccess={handleMemberSelect}
-      />
     </div>
   )
 }

@@ -37,11 +37,16 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       if (quickAddMode) {
         // If quick add is enabled, add directly with quantity=1
         onProductSelect(product, 1)
+        // Also reset search field when using quick add
+        setQuery('')
+        setLastSearchedQuery('')
+        inputRef.current?.focus()
       } else {
         // Otherwise show the quantity dialog
         setSelectedProduct(product)
         setQuantityDialogOpen(true)
       }
+      // Always clear results
       setResults([])
       setShowResults(false)
     },
