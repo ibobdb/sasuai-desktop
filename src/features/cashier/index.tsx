@@ -432,9 +432,9 @@ export default function Cashier() {
       </div>
 
       {/* Fixed payment buttons */}
-      <div className="fixed bottom-6 right-6 flex gap-2 z-10 shadow-lg">
+      <div className="fixed bottom-6 right-6 flex gap-2 z-10">
         <Button
-          className="w-32"
+          className="w-105"
           size="lg"
           onClick={handleOpenPaymentDialog}
           disabled={cart.length === 0}
