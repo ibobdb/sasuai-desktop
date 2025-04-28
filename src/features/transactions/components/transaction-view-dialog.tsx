@@ -139,23 +139,47 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Use max-height values with viewport units for better responsiveness */}
-      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] p-0 flex flex-col overflow-hidden">
-        {/* Fixed header that doesn't scroll */}
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <IconReceipt className="h-5 w-5" /> Transaction Receipt
-          </DialogTitle>
-          <DialogDescription className="mt-1 break-all">
-            <span className="font-semibold">ID:</span> {detail.id}
-          </DialogDescription>
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl h-[90vh] flex flex-col p-0 overflow-hidden">
+        {/* Fixed header */}
+        <DialogHeader className="px-6 py-4 border-b sticky top-0 bg-background z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <IconReceipt className="h-5 w-5" /> Transaction Receipt
+              </DialogTitle>
+              <DialogDescription className="mt-1 break-all">
+                <span className="font-semibold">ID:</span> {detail.id}
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="ml-4"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Scrollable content area */}
-        <ScrollArea className="flex-1">
-          <div className="p-6 space-y-6">
-            {/* Meta Information - Stacks vertically on small screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6 pb-4">
+            {/* Meta Information */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Date & Time</p>
@@ -192,26 +216,32 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
 
             <Separator />
 
-            {/* Items List with inner scrolling for many items */}
+            {/* Items List */}
             <div>
-              <h3 className="font-semibold sticky top-0 mb-3">Items Purchased ({totalItems})</h3>
+              <h3 className="font-semibold mb-3">Items Purchased ({totalItems})</h3>
 
               <div className="border rounded-lg overflow-hidden">
-                <div className="max-h-[40vh] overflow-auto">
+                <div className="max-h-[300px] overflow-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-muted sticky top-0 z-10">
+                    <thead className="bg-muted">
                       <tr>
-                        <th className="text-left p-3">Item</th>
-                        <th className="text-right p-3 whitespace-nowrap">Price</th>
-                        <th className="text-right p-3 whitespace-nowrap">Qty</th>
-                        <th className="text-right p-3 whitespace-nowrap">Total</th>
+                        <th className="text-left p-3 sticky top-0 bg-muted z-10">Item</th>
+                        <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
+                          Price
+                        </th>
+                        <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
+                          Qty
+                        </th>
+                        <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
+                          Total
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item) => (
-                        <tr key={item.id} className="border-t">
+                        <tr key={item.id} className="border-t hover:bg-muted/50 transition-colors">
                           <td className="p-3">
-                            <div className="break-words">
+                            <div className="break-words max-w-[200px] sm:max-w-[300px]">
                               <p className="font-medium">{item.product.name}</p>
                               {item.discountApplied && (
                                 <div className="mt-1">
@@ -309,8 +339,8 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
           </div>
         </ScrollArea>
 
-        {/* Fixed footer that doesn't scroll */}
-        <div className="p-4 border-t flex flex-wrap justify-end gap-2">
+        {/* Fixed footer */}
+        <div className="p-4 border-t bg-background sticky bottom-0 flex flex-wrap justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
