@@ -18,6 +18,7 @@ import {
 import { Member, MemberResponse, MemberSectionProps, Discount } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
+import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 
 export function MemberSection({
   onMemberSelect,
@@ -57,64 +58,94 @@ export function MemberSection({
     callback: searchCallback
   })
 
+  // Define member select handler before it's used
+  const handleMemberSelect = useCallback(
+    (member: Member) => {
+      setSelectedMember(member)
+      setShowResults(false)
+      setQuery('')
+      setLastSearchedQuery('')
+      if (onMemberSelect) {
+        onMemberSelect(member)
+      }
+    },
+    [onMemberSelect, setQuery, setLastSearchedQuery]
+  )
+
+  // Define manual search handler before it's used
+  const handleManualSearch = useCallback(() => {
+    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
+      searchMembers(query)
+      setLastSearchedQuery(query)
+    }
+  }, [query, lastSearchedQuery])
+
+  // Define searchMembers before it's used
+  const searchMembers = useCallback(
+    async (searchQuery: string) => {
+      if (!searchQuery.trim()) return
+
+      setIsLoading(true)
+
+      try {
+        const response = (await window.api.request(
+          `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(searchQuery)}`,
+          {
+            method: 'GET'
+          }
+        )) as MemberResponse
+
+        if (response.success && response.data?.members?.length > 0) {
+          setSearchResults(response.data.members)
+          setShowResults(true)
+
+          // Auto-select if there's an exact match
+          const exactMatch = response.data.members.find(
+            (m) =>
+              m.phone === searchQuery ||
+              m.cardId === searchQuery ||
+              m.name.toLowerCase() === searchQuery.toLowerCase()
+          )
+          if (exactMatch) {
+            handleMemberSelect(exactMatch)
+          }
+        } else {
+          setSearchResults([])
+          setShowResults(false)
+        }
+      } catch (error) {
+        console.error('Failed to search for member:', error)
+        toast.error('Failed to search for member', {
+          description: 'Please try again later'
+        })
+        setSearchResults([])
+        setShowResults(false)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [handleMemberSelect]
+  )
+
+  // Now use the useKeyboardNavigation hook - AFTER all its dependencies are defined
+  const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
+    {
+      items: searchResults,
+      onSelectItem: handleMemberSelect,
+      isDropdownVisible: showResults,
+      setDropdownVisible: setShowResults,
+      onSearch: handleManualSearch,
+      searchQuery: query,
+      minQueryLength: 3
+    }
+  )
+
   // Use click outside hook
   useClickOutside([resultsRef, inputRef], () => {
     setShowResults(false)
   })
 
-  const searchMembers = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return
-
-    setIsLoading(true)
-
-    try {
-      const response = (await window.api.request(
-        `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(searchQuery)}`,
-        {
-          method: 'GET'
-        }
-      )) as MemberResponse
-
-      if (response.success && response.data?.members?.length > 0) {
-        setSearchResults(response.data.members)
-        setShowResults(true)
-
-        // Auto-select if there's an exact match
-        const exactMatch = response.data.members.find(
-          (m) =>
-            m.phone === searchQuery ||
-            m.cardId === searchQuery ||
-            m.name.toLowerCase() === searchQuery.toLowerCase()
-        )
-        if (exactMatch) {
-          handleMemberSelect(exactMatch)
-        }
-      } else {
-        setSearchResults([])
-        setShowResults(false)
-      }
-    } catch (error) {
-      console.error('Failed to search for member:', error)
-      toast.error('Failed to search for member', {
-        description: 'Please try again later'
-      })
-      setSearchResults([])
-      setShowResults(false)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleMemberSelect = (member: Member) => {
-    setSelectedMember(member)
-    setShowResults(false)
-    setQuery('')
-    setLastSearchedQuery('')
-    if (onMemberSelect) {
-      onMemberSelect(member)
-    }
-  }
-
+  // These remaining functions don't need to be defined before the hooks
   const clearMember = () => {
     setSelectedMember(null)
     setLastSearchedQuery('')
@@ -138,13 +169,6 @@ export function MemberSection({
     setShowResults(false)
     setLastSearchedQuery('')
     inputRef.current?.focus()
-  }
-
-  const handleManualSearch = () => {
-    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
-      searchMembers(query)
-      setLastSearchedQuery(query)
-    }
   }
 
   // Format discount for display
@@ -319,12 +343,7 @@ export function MemberSection({
               placeholder="Search member ..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && query.trim().length >= 3) {
-                  handleManualSearch()
-                  e.preventDefault()
-                }
-              }}
+              onKeyDown={handleKeyDown}
               onFocus={handleInputFocus}
               className="pr-16"
             />
@@ -360,11 +379,17 @@ export function MemberSection({
                 ref={resultsRef}
               >
                 <ul className="py-1 divide-y divide-border">
-                  {searchResults.map((member) => (
+                  {searchResults.map((member, index) => (
                     <li
                       key={member.id}
-                      className="px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+                      ref={(el) => {
+                        listItemsRef.current[index] = el
+                      }}
+                      className={`px-3 py-2 transition-colors cursor-pointer ${
+                        index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
+                      }`}
                       onClick={() => handleMemberSelect(member)}
+                      onMouseEnter={() => handleItemMouseEnter(index)}
                     >
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <div className="flex-1">

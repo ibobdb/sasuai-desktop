@@ -41,7 +41,6 @@ export default function CartList({
   const [quantityInput, setQuantityInput] = useState<string>('')
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
 
   const handleSelectItem = (id: string, checked: boolean) => {
     const newSelected = new Set(selectedItems)
@@ -288,13 +287,6 @@ export default function CartList({
                 ))}
               </TableBody>
             </Table>
-          </div>
-
-          <div className="flex justify-between items-center bg-muted/20 p-3 rounded-md">
-            <div className="text-sm">
-              <span className="font-medium">Total Items:</span> {totalItems}
-            </div>
-            <div className="text-lg font-bold">Subtotal: Rp {subtotal.toLocaleString()}</div>
           </div>
         </>
       )}

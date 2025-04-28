@@ -85,8 +85,8 @@ export default function Cashier() {
     setPaymentDialogOpen(true)
   }
 
-  // Add to cart function
-  const addToCart = (product: Product) => {
+  // Add to cart function - modify to accept quantity parameter
+  const addToCart = (product: Product, quantity: number = 1) => {
     // Get best batch (could improve with FIFO logic)
     const batch =
       product.batches && product.batches.length > 0
@@ -101,16 +101,16 @@ export default function Cashier() {
           item.id === product.id
             ? {
                 ...item,
-                quantity: item.quantity + 1,
-                subtotal: (item.quantity + 1) * item.price,
+                quantity: item.quantity + quantity, // Use the provided quantity
+                subtotal: (item.quantity + quantity) * item.price,
                 finalPrice: calculateFinalPrice(
                   item.price,
-                  item.quantity + 1,
+                  item.quantity + quantity,
                   item.selectedDiscount
                 ),
                 discountAmount: calculateDiscountAmount(
                   item.price,
-                  item.quantity + 1,
+                  item.quantity + quantity,
                   item.selectedDiscount
                 )
               }
@@ -123,13 +123,13 @@ export default function Cashier() {
         ...prevCart,
         {
           ...product,
-          quantity: 1,
-          subtotal: product.price,
+          quantity: quantity, // Use the provided quantity
+          subtotal: product.price * quantity, // Multiply by quantity
           batchId: batch?.id,
           unitId: product.unitId || '', // Ensure unit ID is provided in product data
           selectedDiscount: null,
           discountAmount: 0,
-          finalPrice: product.price
+          finalPrice: product.price * quantity // Multiply by quantity
         }
       ]
     })

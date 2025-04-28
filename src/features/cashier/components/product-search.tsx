@@ -6,18 +6,35 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Product, Discount, ProductResponse, ProductSearchProps } from '@/types/cashier'
+import { Product, Discount, ProductResponse } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
+import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
+import { QuantityInputDialog } from './quantity-input-dialog'
+
+// Update the ProductSearchProps interface to include quantity
+interface ProductSearchProps {
+  onProductSelect: (product: Product, quantity?: number) => void
+  autoFocus?: boolean
+}
 
 export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
   const [results, setResults] = useState<Product[]>([])
   const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [lastSearchedQuery, setLastSearchedQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [quantityDialogOpen, setQuantityDialogOpen] = useState(false)
+
+  // Define handleSelect function first, before it's used in the hook
+  const handleSelect = useCallback((product: Product) => {
+    setSelectedProduct(product)
+    setQuantityDialogOpen(true)
+    setResults([])
+    setShowResults(false)
+  }, [])
 
   // Create a memoized search function that avoids duplicate API calls
   const searchCallback = useCallback(
@@ -40,6 +57,27 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     minLength: 3,
     callback: searchCallback
   })
+
+  // Define handleManualSearch here AFTER query is defined
+  const handleManualSearch = useCallback(() => {
+    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
+      fetchProducts(query)
+      setLastSearchedQuery(query)
+    }
+  }, [query, lastSearchedQuery])
+
+  // Now use the handleSelect function in the hook - AFTER query and handleManualSearch are defined
+  const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
+    {
+      items: results,
+      onSelectItem: handleSelect,
+      isDropdownVisible: showResults,
+      setDropdownVisible: setShowResults,
+      onSearch: handleManualSearch,
+      searchQuery: query,
+      minQueryLength: 3
+    }
+  )
 
   // Use click outside hook
   useClickOutside([resultsRef, inputRef], () => {
@@ -100,19 +138,16 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     }
   }
 
-  const handleSelect = (product: Product) => {
-    onProductSelect(product)
-    setSelectedProduct(product)
+  const handleAddWithQuantity = (product: Product, quantity: number) => {
+    onProductSelect(product, quantity)
     setQuery('')
-    setResults([])
-    setShowResults(false)
     setLastSearchedQuery('')
+    inputRef.current?.focus()
   }
 
   const clearSearch = () => {
     setQuery('')
     setResults([])
-    setSelectedProduct(null)
     setShowResults(false)
     setLastSearchedQuery('')
     inputRef.current?.focus()
@@ -121,13 +156,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
   const handleInputFocus = () => {
     if (results.length > 0) {
       setShowResults(true)
-    }
-  }
-
-  const handleManualSearch = () => {
-    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
-      fetchProducts(query)
-      setLastSearchedQuery(query)
     }
   }
 
@@ -151,7 +179,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
     if (activeDiscounts.length === 0) return null
 
-    // Sort by value (higher first)
     return activeDiscounts.sort((a, b) => b.value - a.value)[0]
   }
 
@@ -172,14 +199,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={handleInputFocus}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && query.trim() !== '') {
-              if (query.trim().length >= 3) {
-                handleManualSearch()
-              }
-              e.preventDefault()
-            }
-          }}
+          onKeyDown={handleKeyDown}
           className="pr-8"
           autoFocus={autoFocus}
         />
@@ -208,20 +228,25 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           )}
         </Button>
 
-        {/* Search results dropdown */}
         {showResults && results.length > 0 && (
           <Card
             className="absolute z-50 w-[100%] left-0 right-0 mt-1 max-h-64 overflow-auto"
             ref={resultsRef}
           >
             <ul className="py-1 divide-y divide-border">
-              {results.map((product) => {
+              {results.map((product, index) => {
                 const bestDiscount = getBestDiscount(product)
                 return (
                   <li
                     key={product.id}
-                    className="px-3 py-2 hover:bg-accent transition-colors cursor-pointer"
+                    ref={(el) => {
+                      listItemsRef.current[index] = el
+                    }}
+                    className={`px-3 py-2 transition-colors cursor-pointer ${
+                      index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
+                    }`}
                     onClick={() => handleSelect(product)}
+                    onMouseEnter={() => handleItemMouseEnter(index)}
                   >
                     <div className="flex justify-between">
                       <div>
@@ -261,7 +286,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         )}
       </div>
 
-      {/* Loading state */}
       {(isLoading || isDebouncing) && query.trim() !== '' && (
         <div className="text-sm text-muted-foreground flex items-center">
           <Loader2 className="h-3 w-3 mr-2 animate-spin" />
@@ -269,7 +293,6 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         </div>
       )}
 
-      {/* No results message */}
       {!isLoading && !isDebouncing && query.trim().length >= 3 && results.length === 0 && (
         <div className="text-sm text-muted-foreground flex items-center">
           <X className="h-3 w-3 mr-2" />
@@ -277,48 +300,19 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         </div>
       )}
 
-      {/* Minimum character hint */}
       {isTooShort && (
         <div className="text-sm text-muted-foreground flex items-center">
           Enter at least 3 characters to search
         </div>
       )}
 
-      {/* Selected product display */}
-      {selectedProduct && (
-        <div className="rounded-md border p-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center">
-                <h4 className="font-medium">{selectedProduct.name}</h4>
-                {hasActiveDiscounts(selectedProduct) && (
-                  <Badge
-                    variant="outline"
-                    className="ml-2 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
-                  >
-                    <Ticket className="h-3 w-3 mr-1" />
-                    {getBestDiscount(selectedProduct) &&
-                      formatDiscountLabel(getBestDiscount(selectedProduct)!)}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Rp {selectedProduct.price.toLocaleString()} • Stock: {selectedProduct.currentStock}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSelectedProduct(null)
-                setQuery('')
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <QuantityInputDialog
+        open={quantityDialogOpen}
+        onOpenChange={setQuantityDialogOpen}
+        product={selectedProduct}
+        onConfirm={handleAddWithQuantity}
+        maxQuantity={selectedProduct?.currentStock}
+      />
     </div>
   )
 }
