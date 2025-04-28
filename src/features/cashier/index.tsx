@@ -388,7 +388,7 @@ export default function Cashier() {
 
   return (
     <Main>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
         <div className="md:col-span-2 space-y-4">
           <ProductSearch onProductSelect={addToCart} />
           <CartList
@@ -428,41 +428,39 @@ export default function Cashier() {
               />
             </CardContent>
           </Card>
-
-          {/* Payment and Clear buttons in a flex container */}
-          <div className="flex gap-2">
-            {/* Payment Button */}
-            <Button
-              className="flex-[3]"
-              size="lg"
-              onClick={handleOpenPaymentDialog}
-              disabled={cart.length === 0}
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Payment
-            </Button>
-
-            {/* Clear Button - inlined from ActionButtons component */}
-            <Button variant="destructive" size="lg" onClick={clearCart} className="flex-1">
-              <X className="mr-2 h-4 w-4" /> Clear
-            </Button>
-          </div>
-
-          {/* Payment dialog */}
-          <PaymentDialog
-            open={paymentDialogOpen}
-            onOpenChange={setPaymentDialogOpen}
-            total={total}
-            paymentMethod={paymentMethod}
-            paymentAmount={paymentAmount}
-            onPaymentMethodChange={setPaymentMethod}
-            onPaymentAmountChange={setPaymentAmount}
-            onPay={handlePayment}
-            isPayEnabled={cart.length > 0 && paymentAmount >= total}
-            isProcessing={isProcessingTransaction}
-          />
         </div>
       </div>
+
+      {/* Fixed payment buttons */}
+      <div className="fixed bottom-6 right-6 flex gap-2 z-10 shadow-lg">
+        <Button
+          className="w-32"
+          size="lg"
+          onClick={handleOpenPaymentDialog}
+          disabled={cart.length === 0}
+        >
+          <CreditCard className="mr-2 h-4 w-4" />
+          Payment
+        </Button>
+
+        <Button variant="destructive" size="lg" onClick={clearCart}>
+          <X className="mr-2 h-4 w-4" /> Clear
+        </Button>
+      </div>
+
+      {/* Payment dialog */}
+      <PaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        total={total}
+        paymentMethod={paymentMethod}
+        paymentAmount={paymentAmount}
+        onPaymentMethodChange={setPaymentMethod}
+        onPaymentAmountChange={setPaymentAmount}
+        onPay={handlePayment}
+        isPayEnabled={cart.length > 0 && paymentAmount >= total}
+        isProcessing={isProcessingTransaction}
+      />
     </Main>
   )
 }
