@@ -1,4 +1,4 @@
-import { IconLayoutDashboard, IconCreditCard, IconReceipt2 } from '@tabler/icons-react'
+import { IconCreditCard, IconReceipt2 } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -19,13 +19,8 @@ export const sidebarData: SidebarData = {
       title: 'General',
       items: [
         {
-          title: 'Dashboard',
-          url: '/',
-          icon: IconLayoutDashboard
-        },
-        {
           title: 'Cashier',
-          url: '/cashier',
+          url: '/',
           icon: IconCreditCard
         },
         {
