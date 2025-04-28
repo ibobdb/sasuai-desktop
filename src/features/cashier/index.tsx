@@ -464,6 +464,27 @@ export default function Cashier() {
             />
           </CardContent>
         </Card>
+
+        {/* 5. Mobile-specific payment buttons (non-fixed) */}
+        <div className="mt-4 mb-6">
+          <div className="flex gap-2">
+            <Button variant="destructive" size="lg" onClick={clearCart} tabIndex={4}>
+              <X className="mr-2 h-4 w-4" />
+              Clear Cart
+            </Button>
+
+            <Button
+              size="lg"
+              onClick={handleOpenPaymentDialog}
+              disabled={cart.length === 0}
+              tabIndex={3}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Payment
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Desktop layout (unchanged) */}
@@ -515,8 +536,8 @@ export default function Cashier() {
         </div>
       </div>
 
-      {/* Fixed payment buttons (unchanged) */}
-      <div className="fixed bottom-0 right-0 left-0 p-4 z-20 bg-background border-t shadow-lg md:bg-transparent md:border-none md:shadow-none md:left-auto md:p-6">
+      {/* Fixed payment buttons (desktop only) */}
+      <div className="hidden lg:block fixed bottom-0 right-0 left-0 p-4 z-20 bg-background border-t shadow-lg md:bg-transparent md:border-none md:shadow-none md:left-auto md:p-6">
         <div className="flex gap-2 justify-end">
           <Button
             variant="destructive"
