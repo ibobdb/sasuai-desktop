@@ -325,7 +325,7 @@ export default function Cashier() {
       }
 
       // Call transaction processing endpoint
-      const response = await window.api.request(API_ENDPOINTS.TRANSACTIONS.CHECKOUT, {
+      const response = await window.api.request(API_ENDPOINTS.TRANSACTIONS.BASE, {
         method: 'POST',
         data: transactionData
       })
@@ -336,7 +336,7 @@ export default function Cashier() {
         // Set payment status for the dialog
         setPaymentStatus({
           success: true,
-          transactionId: data.id,
+          transactionId: data.tranId,
           change
         })
 
@@ -588,7 +588,7 @@ export default function Cashier() {
         transactionId={paymentStatus.transactionId}
         paymentMethod={paymentMethod}
         change={paymentStatus.change}
-        finalAmount={total}
+        paymentAmount={paymentAmount}
         errorMessage={paymentStatus.errorMessage}
         memberInfo={member ? { member } : undefined}
       />

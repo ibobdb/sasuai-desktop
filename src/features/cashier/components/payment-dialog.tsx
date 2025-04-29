@@ -12,9 +12,7 @@ import {
   Loader2,
   Wallet,
   Banknote,
-  ArrowRight,
   MoreHorizontal,
-  Check,
   QrCode,
   ArrowRightLeft
 } from 'lucide-react'
@@ -57,29 +55,14 @@ export default function PaymentDialog({
   isProcessing
 }: PaymentDialogProps) {
   const [inputFocused, setInputFocused] = useState(false)
-  const [formattedAmount, setFormattedAmount] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const change = paymentAmount - total
-  const isPaid = change >= 0
 
-  // Format number with thousands separator
+  // Format number with thousands separator (for display only)
   const formatNumber = (value: number): string => {
     return value.toLocaleString('id-ID')
   }
 
-  // Parse formatted string to number
-  const parseFormattedNumber = (value: string): number => {
-    // Remove non-numeric characters except for decimal point
-    const numericValue = value.replace(/[^0-9.]/g, '')
-    return parseFloat(numericValue) || 0
-  }
-
-  // Update formatted amount when paymentAmount changes
-  useEffect(() => {
-    setFormattedAmount(formatNumber(paymentAmount))
-  }, [paymentAmount])
-
-  // Auto-focus payment input when dialog opens, but don't auto-select
+  // Auto-focus payment input when dialog opens
   useEffect(() => {
     if (open && inputRef.current) {
       setTimeout(() => {
@@ -89,17 +72,13 @@ export default function PaymentDialog({
   }, [open])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value
-    // Remove any non-numeric characters
-    const numericValue = parseFormattedNumber(rawValue)
+    // Get numeric value only
+    const inputValue = e.target.value.replace(/[^\d]/g, '')
+    const numericValue = parseInt(inputValue, 10) || 0
 
-    // Update both the formatted display and the actual numeric value
-    setFormattedAmount(formatNumber(numericValue))
+    // Update the payment amount directly
     onPaymentAmountChange(numericValue)
   }
-
-  // Static quick cash options
-  const cashOptions = [20000, 50000, 100000, 200000]
 
   // Get icon for payment method
   const getPaymentIcon = (method: PaymentMethod) => {
@@ -199,7 +178,7 @@ export default function PaymentDialog({
             <div className="space-y-2">
               <Label>Quick cash selection</Label>
               <div className="grid grid-cols-4 gap-2">
-                {cashOptions.map((amount) => (
+                {[20000, 50000, 100000, 200000].map((amount) => (
                   <Button
                     key={amount}
                     variant={paymentAmount === amount ? 'default' : 'outline'}
@@ -214,7 +193,7 @@ export default function PaymentDialog({
             </div>
           )}
 
-          {/* Payment Amount Input */}
+          {/* Payment Amount Input - Simplified */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
@@ -229,36 +208,20 @@ export default function PaymentDialog({
               <Input
                 ref={inputRef}
                 id="paymentAmount"
-                value={formattedAmount}
+                value={paymentAmount || ''}
                 onChange={handleInputChange}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 className="pl-9 text-left font-medium text-lg"
                 placeholder="0"
+                type="number"
               />
             </div>
-          </div>
 
-          {/* Change calculation display */}
-          <div
-            className={cn(
-              'rounded-md px-2 py-2 flex items-center justify-between',
-              change >= 0
-                ? 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800'
-                : 'bg-muted border'
-            )}
-          >
-            <div className="flex items-center">
-              {isPaid ? (
-                <Check className="h-4 w-4 mr-2" />
-              ) : (
-                <ArrowRight className="h-4 w-4 mr-2" />
-              )}
-              <span className="font-normal">{isPaid ? 'Change' : 'Still needed'}:</span>
+            {/* Display payment amount below input with larger size */}
+            <div className="flex justify-end pt-2 pb-1">
+              <div className="text-xl font-semibold">Rp {formatNumber(paymentAmount)}</div>
             </div>
-            <span className="font-normal">
-              Rp {formatNumber(isPaid ? change : Math.abs(change))}
-            </span>
           </div>
         </div>
 

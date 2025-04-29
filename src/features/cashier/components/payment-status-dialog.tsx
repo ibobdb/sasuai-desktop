@@ -29,7 +29,7 @@ interface PaymentStatusDialogProps {
   transactionId?: string
   paymentMethod: PaymentMethod
   change?: number
-  finalAmount: number
+  paymentAmount: number
   memberInfo?: {
     member: Member
     pointsInfo?: string
@@ -44,7 +44,7 @@ export function PaymentStatusDialog({
   transactionId,
   paymentMethod,
   change = 0,
-  finalAmount,
+  paymentAmount,
   errorMessage
 }: PaymentStatusDialogProps) {
   const [copied, setCopied] = useState(false)
@@ -145,7 +145,7 @@ export function PaymentStatusDialog({
               <div className="bg-muted/50 p-3 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Amount Paid</span>
-                  <span className="text-lg font-semibold">Rp {formatNumber(finalAmount)}</span>
+                  <span className="text-lg font-semibold">Rp {formatNumber(paymentAmount)}</span>
                 </div>
 
                 {/* Show change for cash payments */}

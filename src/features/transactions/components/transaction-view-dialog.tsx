@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { IconReceipt, IconLoader2, IconPrinter, IconInfoCircle } from '@tabler/icons-react'
+import { IconReceipt, IconLoader2, IconPrinter } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -64,66 +64,11 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
     )
   }
 
-  // Fallback if detail couldn't be loaded
-  if (!detail) {
-    const date = new Date(currentTransaction.createdAt)
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-left">
-            <DialogTitle className="flex items-center gap-2">
-              <IconReceipt className="h-5 w-5" /> Transaction Details
-            </DialogTitle>
-            <DialogDescription>Transaction ID: {currentTransaction.id}</DialogDescription>
-          </DialogHeader>
+  // If no details are available, close dialog and show loading instead
+  if (!detail) return null
 
-          <Card className="p-4 mb-4 bg-muted/50">
-            <div className="flex items-start gap-2">
-              <IconInfoCircle className="h-4 w-4 mt-0.5 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Detailed information could not be loaded. Showing basic transaction information.
-              </p>
-            </div>
-          </Card>
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-medium">{date.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Cashier</p>
-                  <p className="font-medium">{currentTransaction.cashier.name}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">Customer</p>
-                  <p className="font-medium">{currentTransaction.member?.name || 'Guest'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Final Amount</p>
-                  <p className="font-semibold">
-                    {formatCurrency(currentTransaction.pricing.finalAmount)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  const { pricing, cashier, member, items, paymentMethod } = detail
+  const { pricing, cashier, member, items, payment } = detail
+  const paymentMethod = payment?.method || detail.paymentMethod
   const date = new Date(detail.createdAt)
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -148,7 +93,7 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 <IconReceipt className="h-5 w-5" /> Transaction Receipt
               </DialogTitle>
               <DialogDescription className="mt-1 break-all">
-                <span className="font-semibold">ID:</span> {detail.id}
+                <span className="font-semibold">Transaction ID:</span> {detail.tranId}
               </DialogDescription>
             </div>
             <Button
@@ -209,7 +154,9 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Payment Method</p>
-                  <p className="font-medium capitalize">{paymentMethod.replace('_', ' ')}</p>
+                  <p className="font-medium capitalize">
+                    {paymentMethod ? paymentMethod.replace(/[_-]/g, ' ') : '-'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -297,6 +244,19 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 <span>Total</span>
                 <span>{formatCurrency(pricing.finalAmount)}</span>
               </div>
+
+              {/* Payment amount */}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Payment Amount</span>
+                <span>{formatCurrency(Number(payment.amount))}</span>
+              </div>
+
+              {payment.change && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Change</span>
+                  <span>{formatCurrency(Number(payment.change))}</span>
+                </div>
+              )}
             </div>
 
             {/* Points Earned */}

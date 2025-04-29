@@ -37,50 +37,17 @@ export const columns: ColumnDef<Transaction>[] = [
     enableSorting: false,
     enableHiding: false
   },
+  // custom tranId
   {
-    accessorKey: 'id',
+    accessorKey: 'tranId',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Transaction ID" />,
-    cell: ({ row }) => <div className="font-medium">{row.getValue('id') as string}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.getValue('tranId') as string}</div>,
     enableHiding: false
   },
   {
     id: 'originalAmount',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Original Amount" />,
     cell: ({ row }) => <div>{formatCurrency(row.original.pricing.originalAmount)}</div>
-  },
-  {
-    id: 'productDiscount',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Product Discount" />,
-    cell: ({ row }) => {
-      const pricing = row.original.pricing
-      let productDiscounts = 0
-
-      if (pricing.discounts) {
-        productDiscounts = pricing.discounts.products
-      } else if ('productDiscounts' in pricing) {
-        productDiscounts = pricing.productDiscounts as number
-      }
-
-      if (productDiscounts === 0) return <span className="text-muted-foreground">-</span>
-      return <div className="text-rose-500">{formatCurrency(productDiscounts)}</div>
-    }
-  },
-  {
-    id: 'memberDiscount',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Member Discount" />,
-    cell: ({ row }) => {
-      const pricing = row.original.pricing
-      let memberDiscount = 0
-
-      if (pricing.discounts && pricing.discounts.member) {
-        memberDiscount = pricing.discounts.member.amount
-      } else if ('memberDiscount' in pricing) {
-        memberDiscount = pricing.memberDiscount as number
-      }
-
-      if (memberDiscount === 0) return <span className="text-muted-foreground">-</span>
-      return <div className="text-rose-500">{formatCurrency(memberDiscount)}</div>
-    }
   },
   {
     id: 'totalDiscount',
@@ -129,24 +96,42 @@ export const columns: ColumnDef<Transaction>[] = [
       return <span>{points} pts</span>
     }
   },
+
+  {
+    id: 'paymentAmount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Payment Amount" />,
+    cell: ({ row }) => (
+      <div className="font-medium">{formatCurrency(row.original.payment.amount)}</div>
+    )
+  },
+
   {
     accessorKey: 'paymentMethod',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Payment" />,
     cell: ({ row }) => {
-      const paymentMethod = row.getValue('paymentMethod') as TransactionPaymentMethod
+      // Get payment method from payment.method instead of directly from paymentMethod
+      const paymentMethod = row.original.payment?.method as TransactionPaymentMethod | undefined
+
+      // Handle null/undefined paymentMethod
+      if (!paymentMethod) {
+        return <span className="text-muted-foreground">-</span>
+      }
+
       const method = paymentMethods.find((item) => item.value === paymentMethod)
 
       return (
         <div className="flex items-center gap-x-2">
           {method?.icon && <method.icon size={16} className="text-muted-foreground" />}
           <span className="text-sm capitalize">
-            {method?.label || paymentMethod.replace('_', ' ')}
+            {method?.label || paymentMethod.replace(/[_-]/g, ' ')}
           </span>
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      // Adjust to get payment method from payment.method
+      const paymentMethod = row.original.payment?.method
+      return value.includes(paymentMethod || '')
     }
   },
   {

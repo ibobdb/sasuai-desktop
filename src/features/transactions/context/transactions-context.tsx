@@ -37,8 +37,6 @@ interface TransactionsContextType {
   transactionDetail: TransactionDetail | null
   setTransactionDetail: React.Dispatch<React.SetStateAction<TransactionDetail | null>>
   isLoadingDetail: boolean
-  voidTransaction: (id: string, reason: string) => Promise<boolean>
-  isVoiding: boolean
 }
 
 const TransactionsContext = React.createContext<TransactionsContextType | null>(null)
@@ -82,8 +80,6 @@ export default function TransactionsProvider({ children }: Props) {
     search: '',
     paymentMethods: []
   })
-
-  const [isVoiding, setIsVoiding] = useState<boolean>(false)
 
   // Create a search callback function that checks if the query has changed
   const searchCallback = useCallback(
@@ -138,7 +134,7 @@ export default function TransactionsProvider({ children }: Props) {
   const buildUrl = useCallback((params: TransactionFilterParams): string => {
     try {
       // Start with the base endpoint
-      let url = API_ENDPOINTS.TRANSACTIONS.GET_ALL
+      let url = API_ENDPOINTS.TRANSACTIONS.BASE
       const queryParams: string[] = []
 
       // Add parameters to query string
@@ -160,7 +156,7 @@ export default function TransactionsProvider({ children }: Props) {
       return url
     } catch (error) {
       console.error('Error building URL:', error)
-      return API_ENDPOINTS.TRANSACTIONS.GET_ALL
+      return API_ENDPOINTS.TRANSACTIONS.BASE
     }
   }, [])
 
@@ -229,7 +225,7 @@ export default function TransactionsProvider({ children }: Props) {
     setTransactionDetail(null)
 
     try {
-      const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
+      const url = `${API_ENDPOINTS.TRANSACTIONS.BASE}/${id}`
       console.log('Fetching transaction detail from:', url)
 
       const response = await window.api.request(url, {
@@ -259,54 +255,6 @@ export default function TransactionsProvider({ children }: Props) {
       setIsLoadingDetail(false)
     }
   }, [])
-
-  // Void a transaction with a given reason
-  const voidTransaction = useCallback(
-    async (id: string, reason: string) => {
-      setIsVoiding(true)
-
-      try {
-        const url = `${API_ENDPOINTS.TRANSACTIONS.GET_ALL}/${id}`
-
-        // Prepare the data object
-        const voidData = {
-          reason: reason
-        }
-
-        // Make the API call with proper JSON data format
-        const response = await window.api.request(url, {
-          method: 'POST',
-          data: voidData
-        })
-
-        console.log('Void response:', response)
-
-        if (response && response.success === true) {
-          toast.success('Transaction voided successfully')
-          fetchTransactions()
-          return true
-        } else {
-          const errorMsg = response?.message || 'Unknown server error'
-          const errorDetails = response?.error || 'Please try again later'
-
-          toast.error('Failed to void transaction', {
-            description: `${errorMsg}. ${errorDetails}`
-          })
-          console.error('Void error details:', response)
-          return false
-        }
-      } catch (error) {
-        console.error('Error voiding transaction:', error)
-        toast.error('Failed to void transaction', {
-          description: error instanceof Error ? error.message : 'An unexpected error occurred'
-        })
-        return false
-      } finally {
-        setIsVoiding(false)
-      }
-    },
-    [fetchTransactions]
-  )
 
   const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
     setFilters((prevFilters) => {
@@ -367,9 +315,7 @@ export default function TransactionsProvider({ children }: Props) {
       fetchTransactionDetail,
       transactionDetail,
       setTransactionDetail,
-      isLoadingDetail,
-      voidTransaction,
-      isVoiding
+      isLoadingDetail
     }),
     [
       open,
@@ -391,9 +337,7 @@ export default function TransactionsProvider({ children }: Props) {
       executeSearch,
       fetchTransactionDetail,
       transactionDetail,
-      isLoadingDetail,
-      voidTransaction,
-      isVoiding
+      isLoadingDetail
     ]
   )
 

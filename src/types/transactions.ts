@@ -46,12 +46,20 @@ export interface Pricing {
   finalAmount: number
 }
 
+export interface Payment {
+  method: string
+  amount: number
+  change: number
+}
+
 // Transaction list type
 export interface Transaction {
   id: string
+  tranId: string
   cashier: Entity
   member: Entity | null
   pricing: Pricing
+  payment: Payment
   paymentMethod: TransactionPaymentMethod
   itemCount: number
   pointsEarned: number
@@ -103,10 +111,12 @@ export interface DetailedCashier {
 
 export interface TransactionDetail {
   id: string
+  tranId: string | null
   cashier: DetailedCashier
   member: DetailedMember | null
   pricing: Pricing
-  paymentMethod: TransactionPaymentMethod
+  payment: Payment
+  paymentMethod?: TransactionPaymentMethod // Keep for backward compatibility
   items: TransactionItem[]
   pointsEarned: number
   createdAt: Date
@@ -141,4 +151,4 @@ export interface TransactionFilterUIState {
   paymentMethods: string[]
 }
 
-export type TransactionsDialogType = 'delete' | 'view'
+export type TransactionsDialogType = 'view'
