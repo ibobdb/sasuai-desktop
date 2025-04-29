@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: Props) {
         <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
           <div className="mb-4 flex flex-col items-center justify-center">
             <img
-              src="/resources/icon.png"
+              src="https://res.cloudinary.com/samunu/image/upload/f_auto/q_auto/v1745953012/icon_z07a9i.png"
               alt="Sasuai Store"
               className="mb-3 h-16 w-16 object-contain"
             />

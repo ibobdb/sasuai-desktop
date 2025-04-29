@@ -31,6 +31,7 @@ export type Product = {
   batches?: Array<{
     id: string
     buyPrice: number
+    expiryDate: string
     remainingQuantity: number
   }>
   discountRelationProduct?: ProductDiscount[]

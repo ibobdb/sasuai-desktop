@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, Loader2, X, Ticket } from 'lucide-react'
+import { Search, Loader2, X, Ticket, Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { API_ENDPOINTS } from '@/config/api'
 import { toast } from 'sonner'
@@ -99,7 +99,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         handleSelect(exactMatch)
       }
     }
-  }, [results, query])
+  }, [results, query, handleSelect])
 
   const fetchProducts = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -166,6 +166,35 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     }
   }
 
+  // Helper to format expiry date
+  const getExpiryInfo = (product: Product) => {
+    if (!product.batches || product.batches.length === 0) {
+      return null
+    }
+
+    // Find the closest expiry date
+    const sortedBatches = [...product.batches].sort(
+      (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
+    )
+
+    const closestExpiry = sortedBatches[0]?.expiryDate
+    if (!closestExpiry) return null
+
+    const expiryDate = new Date(closestExpiry)
+    const today = new Date()
+    const daysUntilExpiry = Math.ceil(
+      (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    )
+
+    return {
+      date: expiryDate,
+      daysRemaining: daysUntilExpiry,
+      isExpired: daysUntilExpiry < 0,
+      isWarning: daysUntilExpiry >= 0 && daysUntilExpiry <= 30,
+      formattedDate: expiryDate.toLocaleDateString()
+    }
+  }
+
   // Helper to check if product has active discounts
   const hasActiveDiscounts = (product: Product): boolean => {
     return (
@@ -195,11 +224,22 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       : `Rp ${discount.value.toLocaleString()}`
   }
 
+  // Get stock status for visual indicators
+  const getStockStatus = (stock: number) => {
+    if (stock <= 0) return { color: 'text-red-600 bg-red-50', label: 'Out of stock' }
+    if (stock < 5) return { color: 'text-red-600 bg-red-50', label: 'Low stock' }
+    if (stock < 15) return { color: 'text-amber-600 bg-amber-50', label: 'Limited' }
+    return { color: 'text-green-600 bg-green-50', label: 'In stock' }
+  }
+
   return (
     <div className="space-y-3">
-      <h2 className="font-bold">Product Search</h2>
+      <div className="flex items-center gap-2">
+        <Package className="h-5 w-5 text-primary" />
+        <h2 className="font-bold text-lg">Product Search</h2>
+      </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="relative">
           <Input
             ref={inputRef}
@@ -208,7 +248,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
             onChange={(e) => setQuery(e.target.value)}
             onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
-            className="pr-8"
+            className="pr-16 h-9"
             autoFocus={autoFocus}
             tabIndex={1}
           />
@@ -217,7 +257,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-8 top-0 h-full w-8"
+              className="absolute right-10 top-0 h-full w-8"
               onClick={clearSearch}
             >
               <X className="h-3 w-3" />
@@ -226,7 +266,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
           <Button
             size="icon"
-            className="absolute right-0 top-0 h-full rounded-l-none"
+            className="absolute right-0 top-0 h-full rounded-l-none w-10"
             onClick={handleManualSearch}
             disabled={query.trim().length < 3 || isLoading || isDebouncing}
           >
@@ -239,52 +279,98 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
           {showResults && results.length > 0 && (
             <Card
-              className="absolute z-50 w-[100%] left-0 right-0 mt-1 max-h-64 overflow-auto"
+              className="absolute z-50 w-full mt-1 max-h-[calc(100vh-200px)] overflow-auto shadow-lg border-muted"
               ref={resultsRef}
             >
-              <ul className="py-1 divide-y divide-border">
+              <ul className="divide-y divide-border">
                 {results.map((product, index) => {
                   const bestDiscount = getBestDiscount(product)
+                  const expiryInfo = getExpiryInfo(product)
+                  const stockStatus = getStockStatus(product.currentStock)
+
                   return (
                     <li
                       key={product.id}
                       ref={(el) => {
                         listItemsRef.current[index] = el
                       }}
-                      className={`px-3 py-2 transition-colors cursor-pointer ${
+                      className={`px-3 py-2.5 transition-colors cursor-pointer ${
                         index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
                       }`}
                       onClick={() => handleSelect(product)}
                       onMouseEnter={() => handleItemMouseEnter(index)}
+                      tabIndex={-1}
+                      role="option"
+                      aria-selected={index === focusedIndex}
                     >
-                      <div className="flex justify-between">
-                        <div>
-                          <div className="flex items-center">
-                            <p className="font-medium">{product.name}</p>
-                            {hasActiveDiscounts(product) && (
+                      <div className="flex justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-2">
+                            <p className="font-medium text-sm truncate flex-1">{product.name}</p>
+
+                            {hasActiveDiscounts(product) && bestDiscount && (
                               <Badge
                                 variant="outline"
-                                className="ml-2 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800"
+                                className="ml-auto bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800 whitespace-nowrap"
                               >
                                 <Ticket className="h-3 w-3 mr-1" />
-                                {bestDiscount && formatDiscountLabel(bestDiscount)}
+                                {formatDiscountLabel(bestDiscount)}
                               </Badge>
                             )}
                           </div>
-                          <div className="text-xs text-muted-foreground flex gap-2">
-                            {product.barcode && <span>Barcode: {product.barcode}</span>}
-                            {product.skuCode && <span>SKU: {product.skuCode}</span>}
+
+                          {/* Product codes */}
+                          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground mt-1">
+                            {product.barcode && (
+                              <span className="flex items-center text-sm">
+                                <span className="font-medium mr-1">Barcode:</span>
+                                <span className="font-mono">{product.barcode}</span>
+                              </span>
+                            )}
+                            {product.skuCode && (
+                              <span className="flex items-center text-sm">
+                                <span className="font-medium mr-1">SKU:</span>
+                                <span className="font-mono">{product.skuCode}</span>
+                              </span>
+                            )}
                           </div>
+
+                          {/* Expiry information */}
+                          {expiryInfo && (
+                            <div
+                              className={`text-sm mt-2 flex items-center ${
+                                expiryInfo.isExpired
+                                  ? 'text-red-600'
+                                  : expiryInfo.isWarning
+                                    ? 'text-amber-600'
+                                    : 'text-muted-foreground'
+                              }`}
+                            >
+                              {(expiryInfo.isExpired || expiryInfo.isWarning) && (
+                                <AlertCircle className="h-3 w-3 mr-1.5" />
+                              )}
+                              {expiryInfo.isExpired
+                                ? `Expired: ${expiryInfo.formattedDate}`
+                                : expiryInfo.isWarning
+                                  ? `Expiring soon: ${expiryInfo.formattedDate} (${expiryInfo.daysRemaining} days)`
+                                  : `Expires: ${expiryInfo.formattedDate}`}
+                            </div>
+                          )}
                         </div>
-                        <div className="text-right">
-                          <p>Rp {product.price.toLocaleString()}</p>
-                          <p
-                            className={`text-xs ${
-                              product.currentStock > 0 ? 'text-green-600' : 'text-red-600'
-                            }`}
-                          >
-                            Stock: {product.currentStock}
+
+                        {/* Price and stock information */}
+                        <div className="text-right flex flex-col items-end">
+                          <p className="font-medium whitespace-nowrap">
+                            Rp {product.price.toLocaleString()}
                           </p>
+
+                          <Badge
+                            variant="outline"
+                            className={`mt-1 ${stockStatus.color} text-xs border-none`}
+                          >
+                            <span className="font-medium">{stockStatus.label}</span>
+                            {product.currentStock}
+                          </Badge>
                         </div>
                       </div>
                     </li>
@@ -296,7 +382,12 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         </div>
 
         <div className="flex items-center">
-          <Switch id="quick-add-mode" checked={quickAddMode} onCheckedChange={setQuickAddMode} />
+          <Switch
+            id="quick-add-mode"
+            checked={quickAddMode}
+            onCheckedChange={setQuickAddMode}
+            className={quickAddMode ? 'bg-green-500' : ''}
+          />
           <Label
             htmlFor="quick-add-mode"
             className={`ml-2 text-sm cursor-pointer ${
@@ -310,15 +401,17 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
         </div>
       </div>
 
+      {/* Status messages */}
       {!isLoading && !isDebouncing && query.trim().length >= 3 && results.length === 0 && (
-        <div className="text-sm text-muted-foreground flex items-center">
-          <X className="h-3 w-3 mr-2" />
-          No products found
+        <div className="text-sm text-muted-foreground flex items-center p-2 bg-muted/30 rounded-md">
+          <X className="h-4 w-4 mr-2 text-muted-foreground" />
+          No products found matching &quot;{query}&quot;
         </div>
       )}
 
-      {isTooShort && (
-        <div className="text-sm text-muted-foreground flex items-center">
+      {isTooShort && query.length > 0 && (
+        <div className="text-sm text-muted-foreground flex items-center p-2 bg-muted/30 rounded-md">
+          <AlertCircle className="h-4 w-4 mr-2 text-muted-foreground" />
           Enter at least 3 characters to search
         </div>
       )}
