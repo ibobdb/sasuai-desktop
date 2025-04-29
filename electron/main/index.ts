@@ -161,7 +161,7 @@ app.whenReady().then(() => {
         ...options
       })
 
-      return response.data
+      return { success: true, data: response.data }
     } catch (error: any) {
       if (error.response) {
         // For auth errors, clear cookies
@@ -169,20 +169,29 @@ app.whenReady().then(() => {
           await clearAuthCookies()
         }
 
-        throw {
-          status: error.response.status,
-          message: error.response.data?.message || 'Server error',
-          data: error.response.data
+        return {
+          success: false,
+          error: {
+            status: error.response.status,
+            message: error.response.data?.message || 'Server error',
+            data: error.response.data
+          }
         }
       } else if (error.request) {
-        throw {
-          status: 0,
-          message: 'No response from server'
+        return {
+          success: false,
+          error: {
+            status: 0,
+            message: 'No response from server'
+          }
         }
       } else {
-        throw {
-          status: 0,
-          message: error.message
+        return {
+          success: false,
+          error: {
+            status: 0,
+            message: error.message || 'Unknown error occurred'
+          }
         }
       }
     }

@@ -34,25 +34,17 @@ if (process.contextIsolated) {
 
     contextBridge.exposeInMainWorld('api', {
       request: async (url: string, options = {}) => {
-        try {
-          return await ipcRenderer.invoke('api:request', url, options)
-        } catch (err) {
-          // Ensure error object is properly serialized - critical for display
-          const error = err as any
+        const response = await ipcRenderer.invoke('api:request', url, options)
 
-          // This ensures error.toString() returns the actual message
-          if (error && typeof error === 'object') {
-            // Add proper toString method for better error display
-            Object.defineProperty(error, 'toString', {
-              value: function () {
-                return this.message || 'Unknown error'
-              },
-              enumerable: false
-            })
-          }
-
+        if (response.success === false && response.error) {
+          // Convert the error object back to a proper Error that can be caught
+          const error = new Error(response.error.message)
+          // Add any additional properties from the error object
+          Object.assign(error, response.error)
           throw error
         }
+
+        return response.success ? response.data : response
       },
 
       store: {
