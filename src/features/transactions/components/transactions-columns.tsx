@@ -128,7 +128,7 @@ export const columns: ColumnDef<Transaction>[] = [
         </div>
       )
     },
-    filterFn: (row, id, value) => {
+    filterFn: (row, value) => {
       // Adjust to get payment method from payment.method
       const paymentMethod = row.original.payment?.method
       return value.includes(paymentMethod || '')

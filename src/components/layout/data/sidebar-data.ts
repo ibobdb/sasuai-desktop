@@ -10,7 +10,7 @@ export const sidebarData: SidebarData = {
   stores: [
     {
       name: 'Sasuai Store',
-      logo: '/resources/icon.png',
+      logo: 'https://res.cloudinary.com/samunu/image/upload/f_auto/q_auto/v1745953012/icon_z07a9i.png',
       plan: 'Store Management'
     }
   ],
