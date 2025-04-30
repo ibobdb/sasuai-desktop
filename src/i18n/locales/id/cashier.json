@@ -1,0 +1,137 @@
+{
+  "cashier": {
+    "title": "Kasir",
+    "cart": {
+      "title": "Keranjang Belanja",
+      "empty": "Keranjang Anda kosong",
+      "searchToAdd": "Cari dan tambahkan produk untuk memulai",
+      "selectedItems": "Hapus {{count}}",
+      "product": "Produk",
+      "price": "Harga",
+      "quantity": "Jumlah",
+      "discount": "Diskon",
+      "subtotal": "Subtotal",
+      "noDiscount": "Tidak ada diskon",
+      "select": "Pilih"
+    },
+    "productSearch": {
+      "title": "Pencarian Produk",
+      "placeholder": "Cari berdasarkan nama, barcode, atau SKU...",
+      "noResults": "Tidak ada produk yang cocok dengan \"{{query}}\"",
+      "minCharacters": "Masukkan minimal 3 karakter untuk mencari",
+      "quickAdd": "Tambah Cepat",
+      "barcode": "Barcode",
+      "sku": "SKU",
+      "inStock": "Tersedia",
+      "limitedStock": "Terbatas",
+      "lowStock": "Stok rendah",
+      "outOfStock": "Habis",
+      "expired": "Kadaluarsa",
+      "expiringFormat": "Segera kadaluarsa: {{date}} ({{days}} hari)",
+      "expiresOn": "Kadaluarsa: {{date}}",
+      "fetchError": "Gagal mengambil produk",
+      "fetchErrorDescription": "Silakan coba lagi nanti"
+    },
+    "quantityDialog": {
+      "title": "Tambahkan Produk ke Keranjang",
+      "quantity": "Jumlah:",
+      "price": "Harga",
+      "availableStock": "Stok Tersedia",
+      "total": "Total:",
+      "stockWarning": "Peringatan: Jumlah melebihi stok tersedia ({{max}})",
+      "cancel": "Batal",
+      "add": "Tambahkan ke Keranjang",
+      "adding": "Menambahkan...",
+      "increaseQuantity": "Tambah jumlah",
+      "decreaseQuantity": "Kurangi jumlah",
+      "productQuantity": "Jumlah produk"
+    },
+    "memberSection": {
+      "title": "Pelanggan",
+      "clear": "Hapus",
+      "points": "poin",
+      "memberDiscount": "Diskon Pelanggan:",
+      "selectDiscount": "Pilih diskon",
+      "removeDiscount": "Hapus Diskon",
+      "minPurchase": "Min. pembelian: Rp {{amount}}"
+    },
+    "memberSearch": {
+      "placeholder": "Cari pelanggan ...",
+      "noMembersFound": "Pelanggan tidak ditemukan",
+      "minCharacters": "Masukkan minimal 3 karakter untuk mencari",
+      "newMember": "Pelanggan Baru",
+      "phone": "Telepon",
+      "cardId": "ID Kartu"
+    },
+    "createMember": {
+      "title": "Tambah Pelanggan Baru",
+      "description": "Masukkan informasi pelanggan untuk mendaftarkannya ke sistem.",
+      "name": "Nama",
+      "cardId": "ID Kartu",
+      "phone": "Nomor Telepon",
+      "email": "Email",
+      "address": "Alamat",
+      "cancel": "Batal",
+      "create": "Buat Pelanggan",
+      "creating": "Membuat...",
+      "successTitle": "Pelanggan berhasil dibuat",
+      "successDescription": "{{name}} telah ditambahkan sebagai pelanggan",
+      "errorTitle": "Gagal membuat pelanggan",
+      "errorDefault": "Terjadi kesalahan tak terduga. Silakan coba lagi."
+    },
+    "payment": {
+      "title": "Pembayaran",
+      "description": "Selesaikan transaksi dengan metode pembayaran pilihan Anda.",
+      "totalToPay": "Total yang harus dibayar:",
+      "selectMethod": "Pilih metode pembayaran",
+      "quickCash": "Pilihan tunai cepat",
+      "paymentAmount": "Jumlah Pembayaran",
+      "cancel": "Batal",
+      "payNow": "Bayar sekarang",
+      "processing": "Memproses..."
+    },
+    "paymentStatus": {
+      "success": "Pembayaran Berhasil",
+      "successDescription": "Transaksi Anda telah selesai",
+      "failed": "Pembayaran Gagal",
+      "failedDescription": "Kami tidak dapat memproses pembayaran Anda",
+      "errorDefault": "Terjadi kesalahan saat memproses pembayaran Anda. Silakan coba lagi.",
+      "transactionId": "ID Transaksi",
+      "paymentMethod": "Metode Pembayaran",
+      "amountPaid": "Jumlah Dibayar",
+      "change": "Kembalian",
+      "close": "Tutup",
+      "tryAgain": "Coba Lagi"
+    },
+    "summary": {
+      "title": "Total Pembayaran",
+      "subtotal": "Subtotal:",
+      "productDiscounts": "Diskon Produk:",
+      "memberDiscount": "Diskon Pelanggan:",
+      "total": "Total:",
+      "pointsToEarn": "Poin yang akan didapat:"
+    },
+    "actions": {
+      "clearCart": "Kosongkan Keranjang",
+      "clear": "Hapus",
+      "payment": "Pembayaran",
+      "pay": "Bayar"
+    },
+    "validation": {
+      "emptyCart": "Keranjang kosong",
+      "emptyCartDescription": "Silakan tambahkan produk ke keranjang",
+      "insufficientStock": "Stok tidak mencukupi",
+      "insufficientStockDescription": "Hanya tersedia {{quantity}} unit dari {{product}}",
+      "insufficientPayment": "Jumlah pembayaran tidak mencukupi",
+      "insufficientPaymentDescription": "Jumlah pembayaran harus setidaknya Rp {{amount}}",
+      "cannotApplyDiscount": "Tidak dapat menerapkan diskon anggota",
+      "cannotApplyDiscountDescription": "Minimal pembelian Rp {{amount}} diperlukan"
+    },
+    "fields": {
+      "required": "{{field}} wajib diisi",
+      "validEmail": "Silakan masukkan alamat email yang valid",
+      "validPhone": "Silakan masukkan nomor telepon yang valid",
+      "optional": "(opsional)"
+    }
+  }
+}

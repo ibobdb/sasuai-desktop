@@ -2,6 +2,7 @@ import { Cross2Icon } from '@radix-ui/react-icons'
 import { memo, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from 'react-i18next'
 
 interface FilterToolbarProps {
   onSearch?: (value: string) => void
@@ -24,6 +25,7 @@ function FilterToolbarComponent({
   filterComponents,
   className = ''
 }: FilterToolbarProps) {
+  const { t } = useTranslation(['common'])
   return (
     <div className={`flex flex-col gap-4 mb-4 ${className}`}>
       <div className="flex items-center justify-between">
@@ -43,7 +45,7 @@ function FilterToolbarComponent({
               />
               {onSearchSubmit && (
                 <Button variant="outline" size="sm" onClick={onSearchSubmit} className="h-8">
-                  Search
+                  {t('actions.search')}
                 </Button>
               )}
             </>
@@ -53,7 +55,7 @@ function FilterToolbarComponent({
 
           {hasFilters && onResetFilters && (
             <Button variant="ghost" onClick={onResetFilters} className="h-8 px-2 lg:px-3">
-              Reset
+              {t('actions.reset')}
               <Cross2Icon className="ml-2 h-4 w-4" />
             </Button>
           )}

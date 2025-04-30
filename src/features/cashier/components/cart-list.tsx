@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Minus,
   Plus,
@@ -36,6 +37,7 @@ export default function CartList({
   onRemoveItem,
   onUpdateDiscount
 }: CartListProps) {
+  const { t } = useTranslation(['cashier'])
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [editingQuantity, setEditingQuantity] = useState<string | null>(null)
   const [quantityInput, setQuantityInput] = useState<string>('')
@@ -95,7 +97,7 @@ export default function CartList({
       <div className="flex items-center justify-between">
         <h2 className="font-medium flex items-center text-base">
           <ShoppingCart className="mr-1.5 h-4 w-4" />
-          Shopping Cart
+          {t('cashier.cart.title')}
           {items.length > 0 && (
             <Badge variant="secondary" className="ml-2">
               {totalItems} item{totalItems !== 1 ? 's' : ''}
@@ -106,7 +108,7 @@ export default function CartList({
         {selectedCount > 0 && (
           <Button variant="destructive" size="sm" onClick={handleRemoveSelected} className="h-7">
             <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Remove {selectedCount}
+            {t('cashier.cart.selectedItems', { count: selectedCount })}
           </Button>
         )}
       </div>
@@ -114,8 +116,8 @@ export default function CartList({
       {items.length === 0 ? (
         <div className="text-center py-10 border rounded-md bg-muted/20">
           <AlertCircle className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-          <p className="text-muted-foreground">Your cart is empty</p>
-          <p className="text-xs text-muted-foreground mt-1">Search and add products to begin</p>
+          <p className="text-muted-foreground">{t('cashier.cart.empty')}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('cashier.cart.searchToAdd')}</p>
         </div>
       ) : (
         <>
@@ -131,11 +133,17 @@ export default function CartList({
                         aria-label="Select all items"
                       />
                     </TableHead>
-                    <TableHead className="w-[30%]">Product</TableHead>
-                    <TableHead className="w-[15%] text-right">Price</TableHead>
-                    <TableHead className="w-[15%] text-center">Qty</TableHead>
-                    <TableHead className="w-[20%] text-left">Discount</TableHead>
-                    <TableHead className="w-[15%] text-right">Subtotal</TableHead>
+                    <TableHead className="w-[30%]">{t('cashier.cart.product')}</TableHead>
+                    <TableHead className="w-[15%] text-right">{t('cashier.cart.price')}</TableHead>
+                    <TableHead className="w-[15%] text-center">
+                      {t('cashier.cart.quantity')}
+                    </TableHead>
+                    <TableHead className="w-[20%] text-left">
+                      {t('cashier.cart.discount')}
+                    </TableHead>
+                    <TableHead className="w-[15%] text-right">
+                      {t('cashier.cart.subtotal')}
+                    </TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -230,7 +238,7 @@ export default function CartList({
                                 >
                                   {item.selectedDiscount
                                     ? `${item.selectedDiscount.name} (${formatDiscount(item.selectedDiscount)})`
-                                    : 'Select'}{' '}
+                                    : t('cashier.cart.select')}{' '}
                                   <ChevronDown className="h-3 w-3 ml-1" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -256,14 +264,16 @@ export default function CartList({
                                       className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 font-medium"
                                     >
                                       <X className="h-3.5 w-3.5 mr-1" />
-                                      Remove Discount
+                                      {t('cashier.memberSection.removeDiscount')}
                                     </DropdownMenuItem>
                                   </>
                                 )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           ) : (
-                            <span className="text-muted-foreground">No discount</span>
+                            <span className="text-muted-foreground">
+                              {t('cashier.cart.noDiscount')}
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="w-[15%] text-right">

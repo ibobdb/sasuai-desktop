@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next' // Import useTranslation hook
 import { Button } from '@/components/ui/button'
 import { Transaction, TransactionDetail } from '@/types/transactions'
 import { formatCurrency } from '@/utils/format'
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function TransactionViewDialog({ open, onOpenChange, currentTransaction }: Props) {
+  const { t } = useTranslation(['transactions', 'common']) // Use translation hook
   const { fetchTransactionDetail } = useTransactions()
   const [detail, setDetail] = useState<TransactionDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
@@ -65,18 +67,20 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-muted-foreground">Date & Time</p>
+              <p className="text-sm text-muted-foreground">
+                {t('transaction.details.dateAndTime')}
+              </p>
               <p className="font-medium">{formattedDate}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Cashier</p>
+              <p className="text-sm text-muted-foreground">{t('transaction.details.cashier')}</p>
               <p className="font-medium">{cashier.name}</p>
             </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-muted-foreground">Customer</p>
+              <p className="text-sm text-muted-foreground">{t('transaction.details.customer')}</p>
               <p className="font-medium flex flex-wrap gap-2 items-center">
                 {member ? (
                   <>
@@ -86,12 +90,14 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                     </Badge>
                   </>
                 ) : (
-                  'Guest'
+                  t('transaction.details.guest')
                 )}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Payment Method</p>
+              <p className="text-sm text-muted-foreground">
+                {t('transaction.details.paymentMethod')}
+              </p>
               <p className="font-medium capitalize">
                 {paymentMethod ? paymentMethod.replace(/[_-]/g, ' ') : '-'}
               </p>
@@ -103,22 +109,26 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
 
         {/* Items List */}
         <div>
-          <h3 className="font-semibold mb-3">Items Purchased ({totalItems})</h3>
+          <h3 className="font-semibold mb-3">
+            {t('transaction.details.itemsPurchased')} ({totalItems})
+          </h3>
 
           <div className="border rounded-lg overflow-hidden">
             <div className="max-h-[300px] overflow-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 sticky top-0 bg-muted z-10">Item</th>
-                    <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
-                      Price
+                    <th className="text-left p-3 sticky top-0 bg-muted z-10">
+                      {t('transaction.details.item')}
                     </th>
                     <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
-                      Qty
+                      {t('transaction.details.price')}
                     </th>
                     <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
-                      Total
+                      {t('transaction.details.quantity')}
+                    </th>
+                    <th className="text-right p-3 whitespace-nowrap sticky top-0 bg-muted z-10">
+                      {t('transaction.details.total')}
                     </th>
                   </tr>
                 </thead>
@@ -158,13 +168,15 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
         {/* Pricing Summary */}
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-muted-foreground">{t('transaction.details.subtotal')}</span>
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
           {pricing.discounts.member && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Member Discount</span>
+              <span className="text-muted-foreground">
+                {t('transaction.details.memberDiscount')}
+              </span>
               <span className="text-rose-600">
                 -{formatCurrency(pricing.discounts.member.amount)}
               </span>
@@ -172,26 +184,26 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
           )}
 
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Total Discount</span>
+            <span className="text-muted-foreground">{t('transaction.details.totalDiscount')}</span>
             <span className="text-rose-600">-{formatCurrency(pricing.discounts.total)}</span>
           </div>
 
           <Separator />
 
           <div className="flex justify-between text-lg font-bold">
-            <span>Total</span>
+            <span>{t('transaction.details.total')}</span>
             <span>{formatCurrency(pricing.finalAmount)}</span>
           </div>
 
           {/* Payment amount */}
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Payment Amount</span>
+            <span className="text-muted-foreground">{t('transaction.details.paymentAmount')}</span>
             <span>{formatCurrency(Number(payment.amount))}</span>
           </div>
 
           {payment.change && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Change</span>
+              <span className="text-muted-foreground">{t('transaction.details.change')}</span>
               <span>{formatCurrency(Number(payment.change))}</span>
             </div>
           )}
@@ -225,10 +237,9 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 </svg>
               </div>
               <div>
-                <p className="font-medium">Points Earned</p>
+                <p className="font-medium">{t('transaction.details.pointsEarned')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Customer earned <span className="font-semibold">{detail.pointsEarned}</span>{' '}
-                  loyalty points
+                  {t('transaction.details.pointsDescription', { points: detail.pointsEarned })}
                 </p>
               </div>
             </div>
@@ -242,11 +253,11 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
   const footerContent = (
     <>
       <Button variant="outline" onClick={() => onOpenChange(false)}>
-        Close
+        {t('actions.close', { ns: 'common' })}
       </Button>
       <Button>
         <IconPrinter className="h-4 w-4 mr-2" />
-        Print Receipt
+        {t('actions.print', { ns: 'common' })}
       </Button>
     </>
   )
@@ -256,9 +267,9 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
       open={open}
       onOpenChange={onOpenChange}
       loading={loading}
-      loadingTitle="Loading Transaction"
-      loadingDescription="Fetching detailed transaction information"
-      title="Transaction Receipt"
+      loadingTitle={t('transaction.receipt.loading')}
+      loadingDescription={t('transaction.receipt.loadingDescription')}
+      title={t('transaction.receipt.title')}
       description={detail ? `Transaction ID: ${detail.tranId}` : ''}
       icon={<IconReceipt className="h-5 w-5" />}
       footerContent={footerContent}

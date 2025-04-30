@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
 import { DateRangeFilter } from '@/components/common/date-range-filter'
 import { AmountRangeFilter } from '@/components/common/amount-range-filter'
@@ -7,6 +8,7 @@ import { paymentMethods } from '@/lib/payment-methods'
 import { useTransactions } from '../context/transactions-context'
 
 function FilterToolbarComponent() {
+  const { t } = useTranslation(['transactions'])
   const {
     filterUIState,
     setFilterUIState,
@@ -109,13 +111,13 @@ function FilterToolbarComponent() {
       onSearch={handleSearchChange}
       onResetFilters={contextResetFilters}
       searchValue={search}
-      searchPlaceholder="Search transaction..."
+      searchPlaceholder={t('transaction.filters.searchPlaceholder')}
       onSearchSubmit={() => executeSearch(search)}
       hasFilters={hasFilters}
       filterComponents={
         <div className="flex flex-wrap gap-2">
           <DataTableFacetedFilter
-            title="Payment Method"
+            title={t('transaction.filters.paymentMethod')}
             options={paymentMethods.map(({ label, value, icon }) => ({
               label,
               value,

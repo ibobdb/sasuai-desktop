@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Loader2, X, Ticket, Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { API_ENDPOINTS } from '@/config/api'
@@ -20,6 +21,7 @@ interface ProductSearchProps {
 }
 
 export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
+  const { t } = useTranslation(['cashier'])
   const [results, setResults] = useState<Product[]>([])
   const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -135,8 +137,8 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       }
     } catch (err) {
       console.error('Error fetching products:', err)
-      toast.error('Failed to fetch products', {
-        description: 'Please try again later'
+      toast.error(t('cashier.productSearch.fetchError'), {
+        description: t('cashier.productSearch.fetchErrorDescription')
       })
       setResults([])
       setShowResults(false)
@@ -226,24 +228,29 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
   // Get stock status for visual indicators
   const getStockStatus = (stock: number) => {
-    if (stock <= 0) return { color: 'text-red-600 bg-red-50', label: 'Out of stock' }
-    if (stock < 5) return { color: 'text-red-600 bg-red-50', label: 'Low stock' }
-    if (stock < 15) return { color: 'text-amber-600 bg-amber-50', label: 'Limited' }
-    return { color: 'text-green-600 bg-green-50', label: 'In stock' }
+    if (stock <= 0)
+      return { color: 'text-red-600 bg-red-50', label: t('cashier.productSearch.outOfStock') }
+    if (stock < 5)
+      return { color: 'text-red-600 bg-red-50', label: t('cashier.productSearch.lowStock') }
+    if (stock < 15)
+      return { color: 'text-amber-600 bg-amber-50', label: t('cashier.productSearch.limitedStock') }
+    return { color: 'text-green-600 bg-green-50', label: t('cashier.productSearch.inStock') }
   }
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Package className="h-5 w-5 text-primary" />
-        <h2 className="font-bold text-lg">Product Search</h2>
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium flex items-center">
+          <Package className="h-4 w-4 mr-2 text-muted-foreground" />
+          {t('cashier.productSearch.title')}
+        </h3>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-1.5">
         <div className="relative">
           <Input
             ref={inputRef}
-            placeholder="Search by name, barcode or SKU..."
+            placeholder={t('cashier.productSearch.placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={handleInputFocus}
@@ -323,13 +330,17 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
                           <div className="flex flex-wrap gap-2 text-sm text-muted-foreground mt-1">
                             {product.barcode && (
                               <span className="flex items-center text-sm">
-                                <span className="font-medium mr-1">Barcode:</span>
+                                <span className="font-medium mr-1">
+                                  {t('cashier.productSearch.barcode')}:
+                                </span>
                                 <span className="font-mono">{product.barcode}</span>
                               </span>
                             )}
                             {product.skuCode && (
                               <span className="flex items-center text-sm">
-                                <span className="font-medium mr-1">SKU:</span>
+                                <span className="font-medium mr-1">
+                                  {t('cashier.productSearch.sku')}:
+                                </span>
                                 <span className="font-mono">{product.skuCode}</span>
                               </span>
                             )}
@@ -350,10 +361,16 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
                                 <AlertCircle className="h-3 w-3 mr-1.5" />
                               )}
                               {expiryInfo.isExpired
-                                ? `Expired: ${expiryInfo.formattedDate}`
+                                ? t('cashier.productSearch.expired') +
+                                  `: ${expiryInfo.formattedDate}`
                                 : expiryInfo.isWarning
-                                  ? `Expiring soon: ${expiryInfo.formattedDate} (${expiryInfo.daysRemaining} days)`
-                                  : `Expires: ${expiryInfo.formattedDate}`}
+                                  ? t('cashier.productSearch.expiringFormat', {
+                                      date: expiryInfo.formattedDate,
+                                      days: expiryInfo.daysRemaining
+                                    })
+                                  : t('cashier.productSearch.expiresOn', {
+                                      date: expiryInfo.formattedDate
+                                    })}
                             </div>
                           )}
                         </div>
@@ -396,23 +413,23 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
                 : 'text-muted-foreground'
             }`}
           >
-            Quick Add
+            {t('cashier.productSearch.quickAdd')}
           </Label>
         </div>
       </div>
 
       {/* Status messages */}
       {!isLoading && !isDebouncing && query.trim().length >= 3 && results.length === 0 && (
-        <div className="text-sm text-muted-foreground flex items-center p-2 bg-muted/30 rounded-md">
-          <X className="h-4 w-4 mr-2 text-muted-foreground" />
-          No products found matching &quot;{query}&quot;
+        <div className="text-xs text-muted-foreground flex items-center pt-0.5">
+          <X className="h-3 w-3 mr-1" />
+          {t('cashier.productSearch.noResults', { query })}
         </div>
       )}
 
       {isTooShort && query.length > 0 && (
-        <div className="text-sm text-muted-foreground flex items-center p-2 bg-muted/30 rounded-md">
-          <AlertCircle className="h-4 w-4 mr-2 text-muted-foreground" />
-          Enter at least 3 characters to search
+        <div className="text-xs text-muted-foreground flex items-center pt-0.5">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {t('cashier.productSearch.minCharacters')}
         </div>
       )}
 

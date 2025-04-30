@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
 import CartList from './components/cart-list'
@@ -24,6 +25,7 @@ import {
 } from '@/types/cashier'
 
 export default function Cashier() {
+  const { t } = useTranslation(['cashier'])
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
@@ -77,8 +79,8 @@ export default function Cashier() {
     } catch (error) {
       console.error('Error calculating points:', error)
       setPointsToEarn(0)
-      toast.error('Failed to calculate points', {
-        description: 'Please try again later'
+      toast.error(t('cashier.errors.calculatePoints'), {
+        description: t('cashier.errors.calculatePointsDescription')
       })
     }
   }
@@ -248,7 +250,9 @@ export default function Cashier() {
   const validateTransaction = (): boolean => {
     // Check if cart has items
     if (cart.length === 0) {
-      toast.error('Cart is empty', { description: 'Please add products to cart' })
+      toast.error(t('cashier.validation.emptyCart'), {
+        description: t('cashier.validation.emptyCartDescription')
+      })
       return false
     }
 
@@ -256,24 +260,31 @@ export default function Cashier() {
     const invalidStockItem = cart.find((item) => item.quantity > (item.currentStock || 0))
 
     if (invalidStockItem) {
-      toast.error('Insufficient stock', {
-        description: `Only ${invalidStockItem.currentStock} units of ${invalidStockItem.name} available`
+      toast.error(t('cashier.validation.insufficientStock'), {
+        description: t('cashier.validation.insufficientStockDescription', {
+          quantity: invalidStockItem.currentStock,
+          product: invalidStockItem.name
+        })
       })
       return false
     }
 
     // Validate payment amount against the total after discounts
     if (paymentAmount < total) {
-      toast.error('Insufficient payment amount', {
-        description: `Payment amount must be at least Rp ${total.toLocaleString()}`
+      toast.error(t('cashier.validation.insufficientPayment'), {
+        description: t('cashier.validation.insufficientPaymentDescription', {
+          amount: total.toLocaleString()
+        })
       })
       return false
     }
 
     // Validate member discount minimum purchase
     if (selectedMemberDiscount && subtotal < selectedMemberDiscount.minPurchase) {
-      toast.error('Cannot apply member discount', {
-        description: `Minimum purchase of Rp ${selectedMemberDiscount.minPurchase.toLocaleString()} required`
+      toast.error(t('cashier.validation.cannotApplyDiscount'), {
+        description: t('cashier.validation.cannotApplyDiscountDescription', {
+          amount: selectedMemberDiscount.minPurchase.toLocaleString()
+        })
       })
       return false
     }
@@ -349,14 +360,14 @@ export default function Cashier() {
         // Handle failed transaction
         setPaymentStatus({
           success: false,
-          errorMessage: response.message || 'Transaction failed. Please try again.'
+          errorMessage: response.message || t('cashier.errors.transactionFailed')
         })
 
         // Close payment dialog and show status dialog
         setPaymentDialogOpen(false)
         setPaymentStatusDialogOpen(true)
 
-        return Promise.reject(new Error(response.message || 'Transaction failed'))
+        return Promise.reject(new Error(response.message || t('cashier.errors.transactionFailed')))
       }
     } catch (error) {
       console.error('Payment error:', error)
@@ -364,7 +375,7 @@ export default function Cashier() {
       // Handle error
       setPaymentStatus({
         success: false,
-        errorMessage: 'An unexpected error occurred. Please try again.'
+        errorMessage: t('cashier.errors.unexpectedError')
       })
 
       // Close payment dialog and show status dialog
@@ -470,7 +481,7 @@ export default function Cashier() {
           <div className="flex gap-2">
             <Button variant="destructive" size="lg" onClick={clearCart} tabIndex={4}>
               <X className="mr-2 h-4 w-4" />
-              Clear Cart
+              {t('cashier.actions.clearCart')}
             </Button>
 
             <Button
@@ -481,7 +492,7 @@ export default function Cashier() {
               className="bg-primary hover:bg-primary/90"
             >
               <CreditCard className="mr-2 h-4 w-4" />
-              Payment
+              {t('cashier.actions.payment')}
             </Button>
           </div>
         </div>
@@ -547,8 +558,8 @@ export default function Cashier() {
             className="w-full md:w-auto"
           >
             <X className="mr-2 h-4 w-4" />
-            <span className="hidden md:inline">Clear</span>
-            <span className="md:hidden">Clear Cart</span>
+            <span className="hidden md:inline">{t('cashier.actions.clear')}</span>
+            <span className="md:hidden">{t('cashier.actions.clearCart')}</span>
           </Button>
 
           <Button
@@ -559,15 +570,15 @@ export default function Cashier() {
             className="w-full md:w-auto bg-primary hover:bg-primary/90"
           >
             <CreditCard className="mr-2 h-4 w-4" />
-            <span className="hidden md:inline">Payment</span>
+            <span className="hidden md:inline">{t('cashier.actions.payment')}</span>
             <span className="md:hidden">
-              Pay {total > 0 ? `(Rp ${total.toLocaleString('id-ID')})` : ''}
+              {t('cashier.actions.pay')} {total > 0 ? `(Rp ${total.toLocaleString('id-ID')})` : ''}
             </span>
           </Button>
         </div>
       </div>
 
-      {/* Dialogs (unchanged) */}
+      {/* Dialogs */}
       <PaymentDialog
         open={paymentDialogOpen}
         onOpenChange={setPaymentDialogOpen}

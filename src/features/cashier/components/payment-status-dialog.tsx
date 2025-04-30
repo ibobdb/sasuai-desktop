@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ export function PaymentStatusDialog({
   paymentAmount,
   errorMessage
 }: PaymentStatusDialogProps) {
+  const { t } = useTranslation(['cashier'])
   const [copied, setCopied] = useState(false)
 
   // Format number with thousands separator
@@ -78,16 +80,24 @@ export function PaymentStatusDialog({
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-3">
                   <CheckCircle2 className="h-10 w-10 text-green-500" />
                 </div>
-                <DialogTitle className="text-2xl font-semibold">Payment Successful</DialogTitle>
-                <p className="text-muted-foreground mt-1">Your transaction has been completed</p>
+                <DialogTitle className="text-2xl font-semibold">
+                  {t('cashier.paymentStatus.success')}
+                </DialogTitle>
+                <p className="text-muted-foreground mt-1">
+                  {t('cashier.paymentStatus.successDescription')}
+                </p>
               </>
             ) : (
               <>
                 <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-3">
                   <XCircle className="h-10 w-10 text-red-500" />
                 </div>
-                <DialogTitle className="text-2xl font-semibold">Payment Failed</DialogTitle>
-                <p className="text-muted-foreground mt-1">We couldn&apos;t process your payment</p>
+                <DialogTitle className="text-2xl font-semibold">
+                  {t('cashier.paymentStatus.failed')}
+                </DialogTitle>
+                <p className="text-muted-foreground mt-1">
+                  {t('cashier.paymentStatus.failedDescription')}
+                </p>
               </>
             )}
           </div>
@@ -100,7 +110,9 @@ export function PaymentStatusDialog({
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <Receipt className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm font-medium">Transaction ID</span>
+                  <span className="text-sm font-medium">
+                    {t('cashier.paymentStatus.transactionId')}
+                  </span>
                 </div>
                 <Button
                   size="sm"
@@ -121,7 +133,9 @@ export function PaymentStatusDialog({
             {/* Payment details */}
             <div className="space-y-4">
               <div className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
-                <span className="text-sm font-medium">Payment Method</span>
+                <span className="text-sm font-medium">
+                  {t('cashier.paymentStatus.paymentMethod')}
+                </span>
                 <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-md">
                   {paymentInfo.icon}
                   <span>{paymentInfo.name}</span>
@@ -130,7 +144,9 @@ export function PaymentStatusDialog({
 
               <div className="bg-muted/50 p-3 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Amount Paid</span>
+                  <span className="text-sm font-medium">
+                    {t('cashier.paymentStatus.amountPaid')}
+                  </span>
                   <span className="text-lg font-semibold">Rp {formatNumber(paymentAmount)}</span>
                 </div>
 
@@ -139,7 +155,7 @@ export function PaymentStatusDialog({
                   <div className="flex justify-between items-center text-sm pt-3 mt-3 border-t border-border">
                     <div className="flex items-center text-green-600 dark:text-green-400">
                       <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
-                      <span className="font-medium">Change</span>
+                      <span className="font-medium">{t('cashier.paymentStatus.change')}</span>
                     </div>
                     <span className="font-medium text-green-600 dark:text-green-400">
                       Rp {formatNumber(change)}
@@ -153,13 +169,14 @@ export function PaymentStatusDialog({
           <div className="py-4 space-y-4">
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
               <p className="text-red-600 dark:text-red-400">
-                {errorMessage ||
-                  'An error occurred while processing your payment. Please try again.'}
+                {errorMessage || t('cashier.paymentStatus.errorDefault')}
               </p>
             </div>
             <div className="bg-muted/50 p-3 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Payment Method</span>
+                <span className="text-sm font-medium">
+                  {t('cashier.paymentStatus.paymentMethod')}
+                </span>
                 <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-md">
                   {paymentInfo.icon}
                   <span>{paymentInfo.name}</span>
@@ -179,7 +196,7 @@ export function PaymentStatusDialog({
                 : 'bg-red-600 hover:bg-red-700 text-white'
             )}
           >
-            {success ? 'Close' : 'Try Again'}
+            {success ? t('cashier.paymentStatus.close') : t('cashier.paymentStatus.tryAgain')}
           </Button>
         </DialogFooter>
       </DialogContent>

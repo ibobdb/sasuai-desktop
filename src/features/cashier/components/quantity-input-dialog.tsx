@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export function QuantityInputDialog({
   onConfirm,
   maxQuantity
 }: QuantityInputDialogProps) {
+  const { t } = useTranslation(['cashier'])
   const [quantity, setQuantity] = useState<number>(1)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -128,7 +130,7 @@ export function QuantityInputDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Package className="mr-2 h-5 w-5" />
-            Add Product to Cart
+            {t('cashier.quantityDialog.title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -139,19 +141,23 @@ export function QuantityInputDialog({
 
             <p className="text-sm text-muted-foreground">
               {product.barcode && (
-                <span className="font-mono">{`Barcode: ${product.barcode}`}</span>
+                <span className="font-mono">{`${t('cashier.productSearch.barcode')}: ${product.barcode}`}</span>
               )}
               {product.barcode && product.skuCode && ' • '}
-              {product.skuCode && <span className="font-mono">{`SKU: ${product.skuCode}`}</span>}
+              {product.skuCode && (
+                <span className="font-mono">{`${t('cashier.productSearch.sku')}: ${product.skuCode}`}</span>
+              )}
             </p>
 
-            <p className="mt-2 font-medium">Price: Rp {product.price.toLocaleString()}</p>
+            <p className="mt-2 font-medium">
+              {t('cashier.quantityDialog.price')}: Rp {product.price.toLocaleString()}
+            </p>
 
             <div className="mt-1">
               <p
                 className={`text-sm ${product.currentStock > 0 ? 'text-green-600' : 'text-red-600'}`}
               >
-                Available Stock: {product.currentStock || 0}
+                {t('cashier.quantityDialog.availableStock')}: {product.currentStock || 0}
               </p>
 
               {/* Stock indicator - simple bar */}
@@ -188,10 +194,13 @@ export function QuantityInputDialog({
                 )}
                 <span>
                   {expiryInfo.isExpired
-                    ? `Expired: ${expiryInfo.formattedDate}`
+                    ? t('cashier.productSearch.expired') + `: ${expiryInfo.formattedDate}`
                     : expiryInfo.isWarning
-                      ? `Expiring soon: ${expiryInfo.formattedDate} (${expiryInfo.daysRemaining} days)`
-                      : `Expires: ${expiryInfo.formattedDate}`}
+                      ? t('cashier.productSearch.expiringFormat', {
+                          date: expiryInfo.formattedDate,
+                          days: expiryInfo.daysRemaining
+                        })
+                      : t('cashier.productSearch.expiresOn', { date: expiryInfo.formattedDate })}
                 </span>
               </div>
             )}
@@ -200,7 +209,7 @@ export function QuantityInputDialog({
           {/* Quantity selector with improved accessibility */}
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium mb-2">
-              Quantity:
+              {t('cashier.quantityDialog.quantity')}
             </label>
             <div className="flex items-center space-x-3">
               <Button
@@ -208,7 +217,7 @@ export function QuantityInputDialog({
                 size="icon"
                 onClick={decreaseQuantity}
                 disabled={quantity <= 1}
-                aria-label="Decrease quantity"
+                aria-label={t('cashier.quantityDialog.decreaseQuantity')}
                 className="h-9 w-9"
               >
                 <Minus className="h-4 w-4" />
@@ -224,7 +233,7 @@ export function QuantityInputDialog({
                 type="number"
                 min="1"
                 max={maxQuantity}
-                aria-label="Product quantity"
+                aria-label={t('cashier.quantityDialog.productQuantity')}
                 autoFocus
               />
 
@@ -232,7 +241,7 @@ export function QuantityInputDialog({
                 variant="outline"
                 size="icon"
                 onClick={increaseQuantity}
-                aria-label="Increase quantity"
+                aria-label={t('cashier.quantityDialog.increaseQuantity')}
                 className="h-9 w-9"
               >
                 <Plus className="h-4 w-4" />
@@ -243,7 +252,7 @@ export function QuantityInputDialog({
             {maxQuantity && quantity > maxQuantity && (
               <p className="mt-2 text-sm text-amber-600 flex items-center">
                 <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
-                Warning: Quantity exceeds available stock ({maxQuantity})
+                {t('cashier.quantityDialog.stockWarning', { max: maxQuantity })}
               </p>
             )}
           </div>
@@ -251,7 +260,9 @@ export function QuantityInputDialog({
           {/* Total price with more prominence */}
           <div className="p-2 bg-muted/20 rounded-md">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total:</span>
+              <span className="text-sm text-muted-foreground">
+                {t('cashier.quantityDialog.total')}
+              </span>
               <span className="font-medium text-lg">Rp {totalPrice.toLocaleString()}</span>
             </div>
           </div>
@@ -259,7 +270,7 @@ export function QuantityInputDialog({
 
         <DialogFooter className="space-x-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t('cashier.quantityDialog.cancel')}
           </Button>
           <Button
             onClick={handleConfirm}
@@ -267,7 +278,9 @@ export function QuantityInputDialog({
             className="flex items-center space-x-1"
           >
             <ShoppingCart className="h-4 w-4 mr-1" />
-            <span>{isLoading ? 'Adding...' : 'Add to Cart'}</span>
+            <span>
+              {isLoading ? t('cashier.quantityDialog.adding') : t('cashier.quantityDialog.add')}
+            </span>
           </Button>
         </DialogFooter>
       </DialogContent>

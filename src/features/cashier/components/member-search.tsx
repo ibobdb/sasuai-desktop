@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Loader2, UserPlus, X, Ticket } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ interface MemberSearchProps {
 }
 
 export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
+  const { t } = useTranslation(['cashier'])
   const [isLoading, setIsLoading] = useState(false)
   const [searchResults, setSearchResults] = useState<Member[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -146,7 +148,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
       <div className="relative">
         <Input
           ref={inputRef}
-          placeholder="Search member ..."
+          placeholder={t('cashier.memberSearch.placeholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -202,9 +204,13 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                     <div className="flex-1">
                       <p className="font-medium">{member.name}</p>
                       <div className="text-xs text-muted-foreground mt-1">
-                        <span>Phone: {member.phone}</span>
+                        <span>
+                          {t('cashier.memberSearch.phone')}: {member.phone}
+                        </span>
                         {member.cardId && (
-                          <span className="block sm:inline sm:ml-2">Card ID: {member.cardId}</span>
+                          <span className="block sm:inline sm:ml-2">
+                            {t('cashier.memberSearch.cardId')}: {member.cardId}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -217,7 +223,9 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                           {member.tier?.name || 'Regular'}
                         </Badge>
                       </div>
-                      <p className="text-xs text-amber-500 mt-1">Points: {member.totalPoints}</p>
+                      <p className="text-xs text-amber-500 mt-1">
+                        {t('cashier.memberSection.points')}: {member.totalPoints}
+                      </p>
 
                       {member.discountRelationsMember &&
                         member.discountRelationsMember.length > 0 && (
@@ -239,14 +247,14 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
       {!isLoading && !isDebouncing && query.trim().length >= 3 && searchResults.length === 0 && (
         <div className="text-xs text-muted-foreground flex items-center pt-0.5">
           <X className="h-3 w-3 mr-1" />
-          No members found
+          {t('cashier.memberSearch.noMembersFound')}
         </div>
       )}
 
       {/* Minimum character hint */}
       {isTooShort && (
         <div className="text-xs text-muted-foreground flex items-center pt-0.5">
-          Enter at least 3 characters to search
+          {t('cashier.memberSearch.minCharacters')}
         </div>
       )}
 
@@ -256,7 +264,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
         className="w-full h-7 mt-1"
         onClick={() => setShowCreateMemberDialog(true)}
       >
-        <UserPlus className="h-3 w-3 mr-1" /> New Member
+        <UserPlus className="h-3 w-3 mr-1" /> {t('cashier.memberSearch.newMember')}
       </Button>
 
       <CreateMemberDialog

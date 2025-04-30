@@ -1,0 +1,32 @@
+{
+  "app": {
+    "name": "Sasuai Store",
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "actions": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "close": "Tutup",
+    "print": "Cetak",
+    "search": "Cari",
+    "reset": "Reset",
+    "apply": "Terapkan"
+  },
+  "table": {
+    "noData": "Data tidak tersedia",
+    "pagination": {
+      "showing": "Menampilkan",
+      "of": "dari",
+      "entries": "entri",
+      "rowsPerPage": "Baris per halaman",
+      "page": "Halaman",
+      "goToFirst": "Ke halaman pertama",
+      "goToPrevious": "Ke halaman sebelumnya",
+      "goToNext": "Ke halaman berikutnya",
+      "goToLast": "Ke halaman terakhir"
+    }
+  }
+}

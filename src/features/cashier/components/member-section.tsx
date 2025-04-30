@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Ticket, Check, UserPlus, Phone, CreditCard, MapPin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,7 @@ export function MemberSection({
   subtotal = 0,
   member
 }: MemberSectionProps) {
+  const { t } = useTranslation(['cashier'])
   const [selectedMember, setSelectedMember] = useState<
     (Member & { discountRelationsMember?: MemberDiscount[] }) | null
   >(null)
@@ -96,12 +98,12 @@ export function MemberSection({
       <div className="flex items-center justify-between">
         <h3 className="font-medium flex items-center">
           <UserPlus className="h-4 w-4 mr-2 text-muted-foreground" />
-          Member
+          {t('cashier.memberSection.title')}
         </h3>
 
         {selectedMember && (
           <Button variant="ghost" size="sm" onClick={clearMember} className="h-6 px-2">
-            <X className="h-3 w-3 mr-1" /> Clear
+            <X className="h-3 w-3 mr-1" /> {t('cashier.memberSection.clear')}
           </Button>
         )}
       </div>
@@ -129,7 +131,9 @@ export function MemberSection({
                     {selectedMember.tier?.name || 'Regular'}
                   </Badge>
                   <div className="ml-2 flex items-center text-amber-500 dark:text-amber-400 font-medium">
-                    <span className="text-xs">{selectedMember.totalPoints} points</span>
+                    <span className="text-xs">
+                      {selectedMember.totalPoints} {t('cashier.memberSection.points')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -171,7 +175,9 @@ export function MemberSection({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <div className="flex items-center">
                   <Ticket className="h-4 w-4 mr-1 text-green-600 dark:text-green-500" />
-                  <span className="font-medium text-sm">Member Discount:</span>
+                  <span className="font-medium text-sm">
+                    {t('cashier.memberSection.memberDiscount')}
+                  </span>
                 </div>
 
                 <DropdownMenu>
@@ -187,7 +193,7 @@ export function MemberSection({
                     >
                       {selectedDiscount
                         ? `${selectedDiscount.name} (${formatDiscount(selectedDiscount)})`
-                        : 'Select discount'}
+                        : t('cashier.memberSection.selectDiscount')}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[280px] sm:w-auto">

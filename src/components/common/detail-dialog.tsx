@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 interface DetailDialogProps {
   open: boolean
@@ -37,6 +38,8 @@ export function DetailDialog({
   maxWidth = 'sm:max-w-2xl',
   icon
 }: DetailDialogProps) {
+  const { t } = useTranslation(['common'])
+
   // Loading state dialog
   if (loading) {
     return (
@@ -50,7 +53,7 @@ export function DetailDialog({
             <DialogDescription>{loadingDescription}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center py-8">
-            <p className="mt-2 text-sm text-muted-foreground">Loading details...</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t('app.loading')}</p>
           </div>
         </DialogContent>
       </Dialog>

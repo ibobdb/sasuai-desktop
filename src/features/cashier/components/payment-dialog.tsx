@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export default function PaymentDialog({
   isPayEnabled,
   isProcessing
 }: PaymentDialogProps) {
+  const { t } = useTranslation(['cashier'])
   const [inputFocused, setInputFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -87,30 +89,28 @@ export default function PaymentDialog({
     <Dialog open={open} onOpenChange={isProcessing ? () => {} : onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Payment</DialogTitle>
-          <DialogDescription>
-            Complete the transaction with your preferred payment method.
-          </DialogDescription>
+          <DialogTitle>{t('cashier.payment.title')}</DialogTitle>
+          <DialogDescription>{t('cashier.payment.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           {/* Total to be paid */}
           <div className="bg-primary/10 rounded-md p-3 flex justify-between items-center">
-            <span className="font-medium">Total to be paid:</span>
+            <span className="font-medium">{t('cashier.payment.totalToPay')}</span>
             <span className="font-bold text-lg">Rp {formatNumber(total)}</span>
           </div>
 
-          <h2 className="font-bold">Payment Method</h2>
+          <h2 className="font-bold">{t('cashier.payment.title')}</h2>
 
           {/* Payment Method Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="paymentMethod">Select payment method</Label>
+            <Label htmlFor="paymentMethod">{t('cashier.payment.selectMethod')}</Label>
             <Select
               value={paymentMethod}
               onValueChange={(value: PaymentMethod) => onPaymentMethodChange(value)}
             >
               <SelectTrigger className="w-full h-11">
-                <SelectValue placeholder="Select payment method">
+                <SelectValue placeholder={t('cashier.payment.selectMethod')}>
                   <div className="flex items-center">
                     {getPaymentMethodIcon(paymentMethod)}
                     <span>
@@ -136,7 +136,7 @@ export default function PaymentDialog({
           {/* Quick cash selection buttons - only show for cash payment */}
           {paymentMethod === 'cash' && (
             <div className="space-y-2">
-              <Label>Quick cash selection</Label>
+              <Label>{t('cashier.payment.quickCash')}</Label>
               <div className="grid grid-cols-4 gap-2">
                 {[20000, 50000, 100000, 200000].map((amount) => (
                   <Button
@@ -157,7 +157,7 @@ export default function PaymentDialog({
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
-                Payment Amount
+                {t('cashier.payment.paymentAmount')}
               </Label>
             </div>
 
@@ -187,16 +187,16 @@ export default function PaymentDialog({
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
-            Cancel
+            {t('cashier.payment.cancel')}
           </Button>
           <Button onClick={onPay} disabled={!isPayEnabled || isProcessing} className="flex-1">
             {isProcessing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('cashier.payment.processing')}
               </>
             ) : (
               <>
-                <CreditCard className="mr-2 h-4 w-4" /> Pay now
+                <CreditCard className="mr-2 h-4 w-4" /> {t('cashier.payment.payNow')}
               </>
             )}
           </Button>

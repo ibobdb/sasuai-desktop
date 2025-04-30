@@ -1,6 +1,7 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
 import { IconEye, IconReceipt } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ interface DataTableRowActionsProps {
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
+  const { t } = useTranslation(['transactions'])
   const { setOpen, setCurrentTransaction } = useTransactions()
 
   return (
@@ -35,7 +37,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               setOpen('view')
             }}
           >
-            View Details
+            {t('transaction.actions.viewDetails')}
             <DropdownMenuShortcut>
               <IconEye size={16} />
             </DropdownMenuShortcut>
@@ -46,7 +48,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               console.log('Print invoice')
             }}
           >
-            Print Invoice
+            {t('transaction.actions.printInvoice')}
             <DropdownMenuShortcut>
               <IconReceipt size={16} />
             </DropdownMenuShortcut>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -20,6 +21,8 @@ export function DateRangeFilter({
   onEndDateChange,
   onApply
 }: DateRangeFilterProps) {
+  const { t } = useTranslation(['transactions'])
+
   return (
     <div className="flex gap-2 items-center">
       <Popover>
@@ -30,7 +33,9 @@ export function DateRangeFilter({
             className={cn('h-8 border-dashed', startDate && 'bg-primary/20')}
           >
             <CalendarIcon className="h-3.5 w-3.5 mr-2" />
-            {startDate ? format(startDate, 'PPP') : 'Start Date'}
+            {startDate
+              ? format(startDate, 'PPP')
+              : t('transaction.filters.startDate', { defaultValue: 'Start Date' })}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -46,7 +51,9 @@ export function DateRangeFilter({
             className={cn('h-8 border-dashed', endDate && 'bg-primary/20')}
           >
             <CalendarIcon className="h-3.5 w-3.5 mr-2" />
-            {endDate ? format(endDate, 'PPP') : 'End Date'}
+            {endDate
+              ? format(endDate, 'PPP')
+              : t('transaction.filters.endDate', { defaultValue: 'End Date' })}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -55,7 +62,7 @@ export function DateRangeFilter({
       </Popover>
 
       <Button variant="secondary" size="sm" className="h-8" onClick={onApply}>
-        Apply Dates
+        {t('transaction.filters.applyDates', { defaultValue: 'Apply Dates' })}
       </Button>
     </div>
   )

@@ -1,0 +1,137 @@
+{
+  "cashier": {
+    "title": "Cashier",
+    "cart": {
+      "title": "Shopping Cart",
+      "empty": "Your cart is empty",
+      "searchToAdd": "Search and add products to begin",
+      "selectedItems": "Remove {{count}}",
+      "product": "Product",
+      "price": "Price",
+      "quantity": "Qty",
+      "discount": "Discount",
+      "subtotal": "Subtotal",
+      "noDiscount": "No discount",
+      "select": "Select"
+    },
+    "productSearch": {
+      "title": "Product Search",
+      "placeholder": "Search by name, barcode or SKU...",
+      "noResults": "No products found matching \"{{query}}\"",
+      "minCharacters": "Enter at least 3 characters to search",
+      "quickAdd": "Quick Add",
+      "barcode": "Barcode",
+      "sku": "SKU",
+      "inStock": "In stock",
+      "limitedStock": "Limited",
+      "lowStock": "Low stock",
+      "outOfStock": "Out of stock",
+      "expired": "Expired",
+      "expiringFormat": "Expiring soon: {{date}} ({{days}} days)",
+      "expiresOn": "Expires: {{date}}",
+      "fetchError": "Failed to fetch products",
+      "fetchErrorDescription": "Please try again later"
+    },
+    "quantityDialog": {
+      "title": "Add Product to Cart",
+      "quantity": "Quantity:",
+      "price": "Price",
+      "availableStock": "Available Stock",
+      "total": "Total:",
+      "stockWarning": "Warning: Quantity exceeds available stock ({{max}})",
+      "cancel": "Cancel",
+      "add": "Add to Cart",
+      "adding": "Adding...",
+      "increaseQuantity": "Increase quantity",
+      "decreaseQuantity": "Decrease quantity",
+      "productQuantity": "Product quantity"
+    },
+    "memberSection": {
+      "title": "Member",
+      "clear": "Clear",
+      "points": "points",
+      "memberDiscount": "Member Discount:",
+      "selectDiscount": "Select discount",
+      "removeDiscount": "Remove Discount",
+      "minPurchase": "Min. purchase: Rp {{amount}}"
+    },
+    "memberSearch": {
+      "placeholder": "Search member ...",
+      "noMembersFound": "No members found",
+      "minCharacters": "Enter at least 3 characters to search",
+      "newMember": "New Member",
+      "phone": "Phone",
+      "cardId": "Card ID"
+    },
+    "createMember": {
+      "title": "Add New Member",
+      "description": "Enter the member's information to register them in the system.",
+      "name": "Name",
+      "cardId": "Card ID",
+      "phone": "Phone Number",
+      "email": "Email",
+      "address": "Address",
+      "cancel": "Cancel",
+      "create": "Create Member",
+      "creating": "Creating...",
+      "successTitle": "Member created successfully",
+      "successDescription": "{{name}} has been added as a member",
+      "errorTitle": "Failed to create member",
+      "errorDefault": "An unexpected error occurred. Please try again."
+    },
+    "payment": {
+      "title": "Payment",
+      "description": "Complete the transaction with your preferred payment method.",
+      "totalToPay": "Total to be paid:",
+      "selectMethod": "Select payment method",
+      "quickCash": "Quick cash selection",
+      "paymentAmount": "Payment Amount",
+      "cancel": "Cancel",
+      "payNow": "Pay now",
+      "processing": "Processing..."
+    },
+    "paymentStatus": {
+      "success": "Payment Successful",
+      "successDescription": "Your transaction has been completed",
+      "failed": "Payment Failed",
+      "failedDescription": "We couldn't process your payment",
+      "errorDefault": "An error occurred while processing your payment. Please try again.",
+      "transactionId": "Transaction ID",
+      "paymentMethod": "Payment Method",
+      "amountPaid": "Amount Paid",
+      "change": "Change",
+      "close": "Close",
+      "tryAgain": "Try Again"
+    },
+    "summary": {
+      "title": "Total Payment",
+      "subtotal": "Subtotal:",
+      "productDiscounts": "Product Discounts:",
+      "memberDiscount": "Member Discount:",
+      "total": "Total:",
+      "pointsToEarn": "Points to earn:"
+    },
+    "actions": {
+      "clearCart": "Clear Cart",
+      "clear": "Clear",
+      "payment": "Payment",
+      "pay": "Pay"
+    },
+    "validation": {
+      "emptyCart": "Cart is empty",
+      "emptyCartDescription": "Please add products to cart",
+      "insufficientStock": "Insufficient stock",
+      "insufficientStockDescription": "Only {{quantity}} units of {{product}} available",
+      "insufficientPayment": "Insufficient payment amount",
+      "insufficientPaymentDescription": "Payment amount must be at least Rp {{amount}}",
+      "cannotApplyDiscount": "Cannot apply member discount",
+      "cannotApplyDiscountDescription": "Minimum purchase of Rp {{amount}} required"
+    },
+    "fields": {
+      "required": "{{field}} is required",
+      "validEmail": "Please enter a valid email address",
+      "validPhone": "Please enter a valid phone number",
+      "optional": "(optional)"
+    }
+  }
+}
