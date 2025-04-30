@@ -14,11 +14,6 @@ export const paymentMethods = [
     icon: IconCash
   },
   {
-    label: 'Card',
-    value: 'card',
-    icon: IconCreditCard
-  },
-  {
     label: 'Debit',
     value: 'debit',
     icon: IconCreditCard
@@ -44,3 +39,5 @@ export const paymentMethods = [
     icon: IconDots
   }
 ] as const
+
+export type PaymentMethod = (typeof paymentMethods)[number]['value']

@@ -7,20 +7,13 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import {
-  CreditCard,
-  Loader2,
-  Wallet,
-  Banknote,
-  MoreHorizontal,
-  QrCode,
-  ArrowRightLeft
-} from 'lucide-react'
+import { CreditCard, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PaymentMethod } from '@/types/cashier'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { paymentMethods } from '@/lib/payment-methods'
 import {
   Select,
   SelectContent,
@@ -80,22 +73,14 @@ export default function PaymentDialog({
     onPaymentAmountChange(numericValue)
   }
 
-  // Get icon for payment method
-  const getPaymentIcon = (method: PaymentMethod) => {
-    switch (method) {
-      case 'cash':
-        return <Banknote className="h-4 w-4 mr-2" />
-      case 'card':
-        return <CreditCard className="h-4 w-4 mr-2" />
-      case 'e-wallet':
-        return <Wallet className="h-4 w-4 mr-2" />
-      case 'qris':
-        return <QrCode className="h-4 w-4 mr-2" />
-      case 'transfer':
-        return <ArrowRightLeft className="h-4 w-4 mr-2" />
-      default:
-        return <MoreHorizontal className="h-4 w-4 mr-2" />
+  // Get payment method icon
+  const getPaymentMethodIcon = (method: PaymentMethod) => {
+    const paymentMethod = paymentMethods.find((p) => p.value === method)
+    if (paymentMethod) {
+      const Icon = paymentMethod.icon
+      return <Icon className="h-4 w-4 mr-2" />
     }
+    return null
   }
 
   return (
@@ -127,48 +112,23 @@ export default function PaymentDialog({
               <SelectTrigger className="w-full h-11">
                 <SelectValue placeholder="Select payment method">
                   <div className="flex items-center">
-                    {getPaymentIcon(paymentMethod)}
-                    <span>{paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}</span>
+                    {getPaymentMethodIcon(paymentMethod)}
+                    <span>
+                      {paymentMethods.find((p) => p.value === paymentMethod)?.label ||
+                        paymentMethod}
+                    </span>
                   </div>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cash">
-                  <div className="flex items-center">
-                    <Banknote className="h-4 w-4 mr-2" />
-                    Cash
-                  </div>
-                </SelectItem>
-                <SelectItem value="card">
-                  <div className="flex items-center">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Card
-                  </div>
-                </SelectItem>
-                <SelectItem value="e-wallet">
-                  <div className="flex items-center">
-                    <Wallet className="h-4 w-4 mr-2" />
-                    E-Wallet
-                  </div>
-                </SelectItem>
-                <SelectItem value="qris">
-                  <div className="flex items-center">
-                    <QrCode className="h-4 w-4 mr-2" />
-                    QRIS
-                  </div>
-                </SelectItem>
-                <SelectItem value="transfer">
-                  <div className="flex items-center">
-                    <ArrowRightLeft className="h-4 w-4 mr-2" />
-                    Transfer
-                  </div>
-                </SelectItem>
-                <SelectItem value="other">
-                  <div className="flex items-center">
-                    <MoreHorizontal className="h-4 w-4 mr-2" />
-                    Other
-                  </div>
-                </SelectItem>
+                {paymentMethods.map((method) => (
+                  <SelectItem key={method.value} value={method.value}>
+                    <div className="flex items-center">
+                      <method.icon className="h-4 w-4 mr-2" />
+                      {method.label}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

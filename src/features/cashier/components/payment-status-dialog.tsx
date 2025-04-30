@@ -5,22 +5,12 @@ import {
   DialogFooter,
   DialogTitle
 } from '@/components/ui/dialog'
-import {
-  CheckCircle2,
-  XCircle,
-  Receipt,
-  CreditCard,
-  ArrowRight,
-  Copy,
-  DollarSign,
-  Wallet,
-  QrCode,
-  Banknote
-} from 'lucide-react'
+import { CheckCircle2, XCircle, Receipt, CreditCard, ArrowRight, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Member, PaymentMethod } from '@/types/cashier'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { paymentMethods } from '@/lib/payment-methods'
 
 interface PaymentStatusDialogProps {
   open: boolean
@@ -56,20 +46,16 @@ export function PaymentStatusDialog({
 
   // Get payment method display name and icon
   const getPaymentMethodInfo = (method: PaymentMethod) => {
-    switch (method) {
-      case 'cash':
-        return { name: 'Cash', icon: <DollarSign className="h-4 w-4" /> }
-      case 'card':
-        return { name: 'Card', icon: <CreditCard className="h-4 w-4" /> }
-      case 'e-wallet':
-        return { name: 'E-Wallet', icon: <Wallet className="h-4 w-4" /> }
-      case 'qris':
-        return { name: 'QRIS', icon: <QrCode className="h-4 w-4" /> }
-      case 'transfer':
-        return { name: 'Transfer', icon: <Banknote className="h-4 w-4" /> }
-      default:
-        return { name: 'Other', icon: <CreditCard className="h-4 w-4" /> }
+    const paymentMethod = paymentMethods.find((p) => p.value === method)
+    if (paymentMethod) {
+      const Icon = paymentMethod.icon
+      return {
+        name: paymentMethod.label,
+        icon: <Icon className="h-4 w-4" />
+      }
     }
+    // Fallback
+    return { name: 'Other', icon: <CreditCard className="h-4 w-4" /> }
   }
 
   const copyTransactionId = () => {

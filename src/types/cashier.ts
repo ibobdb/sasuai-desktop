@@ -96,7 +96,7 @@ export type MemberResponse = {
 }
 
 // Payment related types
-export type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
+export type PaymentMethod = 'cash' | 'debit' | 'e-wallet' | 'qris' | 'transfer' | 'other'
 
 export type TransactionItem = {
   productId: string

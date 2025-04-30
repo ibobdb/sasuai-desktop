@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { paymentMethods } from '../data/data'
+import { paymentMethods } from '@/lib/payment-methods'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { useTransactions } from '../context/transactions-context'
 
