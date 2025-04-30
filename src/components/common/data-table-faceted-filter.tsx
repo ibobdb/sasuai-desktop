@@ -25,7 +25,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
     icon?: React.ComponentType<{ className?: string }>
   }[]
   onValueChange?: (value: string[]) => void
-  selectedValues?: string[] // Add this to control selected values from parent
+  selectedValues?: string[]
 }
 
 export function DataTableFacetedFilter<TData, TValue>({

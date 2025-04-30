@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/utils/format'
 import { paymentMethods } from '@/lib/payment-methods'
 import { Transaction, TransactionPaymentMethod } from '@/types/transactions'
-import { DataTableColumnHeader } from './data-table-column-header'
+import { DataTableColumnHeader } from '@/components/common/data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 
 export const columns: ColumnDef<Transaction>[] = [

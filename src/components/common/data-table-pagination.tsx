@@ -16,7 +16,7 @@ import {
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
-  totalCount?: number // Add prop for total count
+  totalCount?: number
 }
 
 export function DataTablePagination<TData>({ table, totalCount }: DataTablePaginationProps<TData>) {
@@ -32,7 +32,7 @@ export function DataTablePagination<TData>({ table, totalCount }: DataTablePagin
         </span>
         {/* Add total count display */}
         <span className="ml-2">
-          Total transactions:{' '}
+          Total records:{' '}
           {totalCount !== undefined ? totalCount : table.getFilteredRowModel().rows.length}
         </span>
       </div>
