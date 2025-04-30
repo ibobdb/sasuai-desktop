@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import React from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import {
   Transaction,
@@ -8,35 +8,40 @@ import {
   TransactionsDialogType
 } from '@/types/transactions'
 import { API_ENDPOINTS } from '@/config/api'
-import { toast } from 'sonner'
-import { useDebounce } from '@/hooks/use-debounce'
+import { createDataProvider } from '@/context/data-context'
+
+// Create the transaction-specific data provider
+const { DataProvider, useData } = createDataProvider<
+  Transaction,
+  TransactionDetail,
+  TransactionFilterParams,
+  TransactionFilterUIState
+>()
 
 interface TransactionsContextType {
-  open: TransactionsDialogType | null
-  setOpen: (str: TransactionsDialogType | null) => void
-  currentTransaction: Transaction | null
-  setCurrentTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
   isLoading: boolean
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-  transactions: Transaction[]
-  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>
   filters: TransactionFilterParams
   updateFilters: (newFilters: Partial<TransactionFilterParams>) => void
-  applyFilters: () => void
-  totalCount: number
-  totalPages: number
-  currentPage: number
-  pageSize: number
-  setTotalCount: React.Dispatch<React.SetStateAction<number>>
   filterUIState: TransactionFilterUIState
   setFilterUIState: React.Dispatch<React.SetStateAction<TransactionFilterUIState>>
   resetFilters: () => void
   debouncedSearch: (searchTerm: string) => void
   executeSearch: (searchTerm: string) => void
-  fetchTransactionDetail: (id: string) => Promise<TransactionDetail | null>
+  isLoadingDetail: boolean
+  open: TransactionsDialogType | null
+  setOpen: (str: TransactionsDialogType | null) => void
+  transactions: Transaction[]
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>
+  currentTransaction: Transaction | null
+  setCurrentTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
   transactionDetail: TransactionDetail | null
   setTransactionDetail: React.Dispatch<React.SetStateAction<TransactionDetail | null>>
-  isLoadingDetail: boolean
+  totalCount: number
+  totalPages: number
+  currentPage: number
+  pageSize: number
+  fetchTransactionDetail: (id: string) => Promise<TransactionDetail | null>
+  applyFilters: () => Promise<void>
 }
 
 const TransactionsContext = React.createContext<TransactionsContextType | null>(null)
@@ -47,298 +52,66 @@ interface Props {
 
 export default function TransactionsProvider({ children }: Props) {
   const [open, setOpen] = useDialogState<TransactionsDialogType>(null)
-  const [currentTransaction, setCurrentTransaction] = useState<Transaction | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [totalCount, setTotalCount] = useState<number>(0)
-  const [totalPages, setTotalPages] = useState<number>(0)
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(10)
-  const [lastSearchedQuery, setLastSearchedQuery] = useState<string>('')
 
-  // Transaction detail states
-  const [transactionDetail, setTransactionDetail] = useState<TransactionDetail | null>(null)
-  const [isLoadingDetail, setIsLoadingDetail] = useState<boolean>(false)
-
-  // Flag to track if filters need to be applied
-  const shouldFetchRef = useRef(false)
-
-  // Default filters state
-  const [filters, setFilters] = useState<TransactionFilterParams>({
-    page: 1,
-    pageSize: 10,
-    sortField: 'createdAt',
-    sortDirection: 'desc'
-  })
-
-  // UI filter state that persists between data refreshes
-  const [filterUIState, setFilterUIState] = useState<TransactionFilterUIState>({
-    startDate: undefined,
-    endDate: undefined,
-    minAmount: '',
-    maxAmount: '',
-    search: '',
-    paymentMethods: []
-  })
-
-  // Create a search callback function that checks if the query has changed
-  const searchCallback = useCallback(
-    (value: string) => {
-      // Only update filters and trigger API call if value has changed
-      if (value !== lastSearchedQuery) {
-        setLastSearchedQuery(value)
-        setFilterUIState((prev) => ({ ...prev, search: value }))
-        setFilters((prev) => ({
-          ...prev,
-          search: value || undefined,
-          page: 1
-        }))
-      }
+  // Configuration for data provider
+  const dataConfig = {
+    apiEndpoint: API_ENDPOINTS.TRANSACTIONS.BASE,
+    detailEndpoint: (id: string) => `${API_ENDPOINTS.TRANSACTIONS.BASE}/${id}`,
+    defaultFilters: {
+      page: 1,
+      pageSize: 10,
+      sortField: 'createdAt',
+      sortDirection: 'desc' as const
     },
-    [lastSearchedQuery]
-  )
-
-  // Setup debounced search using the useDebounce hook
-  const { setValue: setSearchTerm } = useDebounce('', {
-    delay: 500,
-    callback: searchCallback
-  })
-
-  // Wrapper function to debounce search input
-  const debouncedSearch = useCallback(
-    (searchTerm: string) => {
-      setSearchTerm(searchTerm)
-      // Update UI state immediately, but don't trigger API call until debounced
-      setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
-    },
-    [setSearchTerm]
-  )
-
-  // Function to explicitly execute a search (for search button)
-  const executeSearch = useCallback(
-    (searchTerm: string) => {
-      if (searchTerm !== lastSearchedQuery) {
-        setLastSearchedQuery(searchTerm)
-        setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
-        setFilters((prev) => ({
-          ...prev,
-          search: searchTerm || undefined,
-          page: 1
-        }))
-      }
-    },
-    [lastSearchedQuery]
-  )
-
-  // Function to build URL with query parameters
-  const buildUrl = useCallback((params: TransactionFilterParams): string => {
-    try {
-      // Start with the base endpoint
-      let url = API_ENDPOINTS.TRANSACTIONS.BASE
-      const queryParams: string[] = []
-
-      // Add parameters to query string
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          if (value instanceof Date) {
-            queryParams.push(`${key}=${encodeURIComponent(value.toISOString())}`)
-          } else {
-            queryParams.push(`${key}=${encodeURIComponent(String(value))}`)
-          }
-        }
-      })
-
-      // Append query string if we have parameters
-      if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`
-      }
-
-      return url
-    } catch (error) {
-      console.error('Error building URL:', error)
-      return API_ENDPOINTS.TRANSACTIONS.BASE
-    }
-  }, [])
-
-  // Fetch transactions with current filters
-  const fetchTransactions = useCallback(async () => {
-    setIsLoading(true)
-
-    try {
-      const url = buildUrl(filters)
-      console.log('Fetching transactions from:', url)
-
-      const response = await window.api.request(url, {
-        method: 'GET'
-      })
-
-      if (response.success && response.data) {
-        // Handle response data with new structure
-        if (response.data.transactions) {
-          setTransactions(response.data.transactions)
-        } else {
-          setTransactions(response.data)
-        }
-
-        // Update pagination data if available
-        if (response.data.pagination) {
-          const { totalCount, totalPages, currentPage, pageSize } = response.data.pagination
-          setTotalCount(totalCount)
-          setTotalPages(totalPages)
-          setCurrentPage(currentPage)
-          setPageSize(pageSize)
-        } else if (response.data.totalCount !== undefined) {
-          // Fallback for older API response format
-          setTotalCount(response.data.totalCount)
-        }
-      } else {
-        toast.error('Failed to load transactions', {
-          description: response.message || 'Please try again later'
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error)
-      toast.error('Failed to load transactions', {
-        description: 'Please try again later'
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [filters, buildUrl])
-
-  // Effect to handle fetching data when filters change
-  useEffect(() => {
-    // Check if we should fetch data (skip initial render)
-    if (shouldFetchRef.current) {
-      fetchTransactions()
-    } else {
-      // Set the flag to true after first render
-      shouldFetchRef.current = true
-      // And fetch data initially
-      fetchTransactions()
-    }
-  }, [fetchTransactions, filters])
-
-  // Fetch transaction details by ID
-  const fetchTransactionDetail = useCallback(async (id: string) => {
-    setIsLoadingDetail(true)
-    setTransactionDetail(null)
-
-    try {
-      const url = `${API_ENDPOINTS.TRANSACTIONS.BASE}/${id}`
-      console.log('Fetching transaction detail from:', url)
-
-      const response = await window.api.request(url, {
-        method: 'GET'
-      })
-
-      if (response.success && response.data) {
-        // Handle both old and new response formats
-        const detail = response.data.transactionDetails || response.data.transactionDetail
-        if (detail) {
-          setTransactionDetail(detail)
-          return detail
-        }
-      }
-
-      toast.error('Failed to load transaction details', {
-        description: response.message || 'Please try again later'
-      })
-      return null
-    } catch (error) {
-      console.error('Error fetching transaction detail:', error)
-      toast.error('Failed to load transaction details', {
-        description: 'Please try again later'
-      })
-      return null
-    } finally {
-      setIsLoadingDetail(false)
-    }
-  }, [])
-
-  const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
-    setFilters((prevFilters) => {
-      return { ...prevFilters, ...newFilters }
-    })
-  }, [])
-
-  const applyFilters = useCallback(() => {}, [])
-
-  // Reset all filters and immediately apply
-  const resetFilters = useCallback(() => {
-    // Reset UI state
-    setFilterUIState({
+    defaultFilterUIState: {
       startDate: undefined,
       endDate: undefined,
       minAmount: '',
       maxAmount: '',
       search: '',
       paymentMethods: []
-    })
+    }
+  }
 
-    // Reset API filters
-    setFilters({
-      page: 1,
-      pageSize: 10,
-      sortField: 'createdAt',
-      sortDirection: 'desc'
-    })
+  return (
+    <DataProvider config={dataConfig}>
+      <TransactionsWrapper open={open} setOpen={setOpen}>
+        {children}
+      </TransactionsWrapper>
+    </DataProvider>
+  )
+}
 
-    // Reset last searched query
-    setLastSearchedQuery('')
-  }, [])
+function TransactionsWrapper({
+  children,
+  open,
+  setOpen
+}: {
+  children: React.ReactNode
+  open: TransactionsDialogType | null
+  setOpen: (str: TransactionsDialogType | null) => void
+}) {
+  const dataContext = useData()
 
-  // Expose the context value
-  const contextValue = useMemo(
+  const contextValue = React.useMemo(
     () => ({
+      ...dataContext,
       open,
       setOpen,
-      currentTransaction,
-      setCurrentTransaction,
-      isLoading,
-      setIsLoading,
-      transactions,
-      setTransactions,
-      filters,
-      updateFilters,
-      applyFilters,
-      totalCount,
-      totalPages,
-      currentPage,
-      pageSize,
-      setTotalCount,
-      filterUIState,
-      setFilterUIState,
-      resetFilters,
-      debouncedSearch,
-      executeSearch,
-      fetchTransactionDetail,
-      transactionDetail,
-      setTransactionDetail,
-      isLoadingDetail
+      transactions: dataContext.items,
+      setTransactions: dataContext.setItems,
+      currentTransaction: dataContext.currentItem,
+      setCurrentTransaction: dataContext.setCurrentItem,
+      transactionDetail: dataContext.itemDetail,
+      setTransactionDetail: dataContext.setItemDetail,
+      totalCount: dataContext.pagination.totalCount,
+      totalPages: dataContext.pagination.totalPages,
+      currentPage: dataContext.pagination.currentPage,
+      pageSize: dataContext.pagination.pageSize,
+      fetchTransactionDetail: dataContext.fetchItemDetail,
+      applyFilters: dataContext.fetchItems
     }),
-    [
-      open,
-      setOpen,
-      currentTransaction,
-      isLoading,
-      transactions,
-      filters,
-      updateFilters,
-      applyFilters,
-      totalCount,
-      totalPages,
-      currentPage,
-      pageSize,
-      filterUIState,
-      setFilterUIState,
-      resetFilters,
-      debouncedSearch,
-      executeSearch,
-      fetchTransactionDetail,
-      transactionDetail,
-      isLoadingDetail
-    ]
+    [dataContext, open, setOpen]
   )
 
   return (

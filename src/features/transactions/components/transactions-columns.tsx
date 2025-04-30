@@ -2,8 +2,8 @@ import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatCurrency } from '@/utils/format'
-import { paymentMethods } from '@/lib/payment-methods'
-import { Transaction, TransactionPaymentMethod } from '@/types/transactions'
+import { paymentMethods, PaymentMethod } from '@/lib/payment-methods'
+import { Transaction } from '@/types/transactions'
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 
@@ -110,7 +110,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Payment" />,
     cell: ({ row }) => {
       // Get payment method from payment.method instead of directly from paymentMethod
-      const paymentMethod = row.original.payment?.method as TransactionPaymentMethod | undefined
+      const paymentMethod = row.original.payment?.method as PaymentMethod | undefined
 
       // Handle null/undefined paymentMethod
       if (!paymentMethod) {

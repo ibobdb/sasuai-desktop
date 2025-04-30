@@ -1,20 +1,10 @@
-// Payment method types
-export type TransactionPaymentMethod =
-  | 'cash'
-  | 'card'
-  | 'e-wallet'
-  | 'qris'
-  | 'transfer'
-  | 'other'
-  | 'debit'
+import { PaymentMethod } from '@/lib/payment-methods'
 
-// Basic entity type
 export interface Entity {
   id: string
   name: string
 }
 
-// Discount types
 export interface ItemDiscount {
   id?: string
   type: string
@@ -60,23 +50,10 @@ export interface Transaction {
   member: Entity | null
   pricing: Pricing
   payment: Payment
-  paymentMethod: TransactionPaymentMethod
+  paymentMethod: PaymentMethod
   itemCount: number
   pointsEarned: number
   createdAt: Date
-}
-
-// Pagination types
-export interface Pagination {
-  totalCount: number
-  totalPages: number
-  currentPage: number
-  pageSize: number
-}
-
-export interface TransactionResponse {
-  transactions: Transaction[]
-  pagination: Pagination
 }
 
 // Transaction detail types
@@ -116,20 +93,16 @@ export interface TransactionDetail {
   member: DetailedMember | null
   pricing: Pricing
   payment: Payment
-  paymentMethod?: TransactionPaymentMethod // Keep for backward compatibility
+  paymentMethod?: PaymentMethod
   items: TransactionItem[]
   pointsEarned: number
   createdAt: Date
 }
 
-export interface TransactionDetailResponse {
-  transactionDetails: TransactionDetail
-}
-
 // Filter types for transactions
 export interface TransactionFilterParams {
-  page?: number
-  pageSize?: number
+  page: number
+  pageSize: number
   sortField?: string
   sortDirection?: 'asc' | 'desc'
   search?: string
