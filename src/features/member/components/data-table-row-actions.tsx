@@ -32,7 +32,7 @@ interface DataTableRowActionsProps {
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const { t } = useTranslation(['member'])
+  const { t } = useTranslation(['member', 'common'])
   const { setOpen, setCurrentMember, applyFilters } = useMembers()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -119,11 +119,13 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('member.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('member.delete.description', { name: row.original.name })}
+              {t('member.delete.description').replace('{name}', row.original.name)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t('actions.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault()

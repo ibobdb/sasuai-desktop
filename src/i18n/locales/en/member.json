@@ -1,7 +1,7 @@
 {
   "member": {
-    "title": "Members",
-    "description": "Manage your members and their information",
+    "title": "Member Management",
+    "description": "Manage your store members and their information",
 
     "table": {
       "name": "Name",
@@ -10,7 +10,8 @@
       "cardId": "Card ID",
       "points": "Points",
       "tier": "Tier",
-      "createdAt": "Registered On"
+      "createdAt": "Registered On",
+      "status": "Status"
     },
 
     "filters": {
@@ -31,9 +32,14 @@
       "addressPlaceholder": "Enter address",
       "tier": "Membership Tier",
       "tierPlaceholder": "Select tier",
-      "totalPoints": "Points",
+      "totalPoints": "Available Points",
+      "totalPointsEarned": "Total Points Earned",
       "pointsPlaceholder": "Enter points",
-      "points": "pts",
+      "points": "points",
+      "status": "Status",
+      "active": "Active",
+      "banned": "Banned",
+      "pointMultiplier": "Point Multiplier",
       "required": "{field} is required",
       "validEmail": "Please enter a valid email address",
       "validPhone": "Please enter a valid phone number",
@@ -56,17 +62,33 @@
 
     "view": {
       "title": "Member Details",
+      "tabs": {
+        "info": "Information",
+        "transactions": "Transactions",
+        "points": "Points History",
+        "discounts": "Discounts"
+      },
       "loading": "Loading member details",
       "loadingDescription": "Please wait while we fetch the member information",
       "contactInfo": "Contact Information",
       "membershipInfo": "Membership Information",
       "transactionSummary": "Transaction Summary",
+      "transactionHistory": "Transaction History",
+      "pointsHistory": "Points History",
+      "availableDiscounts": "Available Discounts",
       "totalTransactions": "Total Transactions",
       "totalSpent": "Total Spent",
+      "avgSpent": "Average Spent",
       "lastTransaction": "Last Transaction",
       "memberSince": "Member Since",
-      "minPoints": "min. {points} pts",
-      "never": "Never"
+      "minPoints": "Min. {{points}} points",
+      "never": "Never",
+      "transactionCount": "{{count}} transactions",
+      "pointsEarned": "Total {{total}} points earned",
+      "discountCount": "{{count}} discounts available",
+      "banReason": "Ban Reason",
+      "noPointsHistory": "No points history found",
+      "noPointsHistoryDescription": "This member has not earned any points yet"
     },
 
     "tiers": {
@@ -81,13 +103,35 @@
     "actions": {
       "addMember": "Add Member",
       "view": "View Details",
-      "edit": "Edit",
+      "edit": "Edit Member",
       "update": "Update",
       "delete": "Delete",
       "create": "Create Member",
       "creating": "Creating...",
       "updating": "Updating...",
       "refresh": "Refresh"
+    },
+
+    "transactions": {
+      "transId": "Transaction ID",
+      "date": "Date",
+      "amount": "Amount",
+      "finalAmount": "Final Amount",
+      "discount": "Discount",
+      "paymentMethod": "Payment Method"
+    },
+
+    "points": {
+      "date": "Date Earned",
+      "pointsEarned": "Points Earned",
+      "transactionAmount": "Transaction Amount",
+      "notes": "Notes"
+    },
+
+    "discounts": {
+      "discountId": "Discount ID",
+      "noDiscounts": "No discounts available for this member",
+      "noDiscountsDescription": "This member does not have any available discounts at this time"
     },
 
     "delete": {

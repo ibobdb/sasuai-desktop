@@ -10,6 +10,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
+import { cn } from '@/lib/utils'
 
 interface DetailDialogProps {
   open: boolean
@@ -22,6 +23,8 @@ interface DetailDialogProps {
   children: ReactNode
   footerContent?: ReactNode
   maxWidth?: string
+  className?: string
+  contentClassName?: string
   icon?: ReactNode
 }
 
@@ -35,7 +38,9 @@ export function DetailDialog({
   description,
   children,
   footerContent,
-  maxWidth = 'sm:max-w-2xl',
+  maxWidth = 'sm:max-w-3xl', // Increased from 2xl to 5xl
+  className,
+  contentClassName,
   icon
 }: DetailDialogProps) {
   const { t } = useTranslation(['common'])
@@ -63,7 +68,10 @@ export function DetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`max-w-[95vw] ${maxWidth} h-[90vh] flex flex-col p-0 overflow-hidden`}
+        className={cn(
+          `max-w-[95vw] ${maxWidth} h-[90vh] flex flex-col p-0 overflow-hidden`,
+          className
+        )}
       >
         {/* Fixed header */}
         <DialogHeader className="px-6 py-4 border-b sticky top-0 bg-background z-10">
@@ -99,7 +107,7 @@ export function DetailDialog({
         </DialogHeader>
 
         {/* Scrollable content area */}
-        <ScrollArea className="flex-1 px-6">
+        <ScrollArea className={cn('flex-1 px-6', contentClassName)}>
           <div className="space-y-6 py-4">{children}</div>
         </ScrollArea>
 

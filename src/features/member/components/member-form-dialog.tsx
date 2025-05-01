@@ -50,7 +50,7 @@ export function MemberFormDialog({
   onOpenChange,
   currentMember
 }: MemberFormDialogProps) {
-  const { t } = useTranslation(['member'])
+  const { t } = useTranslation(['member', 'common'])
   const { applyFilters } = useMembers()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -366,7 +366,7 @@ export function MemberFormDialog({
               disabled={isLoading}
               className="w-full sm:w-auto"
             >
-              {t('actions.cancel')}
+              {t('actions.cancel', { ns: 'common' })}
             </Button>
             <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? (

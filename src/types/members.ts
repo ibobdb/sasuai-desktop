@@ -42,6 +42,8 @@ export interface Member {
   joinDate: string
   createdAt: string
   updatedAt: string
+  isBanned?: boolean
+  banReason?: string | null
   tier?: MemberTier
   discountRelationsMember?: MemberDiscountRelation[]
 }
@@ -53,6 +55,37 @@ export interface MemberDetail extends Member {
     totalSpent: number
     lastTransaction: string | null
   }
+  memberPoints?: {
+    id: string
+    memberId: string
+    transactionId: string
+    pointsEarned: number
+    dateEarned: string
+    notes: string
+    createdAt: string
+    updatedAt: string
+    transaction: Transaction
+  }[]
+  rewardClaims?: any[]
+  transactions?: Transaction[]
+}
+
+export interface Transaction {
+  id: string
+  tranId: string | null
+  cashierId: string
+  memberId: string
+  totalAmount: number
+  finalAmount: number
+  paymentMethod: string
+  discountMemberId: string | null
+  discountValueType: string | null
+  discountValue: number | null
+  discountAmount: number | null
+  paymentAmount: number | null
+  change: number | null
+  createdAt: string
+  updatedAt: string
 }
 
 // API response structure for member list

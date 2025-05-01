@@ -120,6 +120,24 @@ export function useMemberColumns(): ColumnDef<Member>[] {
         }
       },
       {
+        id: 'status',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('member.table.status')} />
+        ),
+        cell: ({ row }) => {
+          const isBanned = row.original.isBanned
+          return (
+            <Badge variant={isBanned ? 'destructive' : 'outline'} className="capitalize">
+              {isBanned ? t('member.fields.banned') : t('member.fields.active')}
+            </Badge>
+          )
+        },
+        filterFn: (row, value) => {
+          if (value === 'all') return true
+          return value === 'banned' ? Boolean(row.original.isBanned) : !row.original.isBanned
+        }
+      },
+      {
         accessorKey: 'createdAt',
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('member.table.createdAt')} />
