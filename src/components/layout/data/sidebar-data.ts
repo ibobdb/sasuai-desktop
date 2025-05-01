@@ -1,4 +1,4 @@
-import { IconCreditCard, IconReceipt2 } from '@tabler/icons-react'
+import { IconCreditCard, IconReceipt2, IconUsersGroup } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -11,22 +11,27 @@ export const sidebarData: SidebarData = {
     {
       name: 'Sasuai Store',
       logo: 'https://res.cloudinary.com/samunu/image/upload/f_auto/q_auto/v1745953012/icon_z07a9i.png',
-      plan: 'Store Management'
+      plan: 'sidebar:stores.plan'
     }
   ],
   navGroups: [
     {
-      title: 'General',
+      title: 'sidebar:navGroups.title',
       items: [
         {
-          title: 'Cashier',
+          title: 'sidebar:navGroups.items.cashier',
           url: '/',
           icon: IconCreditCard
         },
         {
-          title: 'Transactions',
+          title: 'sidebar:navGroups.items.transactions',
           url: '/transactions',
           icon: IconReceipt2
+        },
+        {
+          title: 'sidebar:navGroups.items.members',
+          url: '/member',
+          icon: IconUsersGroup
         }
       ]
     }

@@ -1,0 +1,108 @@
+{
+  "member": {
+    "title": "Members",
+    "description": "Manage your members and their information",
+
+    "table": {
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "cardId": "Card ID",
+      "points": "Points",
+      "tier": "Tier",
+      "createdAt": "Registered On"
+    },
+
+    "filters": {
+      "searchPlaceholder": "Search by name, phone or card ID...",
+      "tier": "Tier"
+    },
+
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Enter member name",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address",
+      "cardId": "Card ID",
+      "cardIdPlaceholder": "Enter card ID",
+      "address": "Address",
+      "addressPlaceholder": "Enter address",
+      "tier": "Membership Tier",
+      "tierPlaceholder": "Select tier",
+      "totalPoints": "Points",
+      "pointsPlaceholder": "Enter points",
+      "points": "pts",
+      "required": "{field} is required",
+      "validEmail": "Please enter a valid email address",
+      "validPhone": "Please enter a valid phone number",
+      "optional": "optional"
+    },
+
+    "form": {
+      "createTitle": "Add New Member",
+      "createDescription": "Add a new member to your system",
+      "editTitle": "Edit Member",
+      "editDescription": "Update member information",
+      "createSuccess": "Member created successfully",
+      "createSuccessDescription": "{name} has been added to your members",
+      "updateSuccess": "Member updated successfully",
+      "updateSuccessDescription": "Information for {name} has been updated",
+      "createError": "Failed to create member",
+      "updateError": "Failed to update member",
+      "errorDefault": "An error occurred. Please try again."
+    },
+
+    "view": {
+      "title": "Member Details",
+      "loading": "Loading member details",
+      "loadingDescription": "Please wait while we fetch the member information",
+      "contactInfo": "Contact Information",
+      "membershipInfo": "Membership Information",
+      "transactionSummary": "Transaction Summary",
+      "totalTransactions": "Total Transactions",
+      "totalSpent": "Total Spent",
+      "lastTransaction": "Last Transaction",
+      "memberSince": "Member Since",
+      "minPoints": "min. {points} pts",
+      "never": "Never"
+    },
+
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
+    },
+
+    "actions": {
+      "addMember": "Add Member",
+      "view": "View Details",
+      "edit": "Edit",
+      "update": "Update",
+      "delete": "Delete",
+      "create": "Create Member",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "refresh": "Refresh"
+    },
+
+    "delete": {
+      "title": "Delete Member",
+      "description": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "deleting": "Deleting..."
+    },
+
+    "messages": {
+      "deleteSuccess": "Member deleted successfully",
+      "deleteSuccessDescription": "{name} has been removed from your system",
+      "deleteError": "Failed to delete member",
+      "deleteErrorDescription": "An error occurred while trying to delete this member"
+    },
+
+    "noMembersFound": "No members found"
+  }
+}

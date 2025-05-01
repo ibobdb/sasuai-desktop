@@ -9,18 +9,26 @@ import cashierEN from './locales/en/cashier.json'
 import commonID from './locales/id/common.json'
 import transactionsID from './locales/id/transactions.json'
 import cashierID from './locales/id/cashier.json'
+import memberEN from './locales/en/member.json'
+import memberID from './locales/id/member.json'
+import sidebarEN from './locales/en/sidebar.json'
+import sidebarID from './locales/id/sidebar.json'
 
 // Configure resources
 const resources = {
   en: {
     common: commonEN,
     transactions: transactionsEN,
-    cashier: cashierEN
+    cashier: cashierEN,
+    member: memberEN,
+    sidebar: sidebarEN
   },
   id: {
     common: commonID,
     transactions: transactionsID,
-    cashier: cashierID
+    cashier: cashierID,
+    member: memberID,
+    sidebar: sidebarID
   }
 }
 

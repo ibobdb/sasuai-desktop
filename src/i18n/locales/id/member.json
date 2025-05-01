@@ -1,0 +1,108 @@
+{
+  "member": {
+    "title": "Pelanggan",
+    "description": "Kelola pelanggan dan informasinya",
+
+    "table": {
+      "name": "Nama",
+      "phone": "Telepon",
+      "email": "Email",
+      "cardId": "ID Kartu",
+      "points": "Poin",
+      "tier": "Tier",
+      "createdAt": "Terdaftar Pada"
+    },
+
+    "filters": {
+      "searchPlaceholder": "Cari berdasarkan nama, telepon atau ID kartu...",
+      "tier": "Tier"
+    },
+
+    "fields": {
+      "name": "Nama",
+      "namePlaceholder": "Masukkan nama pelanggan",
+      "phone": "Telepon",
+      "phonePlaceholder": "Masukkan nomor telepon",
+      "email": "Email",
+      "emailPlaceholder": "Masukkan alamat email",
+      "cardId": "ID Kartu",
+      "cardIdPlaceholder": "Masukkan ID kartu",
+      "address": "Alamat",
+      "addressPlaceholder": "Masukkan alamat",
+      "tier": "Tier Keanggotaan",
+      "tierPlaceholder": "Pilih tier",
+      "totalPoints": "Poin",
+      "pointsPlaceholder": "Masukkan poin",
+      "points": "poin",
+      "required": "{field} wajib diisi",
+      "validEmail": "Masukkan alamat email yang valid",
+      "validPhone": "Masukkan nomor telepon yang valid",
+      "optional": "opsional"
+    },
+
+    "form": {
+      "createTitle": "Tambah Pelanggan Baru",
+      "createDescription": "Tambahkan pelanggan baru ke sistem Anda",
+      "editTitle": "Edit Pelanggan",
+      "editDescription": "Perbarui informasi pelanggan",
+      "createSuccess": "Pelanggan berhasil ditambahkan",
+      "createSuccessDescription": "{name} telah ditambahkan ke daftar pelanggan Anda",
+      "updateSuccess": "Pelanggan berhasil diperbarui",
+      "updateSuccessDescription": "Informasi untuk {name} telah diperbarui",
+      "createError": "Gagal menambahkan pelanggan",
+      "updateError": "Gagal memperbarui pelanggan",
+      "errorDefault": "Terjadi kesalahan. Silakan coba lagi."
+    },
+
+    "view": {
+      "title": "Detail Pelanggan",
+      "loading": "Memuat detail pelanggan",
+      "loadingDescription": "Mohon tunggu sementara kami mengambil informasi pelanggan",
+      "contactInfo": "Informasi Kontak",
+      "membershipInfo": "Informasi Keanggotaan",
+      "transactionSummary": "Ringkasan Transaksi",
+      "totalTransactions": "Total Transaksi",
+      "totalSpent": "Total Pengeluaran",
+      "lastTransaction": "Transaksi Terakhir",
+      "memberSince": "Menjadi Anggota Sejak",
+      "minPoints": "min. {points} poin",
+      "never": "Tidak Pernah"
+    },
+
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
+    },
+
+    "actions": {
+      "addMember": "Tambah Pelanggan",
+      "view": "Lihat Detail",
+      "edit": "Edit",
+      "update": "Perbarui",
+      "delete": "Hapus",
+      "create": "Buat Pelanggan",
+      "creating": "Sedang Membuat...",
+      "updating": "Sedang Memperbarui...",
+      "refresh": "Segarkan"
+    },
+
+    "delete": {
+      "title": "Hapus Pelanggan",
+      "description": "Apakah Anda yakin ingin menghapus {name}? Tindakan ini tidak dapat dibatalkan.",
+      "deleting": "Sedang Menghapus..."
+    },
+
+    "messages": {
+      "deleteSuccess": "Pelanggan berhasil dihapus",
+      "deleteSuccessDescription": "{name} telah dihapus dari sistem Anda",
+      "deleteError": "Gagal menghapus pelanggan",
+      "deleteErrorDescription": "Terjadi kesalahan saat mencoba menghapus pelanggan ini"
+    },
+
+    "noMembersFound": "Tidak ada pelanggan ditemukan"
+  }
+}

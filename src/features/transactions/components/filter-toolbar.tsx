@@ -96,6 +96,11 @@ function FilterToolbarComponent() {
     })
   }
 
+  const handleResetFilters = () => {
+    contextResetFilters()
+    handleSearchChange('')
+  }
+
   // Determine if any filters are applied
   const hasFilters = !!(
     search ||
@@ -109,7 +114,7 @@ function FilterToolbarComponent() {
   return (
     <BaseFilterToolbar
       onSearch={handleSearchChange}
-      onResetFilters={contextResetFilters}
+      onResetFilters={handleResetFilters}
       searchValue={search}
       searchPlaceholder={t('transaction.filters.searchPlaceholder')}
       onSearchSubmit={() => executeSearch(search)}

@@ -15,6 +15,14 @@
     "reset": "Reset",
     "apply": "Terapkan"
   },
+  "commandMenu": {
+    "placeholder": "Ketik perintah atau cari...",
+    "noResults": "Tidak ada hasil ditemukan.",
+    "theme": "Tema",
+    "light": "Terang",
+    "dark": "Gelap",
+    "system": "Sistem"
+  },
   "table": {
     "noData": "Data tidak tersedia",
     "pagination": {

@@ -1,4 +1,5 @@
 import { Github } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,17 @@ import { Footer } from '@/components/layout/footer'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar()
+  const { t } = useTranslation(['sidebar'])
+
+  // Process navigation groups to translate titles
+  const translatedNavGroups = sidebarData.navGroups.map((group) => ({
+    ...group,
+    title: t(group.title),
+    items: group.items.map((item) => ({
+      ...item,
+      title: t(item.title)
+    }))
+  }))
 
   return (
     <Sidebar
@@ -26,7 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <StoreSwitcher stores={sidebarData.stores} />
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((props) => (
+        {translatedNavGroups.map((props) => (
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>

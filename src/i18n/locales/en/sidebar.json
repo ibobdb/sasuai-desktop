@@ -1,0 +1,13 @@
+{
+  "stores": {
+    "plan": "Store Management"
+  },
+  "navGroups": {
+    "title": "General",
+    "items": {
+      "cashier": "Cashier",
+      "transactions": "Transactions",
+      "members": "Member"
+    }
+  }
+}

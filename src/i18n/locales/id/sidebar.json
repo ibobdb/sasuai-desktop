@@ -1,0 +1,13 @@
+{
+  "stores": {
+    "plan": "Manajemen Toko"
+  },
+  "navGroups": {
+    "title": "Umum",
+    "items": {
+      "cashier": "Kasir",
+      "transactions": "Transaksi",
+      "members": "Pelanggan"
+    }
+  }
+}
