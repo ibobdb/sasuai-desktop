@@ -14,13 +14,6 @@ import {
   DialogTitle,
   DialogClose
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Member } from '@/types/members'
 import { useMembers } from '../context/member-context'
@@ -33,16 +26,6 @@ interface MemberFormDialogProps {
 }
 
 const REQUIRED_FIELDS = ['name', 'cardId', 'phone'] as const
-
-// Available tier options
-const tierOptions = [
-  { value: 'regular', label: 'Regular' }, // Changed from empty string to 'regular'
-  { value: 'bronze', label: 'Bronze' },
-  { value: 'silver', label: 'Silver' },
-  { value: 'gold', label: 'Gold' },
-  { value: 'platinum', label: 'Platinum' },
-  { value: 'diamond', label: 'Diamond' }
-]
 
 export function MemberFormDialog({
   open,
@@ -59,9 +42,7 @@ export function MemberFormDialog({
     email: '',
     address: '',
     cardId: '',
-    phone: '',
-    tier: '',
-    totalPoints: 0
+    phone: ''
   })
 
   // Load current member data when editing
@@ -72,9 +53,7 @@ export function MemberFormDialog({
         email: currentMember.email || '',
         address: currentMember.address || '',
         cardId: currentMember.cardId || '',
-        phone: currentMember.phone || '',
-        tier: currentMember.tier?.name?.toLowerCase() || '',
-        totalPoints: currentMember.totalPoints || 0
+        phone: currentMember.phone || ''
       })
     } else if (mode === 'create') {
       // Reset form for create mode
@@ -89,7 +68,7 @@ export function MemberFormDialog({
     REQUIRED_FIELDS.forEach((field) => {
       if (!formData[field].trim()) {
         formErrors[field] = t('member.fields.required', {
-          field: field.charAt(0).toUpperCase() + field.slice(1)
+          field: t(`member.fields.${field}`)
         })
         isValid = false
       }
@@ -124,8 +103,7 @@ export function MemberFormDialog({
       const memberData = {
         ...formData,
         email: formData.email.trim() === '' ? null : formData.email,
-        address: formData.address.trim() === '' ? null : formData.address,
-        tier: formData.tier || null
+        address: formData.address.trim() === '' ? null : formData.address
       }
 
       const endpoint =
@@ -147,9 +125,8 @@ export function MemberFormDialog({
             description: t(
               mode === 'create'
                 ? 'member.form.createSuccessDescription'
-                : 'member.form.updateSuccessDescription',
-              { name: formData.name }
-            )
+                : 'member.form.updateSuccessDescription'
+            ).replace('{name}', formData.name)
           }
         )
 
@@ -180,9 +157,7 @@ export function MemberFormDialog({
       address: '',
       email: '',
       cardId: '',
-      phone: '',
-      tier: '',
-      totalPoints: 0
+      phone: ''
     })
     setErrors({})
   }
@@ -194,7 +169,7 @@ export function MemberFormDialog({
     }
   }
 
-  const handleInputChange = (field: keyof typeof formData, value: string | number) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
 
     // Clear error when user starts typing
@@ -204,10 +179,8 @@ export function MemberFormDialog({
   }
 
   const dialogTitle = mode === 'create' ? t('member.form.createTitle') : t('member.form.editTitle')
-
   const dialogDescription =
     mode === 'create' ? t('member.form.createDescription') : t('member.form.editDescription')
-
   const submitButtonText =
     mode === 'create' ? t('member.actions.create') : t('member.actions.update')
 
@@ -285,45 +258,6 @@ export function MemberFormDialog({
                   disabled={isLoading}
                 />
                 {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tier" className="font-medium">
-                  {t('member.fields.tier')}
-                </Label>
-                <Select
-                  value={formData.tier}
-                  onValueChange={(value) => handleInputChange('tier', value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('member.fields.tierPlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tierOptions.map((tier) => (
-                      <SelectItem key={tier.value} value={tier.value}>
-                        {tier.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="totalPoints" className="font-medium">
-                  {t('member.fields.totalPoints')}
-                </Label>
-                <Input
-                  id="totalPoints"
-                  type="number"
-                  min="0"
-                  placeholder={t('member.fields.pointsPlaceholder')}
-                  value={formData.totalPoints}
-                  onChange={(e) => handleInputChange('totalPoints', parseInt(e.target.value) || 0)}
-                  disabled={isLoading}
-                />
               </div>
             </div>
 

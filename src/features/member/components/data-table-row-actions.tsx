@@ -26,6 +26,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { useState } from 'react'
+import { MemberBanActions } from './member-ban-actions'
 
 interface DataTableRowActionsProps {
   row: Row<Member>
@@ -49,7 +50,10 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 
       if (response.success) {
         toast.success(t('member.messages.deleteSuccess'), {
-          description: t('member.messages.deleteSuccessDescription', { name: row.original.name })
+          description: t('member.messages.deleteSuccessDescription').replace(
+            '{name}',
+            row.original.name
+          )
         })
         applyFilters() // Refresh the list
       } else {
@@ -101,6 +105,10 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             </DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+
+          {/* Ban/Unban Actions */}
+          <MemberBanActions member={row.original} onSuccess={applyFilters} />
+
           <DropdownMenuItem
             className="text-red-500 focus:text-red-500 hover:text-red-500"
             onClick={() => setShowDeleteDialog(true)}

@@ -88,7 +88,9 @@
       "pointsEarned": "Total {{total}} poin diperoleh",
       "discountCount": "{{count}} diskon tersedia",
       "noPointsHistory": "Tidak ada riwayat poin ditemukan",
-      "noPointsHistoryDescription": "Pelanggan ini belum memperoleh poin"
+      "noPointsHistoryDescription": "Pelanggan ini belum memperoleh poin",
+      "noTransactions": "Tidak ada transaksi ditemukan",
+      "noTransactionsDescription": "Pelanggan ini belum melakukan transaksi"
     },
 
     "tiers": {
@@ -109,7 +111,19 @@
       "create": "Buat Pelanggan",
       "creating": "Membuat...",
       "updating": "Memperbarui...",
-      "refresh": "Segarkan"
+      "refresh": "Segarkan",
+      "ban": "Blokir Pelanggan",
+      "unban": "Buka Blokir",
+      "banning": "Memblokir...",
+      "unbanning": "Membuka blokir..."
+    },
+
+    "ban": {
+      "title": "Blokir Pelanggan",
+      "description": "Apakah Anda yakin ingin memblokir {name}? Mereka tidak akan dapat lagi menggunakan keanggotaannya.",
+      "reasonLabel": "Alasan Blokir",
+      "reasonPlaceholder": "Masukkan alasan untuk memblokir pelanggan ini...",
+      "banning": "Memblokir..."
     },
 
     "transactions": {
@@ -144,7 +158,15 @@
       "deleteSuccess": "Pelanggan berhasil dihapus",
       "deleteSuccessDescription": "{name} telah dihapus dari sistem Anda",
       "deleteError": "Gagal menghapus pelanggan",
-      "deleteErrorDescription": "Terjadi kesalahan saat mencoba menghapus pelanggan ini"
+      "deleteErrorDescription": "Terjadi kesalahan saat mencoba menghapus pelanggan ini",
+      "banSuccess": "Pelanggan berhasil diblokir",
+      "banSuccessDescription": "{name} telah diblokir dari sistem",
+      "banError": "Gagal memblokir pelanggan",
+      "banErrorDescription": "Terjadi kesalahan saat mencoba memblokir pelanggan ini",
+      "unbanSuccess": "Blokir pelanggan berhasil dibuka",
+      "unbanSuccessDescription": "{name} telah dibuka blokirnya dan sekarang dapat menggunakan keanggotaannya kembali",
+      "unbanError": "Gagal membuka blokir pelanggan",
+      "unbanErrorDescription": "Terjadi kesalahan saat mencoba membuka blokir pelanggan ini"
     },
 
     "noMembersFound": "Tidak ada pelanggan yang ditemukan"

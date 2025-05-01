@@ -86,7 +86,7 @@ function MemberContent() {
               <Skeleton className="h-[300px] w-full" />
               <Skeleton className="h-8 w-full" />
             </div>
-          ) : memberData.length > 0 ? (
+          ) : (
             <MemberTable
               data={memberData}
               columns={columns}
@@ -101,14 +101,6 @@ function MemberContent() {
               }}
               totalCount={totalCount || 0}
             />
-          ) : (
-            <div className="w-full text-center py-10">
-              <p className="text-muted-foreground mb-4">{t('member.noMembersFound')}</p>
-              <Button onClick={handleRefresh}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                {t('member.actions.refresh')}
-              </Button>
-            </div>
           )}
         </div>
       </Main>
