@@ -1,13 +1,16 @@
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import { Skeleton } from '@/components/ui/skeleton'
-import { columns } from './components/transactions-columns'
+import { useTransactionColumns } from './components/transactions-columns'
 import { TransactionsDialogs } from './components/transactions-dialogs'
 import { TransactionsTable } from './components/transactions-table'
 import TransactionsProvider, { useTransactions } from './context/transactions-context'
 import { FilterToolbar } from './components/filter-toolbar'
 
 function TransactionsContent() {
+  const { t } = useTranslation(['transactions'])
+  const columns = useTransactionColumns()
   const {
     isLoading,
     transactions,
@@ -40,12 +43,12 @@ function TransactionsContent() {
       <Main>
         <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Transaction History</h2>
-            <p className="text-muted-foreground">View and manage all transactions here.</p>
+            <h2 className="text-2xl font-bold tracking-tight">{t('transaction.title')}</h2>
+            <p className="text-muted-foreground">{t('transaction.description')}</p>
           </div>
         </div>
 
-        {/* Static filters area moved outside of loading section */}
+        {/* Filter toolbar - reusable component */}
         <FilterToolbar />
 
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">

@@ -10,6 +10,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { WindowControls } from '@/components/window-controls'
+import { LanguageSwitcher } from '@/components/common/language-switcher'
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent
@@ -46,6 +47,7 @@ function RouteComponent() {
 
               <div className="flex items-center justify-end z-10">
                 <div className="flex items-center space-x-4 header-right-section">
+                  <LanguageSwitcher />
                   <ThemeSwitch />
                   <ProfileDropdown />
                 </div>

@@ -1,0 +1,63 @@
+{
+  "transaction": {
+    "title": "Transaction History",
+    "description": "View and manage all transactions here.",
+    "receipt": {
+      "title": "Transaction Receipt",
+      "loading": "Loading Transaction",
+      "loadingDescription": "Fetching detailed transaction information"
+    },
+    "table": {
+      "id": "Transaction ID",
+      "originalAmount": "Original Amount",
+      "totalDiscount": "Total Discount",
+      "finalAmount": "Final Amount",
+      "customer": "Customer",
+      "items": "Items",
+      "points": "Points",
+      "paymentAmount": "Payment Amount",
+      "payment": "Payment",
+      "cashier": "Cashier",
+      "date": "Date"
+    },
+    "details": {
+      "item": "Item",
+      "quantity": "Quantity",
+      "price": "Price",
+      "dateAndTime": "Date & Time",
+      "cashier": "Cashier",
+      "customer": "Customer",
+      "guest": "Guest",
+      "paymentMethod": "Payment Method",
+      "itemsPurchased": "Items Purchased",
+      "subtotal": "Subtotal",
+      "memberDiscount": "Member Discount",
+      "totalDiscount": "Total Discount",
+      "total": "Total",
+      "paymentAmount": "Payment Amount",
+      "change": "Change",
+      "pointsEarned": "Points Earned",
+      "pointsDescription": "Customer earned {{points}} loyalty points"
+    },
+    "actions": {
+      "viewDetails": "View Details",
+      "printInvoice": "Print Invoice"
+    },
+    "filters": {
+      "searchPlaceholder": "Search transaction...",
+      "paymentMethod": "Payment Method",
+      "dateRange": "Date Range",
+      "amountRange": "Amount Range",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "applyDates": "Apply Dates",
+      "minAmount": "Min amount",
+      "maxAmount": "Max amount",
+      "to": "to",
+      "applyAmount": "Apply Amount"
+    },
+    "detail-dialog": {
+      "loading": "Loading Transaction Details"
+    }
+  }
+}

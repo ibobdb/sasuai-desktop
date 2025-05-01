@@ -31,6 +31,7 @@ export type Product = {
   batches?: Array<{
     id: string
     buyPrice: number
+    expiryDate: string
     remainingQuantity: number
   }>
   discountRelationProduct?: ProductDiscount[]
@@ -64,6 +65,7 @@ export type Member = {
   name: string
   phone: string
   email: string | null
+  address: string | null
   tierId: string | null
   totalPoints: number
   totalPointsEarned: number
@@ -94,7 +96,7 @@ export type MemberResponse = {
 }
 
 // Payment related types
-export type PaymentMethod = 'cash' | 'card' | 'e-wallet' | 'qris' | 'transfer' | 'other'
+export type PaymentMethod = 'cash' | 'debit' | 'e-wallet' | 'qris' | 'transfer' | 'other'
 
 export type TransactionItem = {
   productId: string
@@ -152,6 +154,7 @@ export type MemberSectionProps = {
   onMemberDiscountSelect?: (discount: Discount | null) => void
   selectedDiscount: Discount | null
   subtotal?: number
+  member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null // Add this prop
 }
 
 export type PaymentSectionProps = {

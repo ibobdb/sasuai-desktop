@@ -6,7 +6,7 @@ export function StoreSwitcher({
 }: {
   stores: {
     name: string
-    logo: React.ElementType
+    logo: string
     plan: string
   }[]
 }) {
@@ -18,8 +18,12 @@ export function StoreSwitcher({
         size="lg"
         className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
       >
-        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <activeStore.logo className="size-4" />
+        <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
+          {typeof activeStore.logo === 'string' ? (
+            <img src={activeStore.logo} alt={activeStore.name} className="size-10 object-contain" />
+          ) : (
+            React.createElement(activeStore.logo, { className: 'size-4' })
+          )}
         </div>
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-semibold">{activeStore.name}</span>

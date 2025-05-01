@@ -1,5 +1,4 @@
-import { IconLayoutDashboard, IconCashBanknote } from '@tabler/icons-react'
-import { Command } from 'lucide-react'
+import { IconCreditCard, IconReceipt2 } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -11,7 +10,7 @@ export const sidebarData: SidebarData = {
   stores: [
     {
       name: 'Sasuai Store',
-      logo: Command,
+      logo: 'https://res.cloudinary.com/samunu/image/upload/f_auto/q_auto/v1745953012/icon_z07a9i.png',
       plan: 'Store Management'
     }
   ],
@@ -20,21 +19,14 @@ export const sidebarData: SidebarData = {
       title: 'General',
       items: [
         {
-          title: 'Dashboard',
-          url: '/',
-          icon: IconLayoutDashboard
-        },
-
-        {
           title: 'Cashier',
-          url: '/cashier',
-          icon: IconCashBanknote
+          url: '/',
+          icon: IconCreditCard
         },
-
         {
           title: 'Transactions',
           url: '/transactions',
-          icon: IconCashBanknote
+          icon: IconReceipt2
         }
       ]
     }

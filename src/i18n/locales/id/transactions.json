@@ -1,0 +1,63 @@
+{
+  "transaction": {
+    "title": "Riwayat Transaksi",
+    "description": "Lihat dan kelola semua transaksi di sini.",
+    "receipt": {
+      "title": "Struk Transaksi",
+      "loading": "Memuat Transaksi",
+      "loadingDescription": "Mengambil informasi detail transaksi"
+    },
+    "table": {
+      "id": "ID Transaksi",
+      "originalAmount": "Jumlah Awal",
+      "totalDiscount": "Total Diskon",
+      "finalAmount": "Jumlah Akhir",
+      "customer": "Pelanggan",
+      "items": "Item",
+      "points": "Poin",
+      "paymentAmount": "Jumlah Pembayaran",
+      "payment": "Pembayaran",
+      "cashier": "Kasir",
+      "date": "Tanggal"
+    },
+    "details": {
+      "item": "Item",
+      "quantity": "Kuantitas",
+      "price": "Harga",
+      "dateAndTime": "Tanggal & Waktu",
+      "cashier": "Kasir",
+      "customer": "Pelanggan",
+      "guest": "Tamu",
+      "paymentMethod": "Metode Pembayaran",
+      "itemsPurchased": "Item Dibeli",
+      "subtotal": "Subtotal",
+      "memberDiscount": "Diskon Member",
+      "totalDiscount": "Total Diskon",
+      "total": "Total",
+      "paymentAmount": "Jumlah Pembayaran",
+      "change": "Kembalian",
+      "pointsEarned": "Poin Diperoleh",
+      "pointsDescription": "Pelanggan memperoleh {{points}} poin loyalitas"
+    },
+    "actions": {
+      "viewDetails": "Lihat Detail",
+      "printInvoice": "Cetak Struk"
+    },
+    "filters": {
+      "searchPlaceholder": "Cari transaksi...",
+      "paymentMethod": "Metode Pembayaran",
+      "dateRange": "Rentang Tanggal",
+      "amountRange": "Rentang Jumlah",
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Selesai",
+      "applyDates": "Terapkan Tanggal",
+      "minAmount": "Jumlah minimum",
+      "maxAmount": "Jumlah maksimum",
+      "to": "sampai",
+      "applyAmount": "Terapkan Jumlah"
+    },
+    "detail-dialog": {
+      "loading": "Memuat Detail Transaksi"
+    }
+  }
+}

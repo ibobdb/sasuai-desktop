@@ -1,12 +1,12 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
-import { IconEye, IconTrash, IconReceipt } from '@tabler/icons-react'
+import { IconEye, IconReceipt } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
@@ -18,6 +18,7 @@ interface DataTableRowActionsProps {
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
+  const { t } = useTranslation(['transactions'])
   const { setOpen, setCurrentTransaction } = useTransactions()
 
   return (
@@ -36,7 +37,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               setOpen('view')
             }}
           >
-            View Details
+            {t('transaction.actions.viewDetails')}
             <DropdownMenuShortcut>
               <IconEye size={16} />
             </DropdownMenuShortcut>
@@ -47,22 +48,9 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               console.log('Print invoice')
             }}
           >
-            Print Invoice
+            {t('transaction.actions.printInvoice')}
             <DropdownMenuShortcut>
               <IconReceipt size={16} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setCurrentTransaction(row.original)
-              setOpen('delete')
-            }}
-            className="text-red-500!"
-          >
-            Void Transaction
-            <DropdownMenuShortcut>
-              <IconTrash size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>

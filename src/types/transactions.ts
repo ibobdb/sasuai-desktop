@@ -1,20 +1,10 @@
-// Payment method types
-export type TransactionPaymentMethod =
-  | 'cash'
-  | 'card'
-  | 'e-wallet'
-  | 'qris'
-  | 'transfer'
-  | 'other'
-  | 'debit'
+import { PaymentMethod } from '@/lib/payment-methods'
 
-// Basic entity type
 export interface Entity {
   id: string
   name: string
 }
 
-// Discount types
 export interface ItemDiscount {
   id?: string
   type: string
@@ -46,29 +36,24 @@ export interface Pricing {
   finalAmount: number
 }
 
+export interface Payment {
+  method: string
+  amount: number
+  change: number
+}
+
 // Transaction list type
 export interface Transaction {
   id: string
+  tranId: string
   cashier: Entity
   member: Entity | null
   pricing: Pricing
-  paymentMethod: TransactionPaymentMethod
+  payment: Payment
+  paymentMethod: PaymentMethod
   itemCount: number
   pointsEarned: number
   createdAt: Date
-}
-
-// Pagination types
-export interface Pagination {
-  totalCount: number
-  totalPages: number
-  currentPage: number
-  pageSize: number
-}
-
-export interface TransactionResponse {
-  transactions: Transaction[]
-  pagination: Pagination
 }
 
 // Transaction detail types
@@ -103,23 +88,21 @@ export interface DetailedCashier {
 
 export interface TransactionDetail {
   id: string
+  tranId: string | null
   cashier: DetailedCashier
   member: DetailedMember | null
   pricing: Pricing
-  paymentMethod: TransactionPaymentMethod
+  payment: Payment
+  paymentMethod?: PaymentMethod
   items: TransactionItem[]
   pointsEarned: number
   createdAt: Date
 }
 
-export interface TransactionDetailResponse {
-  transactionDetails: TransactionDetail
-}
-
 // Filter types for transactions
 export interface TransactionFilterParams {
-  page?: number
-  pageSize?: number
+  page: number
+  pageSize: number
   sortField?: string
   sortDirection?: 'asc' | 'desc'
   search?: string
@@ -141,4 +124,4 @@ export interface TransactionFilterUIState {
   paymentMethods: string[]
 }
 
-export type TransactionsDialogType = 'delete' | 'view'
+export type TransactionsDialogType = 'view'

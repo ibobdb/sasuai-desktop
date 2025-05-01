@@ -1,0 +1,32 @@
+{
+  "app": {
+    "name": "Sasuai Store",
+    "loading": "Loading...",
+    "error": "An error occurred. Please try again."
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "print": "Print",
+    "search": "Search",
+    "reset": "Reset",
+    "apply": "Apply"
+  },
+  "table": {
+    "noData": "No data available",
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "entries": "entries",
+      "rowsPerPage": "Rows per page",
+      "page": "Page",
+      "goToFirst": "Go to first page",
+      "goToPrevious": "Go to previous page",
+      "goToNext": "Go to next page",
+      "goToLast": "Go to last page"
+    }
+  }
+}

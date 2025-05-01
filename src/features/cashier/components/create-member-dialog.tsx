@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader2, UserPlus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -19,6 +20,7 @@ import { Member, CreateMemberDialogProps } from '@/types/cashier'
 const REQUIRED_FIELDS = ['name', 'cardId', 'phone'] as const
 
 export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemberDialogProps) {
+  const { t } = useTranslation(['cashier'])
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [newMember, setNewMember] = useState({
@@ -35,20 +37,22 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
 
     REQUIRED_FIELDS.forEach((field) => {
       if (!newMember[field].trim()) {
-        formErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`
+        formErrors[field] = t('cashier.fields.required', {
+          field: field.charAt(0).toUpperCase() + field.slice(1)
+        })
         isValid = false
       }
     })
 
     // Email validation if provided
     if (newMember.email && !/^\S+@\S+\.\S+$/.test(newMember.email)) {
-      formErrors.email = 'Please enter a valid email address'
+      formErrors.email = t('cashier.fields.validEmail')
       isValid = false
     }
 
     // Phone validation
     if (newMember.phone && !/^[0-9+\-\s()]{6,15}$/.test(newMember.phone)) {
-      formErrors.phone = 'Please enter a valid phone number'
+      formErrors.phone = t('cashier.fields.validPhone')
       isValid = false
     }
 
@@ -78,20 +82,20 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
       })) as { success: boolean; data: Member; message?: string }
 
       if (response.success) {
-        toast.success('Member created successfully', {
-          description: `${newMember.name} has been added as a member`
+        toast.success(t('cashier.createMember.successTitle'), {
+          description: t('cashier.createMember.successDescription', { name: newMember.name })
         })
         onSuccess(response.data)
         handleClose()
       } else {
-        toast.error('Failed to create member', {
-          description: response.message || 'Please try again later'
+        toast.error(t('cashier.createMember.errorTitle'), {
+          description: response.message || t('cashier.createMember.errorDefault')
         })
       }
     } catch (error) {
       console.error('Error creating member:', error)
-      toast.error('Failed to create member', {
-        description: 'An unexpected error occurred. Please try again.'
+      toast.error(t('cashier.createMember.errorTitle'), {
+        description: t('cashier.createMember.errorDefault')
       })
     } finally {
       setIsLoading(false)
@@ -140,23 +144,21 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <UserPlus className="h-5 w-5 text-primary" />
-            Add New Member
+            {t('cashier.createMember.title')}
           </DialogTitle>
-          <DialogDescription>
-            Enter the member&apos;s information to register them in the system.
-          </DialogDescription>
+          <DialogDescription>{t('cashier.createMember.description')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 py-4">
           <div className="grid gap-6">
             <div className="space-y-2">
               <Label htmlFor="name" className="font-medium">
-                Name <span className="text-red-500">*</span>
+                {t('cashier.createMember.name')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Enter full name"
+                placeholder={`${t('cashier.createMember.name')}`}
                 value={newMember.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className={errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}
@@ -169,12 +171,12 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="cardId" className="font-medium">
-                  Card ID <span className="text-red-500">*</span>
+                  {t('cashier.createMember.cardId')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="cardId"
                   type="text"
-                  placeholder="Enter member card ID"
+                  placeholder={`${t('cashier.createMember.cardId')}`}
                   value={newMember.cardId}
                   onChange={(e) => handleInputChange('cardId', e.target.value)}
                   className={errors.cardId ? 'border-red-500 focus-visible:ring-red-500' : ''}
@@ -185,12 +187,12 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
 
               <div className="space-y-2">
                 <Label htmlFor="phone" className="font-medium">
-                  Phone Number <span className="text-red-500">*</span>
+                  {t('cashier.createMember.phone')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter phone number"
+                  placeholder={`${t('cashier.createMember.phone')}`}
                   value={newMember.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   className={errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}
@@ -202,12 +204,12 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
 
             <div className="space-y-2">
               <Label htmlFor="email" className="font-medium">
-                Email
+                {t('cashier.createMember.email')}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter email address (optional)"
+                placeholder={`${t('cashier.createMember.email')} ${t('cashier.fields.optional')}`}
                 value={newMember.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className={errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
@@ -218,12 +220,12 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
 
             <div className="space-y-2">
               <Label htmlFor="address" className="font-medium">
-                Address
+                {t('cashier.createMember.address')}
               </Label>
               <Input
                 id="address"
                 type="text"
-                placeholder="Enter address (optional)"
+                placeholder={`${t('cashier.createMember.address')} ${t('cashier.fields.optional')}`}
                 value={newMember.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 disabled={isLoading}
@@ -239,18 +241,18 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
               disabled={isLoading}
               className="w-full sm:w-auto"
             >
-              Cancel
+              {t('cashier.createMember.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
+                  {t('cashier.createMember.creating')}
                 </>
               ) : (
                 <>
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Create Member
+                  {t('cashier.createMember.create')}
                 </>
               )}
             </Button>

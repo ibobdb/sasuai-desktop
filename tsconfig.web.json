@@ -14,7 +14,8 @@
     "src/context",
     "src/config",
     "src/components",
-    "src/types/**/*.ts"
+    "src/types/**/*.ts",
+    "src/i18n/**/*.ts",
   ],
   "compilerOptions": {
     "composite": true,

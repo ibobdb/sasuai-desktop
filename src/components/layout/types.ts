@@ -8,7 +8,7 @@ interface User {
 
 interface Store {
   name: string
-  logo: React.ElementType
+  logo: string
   plan: string
 }
 

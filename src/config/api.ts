@@ -16,7 +16,6 @@ export const API_ENDPOINTS = {
     CALCULATE_POINTS: `${API_BASE_URL}/members/calculatePoints`
   },
   TRANSACTIONS: {
-    CHECKOUT: `${API_BASE_URL}/transactions/checkout`,
-    GET_ALL: `${API_BASE_URL}/transactions`
+    BASE: `${API_BASE_URL}/transactions`
   }
 }

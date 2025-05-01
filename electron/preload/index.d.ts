@@ -39,6 +39,10 @@ declare global {
         set: (key: string, value: any) => Promise<boolean>
         delete: (key: string) => Promise<boolean>
       }
+      language: {
+        get: () => Promise<string>
+        set: (lang: string) => Promise<boolean>
+      }
     }
   }
 }
