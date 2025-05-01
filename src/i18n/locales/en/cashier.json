@@ -88,7 +88,9 @@
       "paymentAmount": "Payment Amount",
       "cancel": "Cancel",
       "payNow": "Pay now",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "enterAmount": "Enter payment amount",
+      "clear": "Clear"
     },
     "paymentStatus": {
       "success": "Payment Successful",

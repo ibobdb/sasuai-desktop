@@ -88,7 +88,9 @@
       "paymentAmount": "Jumlah Pembayaran",
       "cancel": "Batal",
       "payNow": "Bayar sekarang",
-      "processing": "Memproses..."
+      "processing": "Memproses...",
+      "enterAmount": "Masukkan jumlah pembayaran",
+      "clear": "Hapus"
     },
     "paymentStatus": {
       "success": "Pembayaran Berhasil",
