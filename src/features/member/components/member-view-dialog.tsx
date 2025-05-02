@@ -62,7 +62,9 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
 
   const handleEditClick = () => {
     onOpenChange(false)
-    setOpen('edit')
+    setTimeout(() => {
+      setOpen('edit')
+    }, 0)
   }
 
   const calculateTotalSpent = (transactions: Transaction[] | undefined): number => {

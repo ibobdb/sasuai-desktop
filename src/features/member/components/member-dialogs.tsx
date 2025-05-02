@@ -6,13 +6,14 @@ export function MemberDialogs() {
   const { open, setOpen, currentMember, setCurrentMember } = useMembers()
 
   const handleDialogClose = () => {
-    // Close dialog without triggering a fetch
     setOpen(null)
+    const isTransitioning = open === 'view'
 
-    // Clear current member after dialog animation completes
-    setTimeout(() => {
-      setCurrentMember(null)
-    }, 500)
+    if (!isTransitioning) {
+      setTimeout(() => {
+        setCurrentMember(null)
+      }, 500)
+    }
   }
 
   return (
