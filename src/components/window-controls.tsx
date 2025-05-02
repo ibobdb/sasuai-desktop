@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Minus, Square, Maximize2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 
 // Define ElectronWindowAPI interface
 interface ElectronWindowAPI {
@@ -24,6 +25,7 @@ interface WindowControlsProps {
 
 export function WindowControls({ className }: WindowControlsProps) {
   const [isMaximized, setIsMaximized] = useState<boolean>(false)
+  const { t } = useTranslation(['common'])
 
   useEffect(() => {
     // Check initial window state
@@ -94,7 +96,7 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label="Minimize"
             type="button"
-            title="Minimize"
+            title={t('actions.minimize')}
           >
             <Minus size={12} className="text-foreground/70" />
           </button>
@@ -107,7 +109,7 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label={isMaximized ? 'Restore' : 'Maximize'}
             type="button"
-            title={isMaximized ? 'Restore' : 'Maximize'}
+            title={isMaximized ? t('actions.restore') : t('actions.maximize')}
           >
             {isMaximized ? (
               <Square size={10} className="text-foreground/70" />
@@ -124,7 +126,7 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-destructive/80 hover:text-destructive-foreground transition-colors duration-150 focus:outline-none"
             aria-label="Close"
             type="button"
-            title="Close"
+            title={t('actions.close')}
           >
             <X size={12} />
           </button>

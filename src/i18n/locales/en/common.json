@@ -13,7 +13,10 @@
     "print": "Print",
     "search": "Search",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore"
   },
   "commandMenu": {
     "placeholder": "Type a command or search...",
