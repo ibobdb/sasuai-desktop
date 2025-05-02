@@ -36,5 +36,14 @@
       "goToNext": "Ke halaman berikutnya",
       "goToLast": "Ke halaman terakhir"
     }
+  },
+  "languageSwitcher": {
+    "tooltip": "Ubah bahasa"
+  },
+  "themeSwitcher": {
+    "tooltip": "Ganti tema",
+    "light": "Terang",
+    "dark": "Gelap",
+    "system": "Sistem"
   }
 }

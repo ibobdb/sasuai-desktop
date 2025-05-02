@@ -94,12 +94,10 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label="Minimize"
             type="button"
+            title="Minimize"
           >
             <Minus size={12} className="text-foreground/70" />
           </button>
-          <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            Minimize
-          </div>
         </div>
 
         {/* Maximize Button */}
@@ -109,6 +107,7 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-muted/60 transition-colors duration-150 focus:outline-none"
             aria-label={isMaximized ? 'Restore' : 'Maximize'}
             type="button"
+            title={isMaximized ? 'Restore' : 'Maximize'}
           >
             {isMaximized ? (
               <Square size={10} className="text-foreground/70" />
@@ -116,9 +115,6 @@ export function WindowControls({ className }: WindowControlsProps) {
               <Maximize2 size={10} className="text-foreground/70" />
             )}
           </button>
-          <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            {isMaximized ? 'Restore' : 'Maximize'}
-          </div>
         </div>
 
         {/* Close Button */}
@@ -128,12 +124,10 @@ export function WindowControls({ className }: WindowControlsProps) {
             className="h-8 w-10 inline-flex items-center justify-center hover:bg-destructive/80 hover:text-destructive-foreground transition-colors duration-150 focus:outline-none"
             aria-label="Close"
             type="button"
+            title="Close"
           >
             <X size={12} />
           </button>
-          <div className="absolute top-full mt-1 right-0 bg-popover text-popover-foreground px-2 py-1 rounded text-xs shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            Close
-          </div>
         </div>
       </div>
     </div>

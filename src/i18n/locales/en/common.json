@@ -36,5 +36,14 @@
       "goToNext": "Go to next page",
       "goToLast": "Go to last page"
     }
+  },
+  "languageSwitcher": {
+    "tooltip": "Change language"
+  },
+  "themeSwitcher": {
+    "tooltip": "Switch theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
