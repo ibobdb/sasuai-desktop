@@ -17,6 +17,8 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
 import { Route as AuthenticatedMemberImport } from './routes/_authenticated/member'
+import { Route as legalTermsImport } from './routes/(legal)/terms'
+import { Route as legalPrivacyImport } from './routes/(legal)/privacy'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as auth500Import } from './routes/(auth)/500'
 
@@ -27,26 +29,28 @@ const errors500LazyImport = createFileRoute('/(errors)/500')()
 const errors404LazyImport = createFileRoute('/(errors)/404')()
 const errors403LazyImport = createFileRoute('/(errors)/403')()
 const errors401LazyImport = createFileRoute('/(errors)/401')()
-const authForgotPasswordLazyImport = createFileRoute('/(auth)/forgot-password')()
+const authForgotPasswordLazyImport = createFileRoute(
+  '/(auth)/forgot-password',
+)()
 
 // Create/Update Routes
 
 const AuthenticatedRouteRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 const errors503LazyRoute = errors503LazyImport
   .update({
     id: '/(errors)/503',
     path: '/503',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/503.lazy').then((d) => d.Route))
 
@@ -54,7 +58,7 @@ const errors500LazyRoute = errors500LazyImport
   .update({
     id: '/(errors)/500',
     path: '/500',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/500.lazy').then((d) => d.Route))
 
@@ -62,7 +66,7 @@ const errors404LazyRoute = errors404LazyImport
   .update({
     id: '/(errors)/404',
     path: '/404',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/404.lazy').then((d) => d.Route))
 
@@ -70,7 +74,7 @@ const errors403LazyRoute = errors403LazyImport
   .update({
     id: '/(errors)/403',
     path: '/403',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/403.lazy').then((d) => d.Route))
 
@@ -78,7 +82,7 @@ const errors401LazyRoute = errors401LazyImport
   .update({
     id: '/(errors)/401',
     path: '/401',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
 
@@ -86,32 +90,46 @@ const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   .update({
     id: '/(auth)/forgot-password',
     path: '/forgot-password',
-    getParentRoute: () => rootRoute
+    getParentRoute: () => rootRoute,
   } as any)
-  .lazy(() => import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route))
+  .lazy(() =>
+    import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
+  )
 
 const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
   id: '/transactions',
   path: '/transactions',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 const AuthenticatedMemberRoute = AuthenticatedMemberImport.update({
   id: '/member',
   path: '/member',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+
+const legalTermsRoute = legalTermsImport.update({
+  id: '/(legal)/terms',
+  path: '/terms',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const legalPrivacyRoute = legalPrivacyImport.update({
+  id: '/(legal)/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const authSignInRoute = authSignInImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 const auth500Route = auth500Import.update({
   id: '/(auth)/500',
   path: '/500',
-  getParentRoute: () => rootRoute
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -137,6 +155,20 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/(legal)/privacy': {
+      id: '/(legal)/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof legalPrivacyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(legal)/terms': {
+      id: '/(legal)/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof legalTermsImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/member': {
@@ -216,17 +248,18 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberRoute: AuthenticatedMemberRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(
-  AuthenticatedRouteRouteChildren
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteRouteWithChildren
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
@@ -240,6 +273,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
@@ -255,6 +290,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/(auth)/500': typeof auth500Route
   '/(auth)/sign-in': typeof authSignInRoute
+  '/(legal)/privacy': typeof legalPrivacyRoute
+  '/(legal)/terms': typeof legalTermsRoute
   '/_authenticated/member': typeof AuthenticatedMemberRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
@@ -272,6 +309,8 @@ export interface FileRouteTypes {
     | ''
     | '/500'
     | '/sign-in'
+    | '/privacy'
+    | '/terms'
     | '/member'
     | '/transactions'
     | '/forgot-password'
@@ -284,6 +323,8 @@ export interface FileRouteTypes {
   to:
     | '/500'
     | '/sign-in'
+    | '/privacy'
+    | '/terms'
     | '/member'
     | '/transactions'
     | '/forgot-password'
@@ -297,6 +338,8 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/(auth)/500'
     | '/(auth)/sign-in'
+    | '/(legal)/privacy'
+    | '/(legal)/terms'
     | '/_authenticated/member'
     | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
@@ -313,6 +356,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   auth500Route: typeof auth500Route
   authSignInRoute: typeof authSignInRoute
+  legalPrivacyRoute: typeof legalPrivacyRoute
+  legalTermsRoute: typeof legalTermsRoute
   authForgotPasswordLazyRoute: typeof authForgotPasswordLazyRoute
   errors401LazyRoute: typeof errors401LazyRoute
   errors403LazyRoute: typeof errors403LazyRoute
@@ -325,12 +370,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   auth500Route: auth500Route,
   authSignInRoute: authSignInRoute,
+  legalPrivacyRoute: legalPrivacyRoute,
+  legalTermsRoute: legalTermsRoute,
   authForgotPasswordLazyRoute: authForgotPasswordLazyRoute,
   errors401LazyRoute: errors401LazyRoute,
   errors403LazyRoute: errors403LazyRoute,
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
-  errors503LazyRoute: errors503LazyRoute
+  errors503LazyRoute: errors503LazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -346,6 +393,8 @@ export const routeTree = rootRoute
         "/_authenticated",
         "/(auth)/500",
         "/(auth)/sign-in",
+        "/(legal)/privacy",
+        "/(legal)/terms",
         "/(auth)/forgot-password",
         "/(errors)/401",
         "/(errors)/403",
@@ -367,6 +416,12 @@ export const routeTree = rootRoute
     },
     "/(auth)/sign-in": {
       "filePath": "(auth)/sign-in.tsx"
+    },
+    "/(legal)/privacy": {
+      "filePath": "(legal)/privacy.tsx"
+    },
+    "/(legal)/terms": {
+      "filePath": "(legal)/terms.tsx"
     },
     "/_authenticated/member": {
       "filePath": "_authenticated/member.tsx",

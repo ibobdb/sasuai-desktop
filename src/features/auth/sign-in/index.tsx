@@ -5,6 +5,7 @@ import { LogIn } from 'lucide-react'
 import lightIllustration from '../../../../resources/public/auth-login-illustration-light.png?asset'
 import darkIllustration from '../../../../resources/public/auth-login-illustration-dark.png?asset'
 import { useTheme } from '@/context/theme-context'
+import { Link } from '@tanstack/react-router'
 
 export default function SignIn() {
   const { theme } = useTheme()
@@ -33,13 +34,13 @@ export default function SignIn() {
           <div className="pt-2 text-center text-sm text-muted-foreground">
             <p className="leading-relaxed">
               By signing in, you agree to our{' '}
-              <a href="/terms" className="underline underline-offset-4 hover:text-primary">
+              <Link to="/terms" className="underline underline-offset-4 hover:text-primary">
                 Terms of Service
-              </a>{' '}
+              </Link>{' '}
               and{' '}
-              <a href="/privacy" className="underline underline-offset-4 hover:text-primary">
+              <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
                 Privacy Policy
-              </a>
+              </Link>
             </p>
           </div>
         </div>
