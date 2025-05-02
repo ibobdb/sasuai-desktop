@@ -41,14 +41,17 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
       // Panggil API forgot password melalui Electron
       const response = await window.api.request(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
         method: 'POST',
-        data: { email: data.email }
+        data: {
+          email: data.email,
+          redirectTo: '/reset-password'
+        }
       })
 
-      if (response.success) {
-        toast.success(response.message || 'Password reset link has been sent to your email')
+      if (response.status === true) {
+        toast.success(
+          'If the email exists in our database, an email will be sent to your inbox to reset your password.'
+        )
         navigate({ to: '/sign-in' })
-      } else {
-        toast.error(response.message || 'Failed to send reset link')
       }
     } catch (error) {
       console.error('Forgot password error:', error)
