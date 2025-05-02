@@ -1,7 +1,7 @@
 import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -79,17 +79,6 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
             <Button className="mt-2" type="submit" disabled={isLoading}>
               {isLoading ? 'Sending...' : 'Continue'}
             </Button>
-          </div>
-
-          <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-muted-foreground">Remembered your password?</div>
-            <Link
-              to="/sign-in"
-              className="text-sm font-medium text-muted-foreground hover:opacity-75"
-              onClick={(e) => isLoading && e.preventDefault()}
-            >
-              Sign In
-            </Link>
           </div>
         </form>
       </Form>

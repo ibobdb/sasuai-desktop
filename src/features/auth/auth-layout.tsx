@@ -1,32 +1,31 @@
 import { WindowControls } from '@/components/window-controls'
+import { useEffect } from 'react'
 
 interface Props {
   children: React.ReactNode
 }
 
 export default function AuthLayout({ children }: Props) {
-  return (
-    <div className="h-svh flex flex-col">
-      {/* Title bar with controls properly positioned */}
-      <div className="h-10 w-full titlebar-drag-region flex items-center justify-between">
-        <div className="flex-1"></div>
-        <WindowControls />
-      </div>
+  // Add page transition effect
+  useEffect(() => {
+    document.body.classList.add('auth-page-loaded')
+    return () => {
+      document.body.classList.remove('auth-page-loaded')
+    }
+  }, [])
 
-      {/* Content area */}
-      <div className="flex-1 container grid items-center justify-center lg:max-w-none lg:px-0">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[480px] lg:p-8">
-          <div className="mb-4 flex flex-col items-center justify-center">
-            <img
-              src="https://res.cloudinary.com/samunu/image/upload/f_auto/q_auto/v1745953012/icon_z07a9i.png"
-              alt="Sasuai Store"
-              className="mb-3 h-16 w-16 object-contain"
-            />
-            <h1 className="text-xl font-medium">Sasuai Store</h1>
-          </div>
-          {children}
+  return (
+    <div className="h-svh flex flex-col bg-background relative">
+      {/* Drag area only covers non-content areas */}
+      <div className="h-10 w-full titlebar-drag-region absolute top-0 left-0 pointer-events-none">
+        {/* Re-enable pointer events only for window controls */}
+        <div className="absolute top-2 right-2 z-50 pointer-events-auto">
+          <WindowControls />
         </div>
       </div>
+
+      {/* Content area - full height, no padding */}
+      <div className="flex-1 animate-fadeIn">{children}</div>
     </div>
   )
 }
