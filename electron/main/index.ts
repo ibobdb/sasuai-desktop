@@ -35,8 +35,8 @@ const typedStore = store as Store<StoreSchema>
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1280,
+    height: 960,
     show: false,
     frame: false,
     titleBarStyle: 'hidden',
