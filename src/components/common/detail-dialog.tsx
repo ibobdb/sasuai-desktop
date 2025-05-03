@@ -38,7 +38,7 @@ export function DetailDialog({
   description,
   children,
   footerContent,
-  maxWidth = 'sm:max-w-3xl', // Increased from 2xl to 5xl
+  maxWidth = 'sm:max-w-3xl',
   className,
   contentClassName,
   icon
@@ -69,12 +69,11 @@ export function DetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          `max-w-[95vw] ${maxWidth} h-[90vh] flex flex-col p-0 overflow-hidden`,
+          `max-w-[95vw] ${maxWidth} h-[90vh] flex flex-col p-0 gap-0 overflow-hidden`,
           className
         )}
       >
-        {/* Fixed header */}
-        <DialogHeader className="px-6 py-4 border-b sticky top-0 bg-background z-10">
+        <DialogHeader className="px-6 py-4 border-b bg-background z-10 shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="flex items-center gap-2 text-xl">
@@ -106,14 +105,14 @@ export function DetailDialog({
           </div>
         </DialogHeader>
 
-        {/* Scrollable content area */}
-        <ScrollArea className={cn('flex-1 px-6', contentClassName)}>
-          <div className="space-y-6 py-4">{children}</div>
-        </ScrollArea>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <ScrollArea className={cn('h-full w-full', contentClassName)} type="auto">
+            <div className="px-6 py-4 space-y-6">{children}</div>
+          </ScrollArea>
+        </div>
 
-        {/* Fixed footer */}
         {footerContent && (
-          <div className="p-4 border-t bg-background sticky bottom-0 flex flex-wrap justify-end gap-2">
+          <div className="p-4 border-t bg-background z-10 shrink-0 flex flex-wrap justify-end gap-2">
             {footerContent}
           </div>
         )}
