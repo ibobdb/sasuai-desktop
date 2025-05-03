@@ -8,21 +8,22 @@ import { Badge } from '@/components/ui/badge'
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 
-// Function to get tier badge color
-const getTierBadgeVariant = (tier: string | undefined) => {
-  switch (tier?.toLowerCase()) {
-    case 'bronze':
-      return 'bronze'
-    case 'silver':
-      return 'silver'
-    case 'gold':
-      return 'gold'
-    case 'platinum':
-      return 'platinum'
-    case 'diamond':
-      return 'diamond'
-    default:
-      return 'outline'
+// Function to get tier badge color classes
+export const getTierBadgeVariant = (tier: string | undefined) => {
+  const tierName = tier?.toLowerCase() || ''
+
+  if (tierName.includes('bronze')) {
+    return 'bg-amber-800 text-white hover:bg-amber-900'
+  } else if (tierName.includes('silver')) {
+    return 'bg-gray-400 text-black hover:bg-gray-500'
+  } else if (tierName.includes('gold')) {
+    return 'bg-yellow-500 text-black hover:bg-yellow-600'
+  } else if (tierName.includes('platinum')) {
+    return 'bg-blue-300 text-blue-950 hover:bg-blue-400'
+  } else if (tierName.includes('diamond')) {
+    return 'bg-cyan-500 text-white hover:bg-cyan-600'
+  } else {
+    return 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
   }
 }
 
@@ -96,6 +97,16 @@ export function useMemberColumns(): ColumnDef<Member>[] {
         }
       },
       {
+        accessorKey: 'address',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('member.table.address')} />
+        ),
+        cell: ({ row }) => {
+          const address = row.getValue('address') as string | null
+          return <div>{address || <span className="text-muted-foreground">-</span>}</div>
+        }
+      },
+      {
         accessorKey: 'totalPoints',
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('member.table.points')} />
@@ -110,7 +121,7 @@ export function useMemberColumns(): ColumnDef<Member>[] {
         cell: ({ row }) => {
           const tierName = row.original.tier?.name
           return (
-            <Badge variant={getTierBadgeVariant(tierName) as any} className="capitalize">
+            <Badge className={`capitalize ${getTierBadgeVariant(tierName)}`}>
               {tierName || t('member.tiers.regular')}
             </Badge>
           )
@@ -127,7 +138,7 @@ export function useMemberColumns(): ColumnDef<Member>[] {
         cell: ({ row }) => {
           const isBanned = row.original.isBanned
           return (
-            <Badge variant={isBanned ? 'destructive' : 'outline'} className="capitalize">
+            <Badge variant={isBanned ? 'destructive' : 'default'} className="capitalize">
               {isBanned ? t('member.fields.banned') : t('member.fields.active')}
             </Badge>
           )

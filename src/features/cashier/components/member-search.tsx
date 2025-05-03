@@ -12,6 +12,7 @@ import { Member, MemberResponse } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
+import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 
 interface MemberSearchProps {
   onMemberSelect: (member: Member | null) => void
@@ -233,11 +234,8 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                     </div>
                     <div className="sm:text-right mt-2 sm:mt-0">
                       <div className="flex sm:justify-end">
-                        <Badge
-                          variant={member.tier?.name ? 'default' : 'outline'}
-                          className="sm:ml-2"
-                        >
-                          {member.tier?.name || 'Regular'}
+                        <Badge className={`capitalize ${getTierBadgeVariant(member.tier?.name)}`}>
+                          {member.tier?.name || t('member.tiers.regular')}
                         </Badge>
                       </div>
                       <p className="text-xs text-amber-500 mt-1">

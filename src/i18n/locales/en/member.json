@@ -11,7 +11,8 @@
       "points": "Points",
       "tier": "Tier",
       "createdAt": "Registered On",
-      "status": "Status"
+      "status": "Status",
+      "address": "Address"
     },
 
     "filters": {

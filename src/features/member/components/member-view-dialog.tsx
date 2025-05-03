@@ -29,6 +29,7 @@ import { formatCurrency } from '@/utils/format'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { getTierBadgeVariant } from './member-columns'
 
 interface MemberViewDialogProps {
   open: boolean
@@ -154,7 +155,9 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
               <div>
                 <p className="text-sm text-muted-foreground">{t('member.fields.tier')}</p>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{detail.tier?.name || 'Regular'}</Badge>
+                  <Badge className={getTierBadgeVariant(detail.tier?.name)}>
+                    {detail.tier?.name || t('member.tiers.regular')}
+                  </Badge>
                   {detail.tier?.minPoints && (
                     <TooltipProvider>
                       <Tooltip>

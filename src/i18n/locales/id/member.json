@@ -11,7 +11,8 @@
       "points": "Poin",
       "tier": "Tingkatan",
       "createdAt": "Terdaftar Pada",
-      "status": "Status"
+      "status": "Status",
+      "address": "Alamat"
     },
 
     "filters": {
