@@ -48,8 +48,10 @@ export function ProfileDropdown() {
             <span
               className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs rounded px-2 py-1 
                 pointer-events-none select-none
-                opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                transition-all duration-200 delay-300 whitespace-nowrap"
+                opacity-0 invisible shadow-none 
+                group-hover:opacity-100 group-hover:visible group-hover:shadow-sm
+                transition-all duration-150 delay-75 group-hover:delay-300 
+                whitespace-nowrap z-50"
             >
               {user.name}
             </span>
