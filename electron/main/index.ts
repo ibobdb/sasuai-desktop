@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import axios from 'axios'
 import Store from 'electron-store'
+import { setupAutoUpdater } from './updater'
 
 // Cookie configuration constants
 const COOKIE_DOMAIN = 'localhost' // Change to your domain in production
@@ -60,6 +61,9 @@ function createWindow(): void {
   mainWindow.webContents.on('did-navigate', () => {
     persistentSession.cookies.flushStore().catch(() => {})
   })
+
+  // Set up the auto updater
+  setupAutoUpdater(mainWindow)
 
   mainWindow.on('ready-to-show', () => {
     if (mainWindow) {
