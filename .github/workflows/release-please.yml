@@ -27,5 +27,3 @@ jobs:
               {"type":"perf","section":"Performance Improvements"},
               {"type":"test","section":"Tests"}
             ]
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
