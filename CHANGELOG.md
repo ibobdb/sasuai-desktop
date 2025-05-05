@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.1...v1.1.2) (2025-05-05)
+
+
+### Code Refactoring
+
+* streamline release workflow for Windows, macOS, and Linux builds ([a318af6](https://github.com/ibobdb/sasuai-dekstop/commit/a318af64676bdea3f72852fadca1598c19543e77))
+
 ## [1.1.1](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.0...v1.1.1) (2025-05-05)
 
 
