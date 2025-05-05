@@ -21,6 +21,9 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
     repo: REPO_NAME
   })
 
+  // force updater for dev
+  autoUpdater.forceDevUpdateConfig = true
+
   // Disable auto download - we'll manually control this
   autoUpdater.autoDownload = false
 
@@ -90,5 +93,5 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
     autoUpdater.checkForUpdates().catch((error) => {
       log.error('Auto update check failed:', error)
     })
-  }, 3000)
+  }, 6000)
 }
