@@ -18,28 +18,22 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: [20.x]
+          node-version: 20
 
       - name: Install Dependencies
         run: npm install
 
-      - name: build-win
+      - name: Build Windows App
         if: matrix.os == 'windows-latest'
         run: npm run build:win
 
-      - name: release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: |
             dist/*.exe
             dist/*.zip
-            dist/*.dmg
-            dist/*.AppImage
-            dist/*.snap
-            dist/*.deb
-            dist/*.rpm
-            dist/*.tar.gz
             dist/*.yml
             dist/*.blockmap
         env:
