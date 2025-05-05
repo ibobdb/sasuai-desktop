@@ -60,7 +60,6 @@ publish:
   provider: github
   owner: ibobdb
   repo: sasuai-dekstop
-  private: false
   releaseType: release
 
 electronDownload:
