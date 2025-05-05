@@ -23,7 +23,12 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          title={i18n.t('common:languageSwitcher.tooltip')}
+        >
           <IconLanguage className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

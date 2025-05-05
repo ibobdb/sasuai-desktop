@@ -5,7 +5,7 @@ export const API_ENDPOINTS = {
     SIGN_IN_EMAIL: `${API_BASE_URL}/auth/sign-in/email`,
     SIGN_IN_USERNAME: `${API_BASE_URL}/auth/sign-in/username`,
     SIGN_OUT: `${API_BASE_URL}/auth/sign-out`,
-    FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/auth/forget-password`,
     VALIDATE_SESSION: `${API_BASE_URL}/auth/get-session`
   },
   PRODUCTS: {

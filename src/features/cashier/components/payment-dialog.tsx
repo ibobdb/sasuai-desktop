@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { CreditCard, Loader2 } from 'lucide-react'
+import { CreditCard, Loader2, X as XIcon, Delete, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PaymentMethod } from '@/types/cashier'
 import { Input } from '@/components/ui/input'
@@ -50,29 +50,99 @@ export default function PaymentDialog({
 }: PaymentDialogProps) {
   const { t } = useTranslation(['cashier'])
   const [inputFocused, setInputFocused] = useState(false)
+  const [amountString, setAmountString] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const payButtonRef = useRef<HTMLButtonElement>(null)
 
   // Format number with thousands separator (for display only)
   const formatNumber = (value: number): string => {
     return value.toLocaleString('id-ID')
   }
 
-  // Auto-focus payment input when dialog opens
+  // Format the input display with thousand separators
+  const getFormattedInputValue = (): string => {
+    if (!amountString) return ''
+    const numericValue = parseInt(amountString, 10)
+    return numericValue.toLocaleString('id-ID')
+  }
+
+  // Reset amount string and focus input when dialog opens
   useEffect(() => {
-    if (open && inputRef.current) {
+    if (open) {
+      const valueString = paymentAmount > 0 ? paymentAmount.toString() : ''
+      setAmountString(valueString)
+
+      // Focus the input field after a short delay to ensure the dialog is fully rendered
       setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
+        if (inputRef.current) {
+          inputRef.current.focus()
+          setInputFocused(true)
+        }
+      }, 50)
     }
-  }, [open])
+  }, [open, paymentAmount])
 
+  // Handle numeric keypad input
+  const handleKeypadInput = (value: string) => {
+    if (value === 'backspace') {
+      const newValue = amountString.slice(0, -1)
+      setAmountString(newValue)
+      onPaymentAmountChange(parseInt(newValue || '0', 10))
+    } else if (value === 'clear') {
+      setAmountString('')
+      onPaymentAmountChange(0)
+    } else {
+      // Prevent leading zeros
+      let newValue = amountString
+      if (newValue === '0' && value !== '0') {
+        newValue = value
+      } else if (newValue === '') {
+        // Don't allow leading zeros but allow other digits
+        newValue = value === '0' ? '' : value
+      } else {
+        newValue = newValue + value
+      }
+      setAmountString(newValue)
+      onPaymentAmountChange(parseInt(newValue || '0', 10))
+    }
+
+    // Set focus back to input and move cursor to the end
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus()
+        const len = inputRef.current.value.length
+        inputRef.current.setSelectionRange(len, len)
+      }
+    }, 0)
+  }
+
+  // Handle quick amount buttons
+  const handleQuickAmount = (amount: number) => {
+    setAmountString(amount.toString())
+    onPaymentAmountChange(amount)
+  }
+
+  // Handle manual input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get numeric value only
+    // Get only digits from input
     const inputValue = e.target.value.replace(/[^\d]/g, '')
-    const numericValue = parseInt(inputValue, 10) || 0
 
-    // Update the payment amount directly
-    onPaymentAmountChange(numericValue)
+    // Prevent leading zeros
+    let newValue = inputValue
+    if (newValue.length > 0 && newValue[0] === '0') {
+      newValue = newValue.substring(1)
+    }
+
+    setAmountString(newValue)
+    onPaymentAmountChange(parseInt(newValue || '0', 10))
+  }
+
+  // Handle Tab key to move focus to the pay button
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault()
+      payButtonRef.current?.focus()
+    }
   }
 
   // Get payment method icon
@@ -87,109 +157,186 @@ export default function PaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={isProcessing ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden">
+        <DialogHeader className="p-6 pb-2">
           <DialogTitle>{t('cashier.payment.title')}</DialogTitle>
           <DialogDescription>{t('cashier.payment.description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          {/* Total to be paid */}
-          <div className="bg-primary/10 rounded-md p-3 flex justify-between items-center">
-            <span className="font-medium">{t('cashier.payment.totalToPay')}</span>
-            <span className="font-bold text-lg">Rp {formatNumber(total)}</span>
-          </div>
-
-          <h2 className="font-bold">{t('cashier.payment.title')}</h2>
-
-          {/* Payment Method Dropdown */}
-          <div className="space-y-2">
-            <Label htmlFor="paymentMethod">{t('cashier.payment.selectMethod')}</Label>
-            <Select
-              value={paymentMethod}
-              onValueChange={(value: PaymentMethod) => onPaymentMethodChange(value)}
-            >
-              <SelectTrigger className="w-full h-11">
-                <SelectValue placeholder={t('cashier.payment.selectMethod')}>
-                  <div className="flex items-center">
-                    {getPaymentMethodIcon(paymentMethod)}
-                    <span>
-                      {paymentMethods.find((p) => p.value === paymentMethod)?.label ||
-                        paymentMethod}
-                    </span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((method) => (
-                  <SelectItem key={method.value} value={method.value}>
-                    <div className="flex items-center">
-                      <method.icon className="h-4 w-4 mr-2" />
-                      {method.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Quick cash selection buttons - only show for cash payment */}
-          {paymentMethod === 'cash' && (
-            <div className="space-y-2">
-              <Label>{t('cashier.payment.quickCash')}</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {[20000, 50000, 100000, 200000].map((amount) => (
-                  <Button
-                    key={amount}
-                    variant={paymentAmount === amount ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => onPaymentAmountChange(amount)}
-                    className="text-sm"
-                  >
-                    Rp {formatNumber(amount)}
-                  </Button>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+          {/* Left column - Payment info */}
+          <div className="p-6 pt-0 border-r">
+            <div className="space-y-4">
+              {/* Total to be paid */}
+              <div className="bg-primary/10 rounded-md p-3 flex justify-between items-center">
+                <span className="font-medium">{t('cashier.payment.totalToPay')}</span>
+                <span className="font-bold text-lg">Rp {formatNumber(total)}</span>
               </div>
-            </div>
-          )}
 
-          {/* Payment Amount Input - Simplified */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
+              {/* Payment Method Dropdown */}
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">{t('cashier.payment.selectMethod')}</Label>
+                <Select
+                  value={paymentMethod}
+                  onValueChange={(value: PaymentMethod) => onPaymentMethodChange(value)}
+                >
+                  <SelectTrigger className="w-full h-11">
+                    <SelectValue placeholder={t('cashier.payment.selectMethod')}>
+                      <div className="flex items-center">
+                        {getPaymentMethodIcon(paymentMethod)}
+                        <span>
+                          {paymentMethods.find((p) => p.value === paymentMethod)?.label ||
+                            paymentMethod}
+                        </span>
+                      </div>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods.map((method) => (
+                      <SelectItem key={method.value} value={method.value}>
+                        <div className="flex items-center">
+                          <method.icon className="h-4 w-4 mr-2" />
+                          {method.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Quick cash selection buttons - only show for cash payment */}
+              {paymentMethod === 'cash' && (
+                <div className="space-y-2">
+                  <Label>{t('cashier.payment.quickCash')}</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[20000, 50000, 100000, 200000].map((amount) => (
+                      <Button
+                        key={amount}
+                        variant={paymentAmount === amount ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleQuickAmount(amount)}
+                        className="text-sm h-12"
+                      >
+                        Rp {formatNumber(amount)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Change calculation - only show for cash if amount > total */}
+              {paymentMethod === 'cash' && paymentAmount > total && (
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3 flex justify-between items-center">
+                  <span className="font-medium">{t('cashier.paymentStatus.change')}:</span>
+                  <span className="font-bold text-lg text-green-600 dark:text-green-400">
+                    Rp {formatNumber(paymentAmount - total)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right column - Numeric keypad */}
+          <div className="p-6 pt-0 flex flex-col">
+            <div className="space-y-2 mb-4">
               <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
                 {t('cashier.payment.paymentAmount')}
               </Label>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground">
-                Rp
+              <div className="relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground text-2xl">
+                  Rp
+                </div>
+                <Input
+                  ref={inputRef}
+                  id="paymentAmount"
+                  value={getFormattedInputValue()}
+                  onChange={handleInputChange}
+                  onFocus={() => {
+                    setInputFocused(true)
+                    setTimeout(() => {
+                      if (inputRef.current) {
+                        const len = inputRef.current.value.length
+                        inputRef.current.setSelectionRange(len, len)
+                      }
+                    }, 0)
+                  }}
+                  onBlur={() => setInputFocused(false)}
+                  onKeyDown={handleKeyDown}
+                  className="pl-12 text-right font-bold h-16 [&:not(:focus)]:text-2xl [&:focus]:text-2xl"
+                  style={{ fontSize: '1.5rem' }}
+                  autoFocus
+                  tabIndex={1}
+                />
               </div>
-              <Input
-                ref={inputRef}
-                id="paymentAmount"
-                value={paymentAmount || ''}
-                onChange={handleInputChange}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                className="pl-9 text-left font-medium text-lg"
-                placeholder="0"
-                type="number"
-              />
             </div>
 
-            {/* Display payment amount below input with larger size */}
-            <div className="flex justify-end pt-2 pb-1">
-              <div className="text-xl font-semibold">Rp {formatNumber(paymentAmount)}</div>
+            {/* Numeric keypad */}
+            <div className="flex-1 flex flex-col">
+              <div className="grid grid-cols-3 gap-2 flex-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <Button
+                    key={num}
+                    variant="outline"
+                    className="h-16 text-2xl font-semibold hover:bg-primary/10"
+                    onClick={() => handleKeypadInput(num.toString())}
+                  >
+                    {num}
+                  </Button>
+                ))}
+                <Button
+                  variant="outline"
+                  className="h-16 text-2xl font-semibold hover:bg-primary/10"
+                  onClick={() => handleKeypadInput('0')}
+                >
+                  0
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-16 text-2xl font-semibold hover:bg-primary/10"
+                  onClick={() => handleKeypadInput('000')}
+                >
+                  000
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-16 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => handleKeypadInput('backspace')}
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+              </div>
+
+              <div className="mt-2 grid grid-cols-1 gap-2">
+                <Button
+                  variant="ghost"
+                  className="h-12 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => handleKeypadInput('clear')}
+                >
+                  <Delete className="mr-2 h-4 w-4" /> {t('cashier.actions.clear')}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
-            {t('cashier.payment.cancel')}
+        <DialogFooter className="p-6 pt-2 border-t">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isProcessing}
+            className="mr-auto"
+            tabIndex={3}
+          >
+            <XIcon className="mr-2 h-4 w-4" /> {t('cashier.payment.cancel')}
           </Button>
-          <Button onClick={onPay} disabled={!isPayEnabled || isProcessing} className="flex-1">
+          <Button
+            ref={payButtonRef}
+            onClick={onPay}
+            disabled={!isPayEnabled || isProcessing}
+            size="lg"
+            className="min-w-[180px]"
+            tabIndex={2}
+          >
             {isProcessing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('cashier.payment.processing')}

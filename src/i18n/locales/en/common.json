@@ -13,7 +13,18 @@
     "print": "Print",
     "search": "Search",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore"
+  },
+  "commandMenu": {
+    "placeholder": "Type a command or search...",
+    "noResults": "No results found.",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "table": {
     "noData": "No data available",
@@ -28,5 +39,14 @@
       "goToNext": "Go to next page",
       "goToLast": "Go to last page"
     }
+  },
+  "languageSwitcher": {
+    "tooltip": "Change language"
+  },
+  "themeSwitcher": {
+    "tooltip": "Switch theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }

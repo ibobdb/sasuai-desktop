@@ -5,6 +5,8 @@ import { NavigationProgress } from '@/components/navigation-progress'
 import GeneralError from '@/features/errors/general-error'
 import NotFoundError from '@/features/errors/not-found-error'
 import { AuthProvider } from '@/context/auth-provider'
+import { UpdaterProvider } from '@/context/updater-provider'
+import { AutoUpdateCheck } from '@/components/auto-update-check'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -13,9 +15,12 @@ export const Route = createRootRouteWithContext<{
     return (
       <>
         <AuthProvider>
-          <NavigationProgress />
-          <Outlet />
-          <Toaster duration={3000} />
+          <UpdaterProvider>
+            <NavigationProgress />
+            <Outlet />
+            <Toaster duration={3000} />
+            <AutoUpdateCheck />
+          </UpdaterProvider>
         </AuthProvider>
       </>
     )

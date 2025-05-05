@@ -53,7 +53,21 @@ interface Props {
 export default function TransactionsProvider({ children }: Props) {
   const [open, setOpen] = useDialogState<TransactionsDialogType>(null)
 
-  // Configuration for data provider
+  // Add this to track if dialog state changes should trigger data refresh
+  const ignoreDialogStateChanges = React.useRef(false)
+
+  // Custom setOpen function that won't trigger data refresh
+  const handleSetOpen = (state: TransactionsDialogType | null) => {
+    // Set flag to true before changing state
+    ignoreDialogStateChanges.current = true
+    setOpen(state)
+    // Reset flag after a short delay (after state updates have completed)
+    setTimeout(() => {
+      ignoreDialogStateChanges.current = false
+    }, 100)
+  }
+
+  // Configuration for data provider with adapter functions
   const dataConfig = {
     apiEndpoint: API_ENDPOINTS.TRANSACTIONS.BASE,
     detailEndpoint: (id: string) => `${API_ENDPOINTS.TRANSACTIONS.BASE}/${id}`,
@@ -70,12 +84,43 @@ export default function TransactionsProvider({ children }: Props) {
       maxAmount: '',
       search: '',
       paymentMethods: []
-    }
+    },
+    responseAdapter: (response: any) => {
+      if (response?.success) {
+        if (response?.data?.transactions) {
+          return {
+            success: response.success,
+            data: response.data.transactions,
+            pagination: {
+              totalCount: response.data.pagination.totalCount,
+              totalPages: response.data.pagination.totalPages,
+              currentPage: response.data.pagination.currentPage
+            }
+          }
+        }
+        return response
+      }
+      return response
+    },
+    detailAdapter: (response: any) => {
+      if (response?.success && response?.data) {
+        if (response.data.transactionDetails) {
+          return {
+            success: response.success,
+            data: response.data.transactionDetails
+          }
+        }
+        return response
+      }
+      return response
+    },
+    // Add this to prevent fetching when dialog state changes
+    shouldFetchItems: () => !ignoreDialogStateChanges.current
   }
 
   return (
     <DataProvider config={dataConfig}>
-      <TransactionsWrapper open={open} setOpen={setOpen}>
+      <TransactionsWrapper open={open} setOpen={handleSetOpen}>
         {children}
       </TransactionsWrapper>
     </DataProvider>

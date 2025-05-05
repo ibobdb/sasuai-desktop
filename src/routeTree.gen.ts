@@ -16,6 +16,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
+import { Route as AuthenticatedMemberImport } from './routes/_authenticated/member'
+import { Route as legalTermsImport } from './routes/(legal)/terms'
+import { Route as legalPrivacyImport } from './routes/(legal)/privacy'
 import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as auth500Import } from './routes/(auth)/500'
 
@@ -95,6 +98,24 @@ const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
   getParentRoute: () => AuthenticatedRouteRoute
 } as any)
 
+const AuthenticatedMemberRoute = AuthenticatedMemberImport.update({
+  id: '/member',
+  path: '/member',
+  getParentRoute: () => AuthenticatedRouteRoute
+} as any)
+
+const legalTermsRoute = legalTermsImport.update({
+  id: '/(legal)/terms',
+  path: '/terms',
+  getParentRoute: () => rootRoute
+} as any)
+
+const legalPrivacyRoute = legalPrivacyImport.update({
+  id: '/(legal)/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRoute
+} as any)
+
 const authSignInRoute = authSignInImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
@@ -131,6 +152,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-in'
       preLoaderRoute: typeof authSignInImport
       parentRoute: typeof rootRoute
+    }
+    '/(legal)/privacy': {
+      id: '/(legal)/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof legalPrivacyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(legal)/terms': {
+      id: '/(legal)/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof legalTermsImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/member': {
+      id: '/_authenticated/member'
+      path: '/member'
+      fullPath: '/member'
+      preLoaderRoute: typeof AuthenticatedMemberImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/transactions': {
       id: '/_authenticated/transactions'
@@ -194,11 +236,13 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMemberRoute: typeof AuthenticatedMemberRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMemberRoute: AuthenticatedMemberRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute
 }
@@ -211,6 +255,9 @@ export interface FileRoutesByFullPath {
   '': typeof AuthenticatedRouteRouteWithChildren
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/terms': typeof legalTermsRoute
+  '/member': typeof AuthenticatedMemberRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -223,6 +270,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/500': typeof errors500LazyRoute
   '/sign-in': typeof authSignInRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/terms': typeof legalTermsRoute
+  '/member': typeof AuthenticatedMemberRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -237,6 +287,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/(auth)/500': typeof auth500Route
   '/(auth)/sign-in': typeof authSignInRoute
+  '/(legal)/privacy': typeof legalPrivacyRoute
+  '/(legal)/terms': typeof legalTermsRoute
+  '/_authenticated/member': typeof AuthenticatedMemberRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
@@ -253,6 +306,9 @@ export interface FileRouteTypes {
     | ''
     | '/500'
     | '/sign-in'
+    | '/privacy'
+    | '/terms'
+    | '/member'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -264,6 +320,9 @@ export interface FileRouteTypes {
   to:
     | '/500'
     | '/sign-in'
+    | '/privacy'
+    | '/terms'
+    | '/member'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -276,6 +335,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/(auth)/500'
     | '/(auth)/sign-in'
+    | '/(legal)/privacy'
+    | '/(legal)/terms'
+    | '/_authenticated/member'
     | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
     | '/(errors)/401'
@@ -291,6 +353,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   auth500Route: typeof auth500Route
   authSignInRoute: typeof authSignInRoute
+  legalPrivacyRoute: typeof legalPrivacyRoute
+  legalTermsRoute: typeof legalTermsRoute
   authForgotPasswordLazyRoute: typeof authForgotPasswordLazyRoute
   errors401LazyRoute: typeof errors401LazyRoute
   errors403LazyRoute: typeof errors403LazyRoute
@@ -303,6 +367,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   auth500Route: auth500Route,
   authSignInRoute: authSignInRoute,
+  legalPrivacyRoute: legalPrivacyRoute,
+  legalTermsRoute: legalTermsRoute,
   authForgotPasswordLazyRoute: authForgotPasswordLazyRoute,
   errors401LazyRoute: errors401LazyRoute,
   errors403LazyRoute: errors403LazyRoute,
@@ -324,6 +390,8 @@ export const routeTree = rootRoute
         "/_authenticated",
         "/(auth)/500",
         "/(auth)/sign-in",
+        "/(legal)/privacy",
+        "/(legal)/terms",
         "/(auth)/forgot-password",
         "/(errors)/401",
         "/(errors)/403",
@@ -335,6 +403,7 @@ export const routeTree = rootRoute
     "/_authenticated": {
       "filePath": "_authenticated/route.tsx",
       "children": [
+        "/_authenticated/member",
         "/_authenticated/transactions",
         "/_authenticated/"
       ]
@@ -344,6 +413,16 @@ export const routeTree = rootRoute
     },
     "/(auth)/sign-in": {
       "filePath": "(auth)/sign-in.tsx"
+    },
+    "/(legal)/privacy": {
+      "filePath": "(legal)/privacy.tsx"
+    },
+    "/(legal)/terms": {
+      "filePath": "(legal)/terms.tsx"
+    },
+    "/_authenticated/member": {
+      "filePath": "_authenticated/member.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/transactions": {
       "filePath": "_authenticated/transactions.tsx",

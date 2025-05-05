@@ -36,6 +36,9 @@ export interface DataContextConfig<
   defaultFilterUIState: TFilterUIState
   parseResponse?: (data: any) => TItem[]
   parseDetail?: (data: any) => TDetail
+  responseAdapter?: (response: any) => any
+  detailAdapter?: (response: any) => any
+  shouldFetchItems?: () => boolean
 }
 
 export interface DataContextType<
@@ -100,7 +103,14 @@ export function createDataProvider<
     children,
     config
   }: DataProviderProps<TItem, TDetail, TFilterParams, TFilterUIState>) {
-    const { apiEndpoint, detailEndpoint, defaultFilters, defaultFilterUIState } = config
+    const {
+      apiEndpoint,
+      detailEndpoint,
+      defaultFilters,
+      defaultFilterUIState,
+      responseAdapter,
+      detailAdapter
+    } = config
 
     // State variables
     const [items, setItems] = useState<TItem[]>([])
@@ -218,30 +228,17 @@ export function createDataProvider<
           method: 'GET'
         })
 
-        if (response.success && response.data) {
-          // Handle response data considering different API response structures
-          if (response.data.items || response.data.transactions) {
-            setItems(response.data.items || response.data.transactions || response.data)
-          } else {
-            setItems(response.data)
-          }
+        const adaptedResponse = responseAdapter ? responseAdapter(response) : response
 
-          // Update pagination data if available
-          if (response.data.pagination) {
-            setPagination(response.data.pagination)
-          } else if (response.data.totalCount !== undefined) {
-            // Fallback for older API response format
-            setPagination((prev) => ({
-              ...prev,
-              totalCount: response.data.totalCount,
-              totalPages: response.data.totalPages || prev.totalPages,
-              currentPage: response.data.currentPage || prev.currentPage,
-              pageSize: response.data.pageSize || prev.pageSize
-            }))
+        if (adaptedResponse.success) {
+          setItems(adaptedResponse.data || [])
+
+          if (adaptedResponse.pagination) {
+            setPagination(adaptedResponse.pagination)
           }
         } else {
           toast.error('Failed to load data', {
-            description: response.message || 'Please try again later'
+            description: adaptedResponse.message || 'Please try again later'
           })
         }
       } catch (error) {
@@ -252,7 +249,7 @@ export function createDataProvider<
       } finally {
         setIsLoading(false)
       }
-    }, [filters, buildUrl])
+    }, [filters, buildUrl, responseAdapter])
 
     // Fetch item details by ID
     const fetchItemDetail = useCallback(
@@ -268,19 +265,15 @@ export function createDataProvider<
             method: 'GET'
           })
 
-          if (response.success && response.data) {
-            // Handle flexible API response formats
-            const detail =
-              response.data.itemDetails ||
-              response.data.transactionDetails ||
-              response.data.details ||
-              response.data
-            setItemDetail(detail)
-            return detail
+          const adaptedResponse = detailAdapter ? detailAdapter(response) : response
+
+          if (adaptedResponse.success && adaptedResponse.data) {
+            setItemDetail(adaptedResponse.data)
+            return adaptedResponse.data
           }
 
           toast.error('Failed to load details', {
-            description: response.message || 'Please try again later'
+            description: adaptedResponse.message || 'Please try again later'
           })
           return null
         } catch (error) {
@@ -293,7 +286,7 @@ export function createDataProvider<
           setIsLoadingDetail(false)
         }
       },
-      [detailEndpoint]
+      [detailEndpoint, detailAdapter]
     )
 
     const updateFilters = useCallback((newFilters: Partial<TFilterParams>) => {
@@ -304,28 +297,25 @@ export function createDataProvider<
 
     // Reset all filters and immediately apply
     const resetFilters = useCallback(() => {
-      // Reset UI state
       setFilterUIState(defaultFilterUIState)
-      // Reset API filters
       setFilters(defaultFilters)
-      // Reset last searched query
       setLastSearchedQuery('')
     }, [defaultFilterUIState, defaultFilters])
 
     // Effect to handle fetching data when filters change
     useEffect(() => {
-      // Check if we should fetch data (skip initial render)
       if (shouldFetchRef.current) {
-        fetchItems()
+        const shouldProceedWithFetch = config.shouldFetchItems ? config.shouldFetchItems() : true
+
+        if (shouldProceedWithFetch) {
+          fetchItems()
+        }
       } else {
-        // Set the flag to true after first render
         shouldFetchRef.current = true
-        // And fetch data initially
         fetchItems()
       }
     }, [fetchItems, filters])
 
-    // Expose the context value
     const contextValue = useMemo(
       () => ({
         isLoading,
@@ -371,7 +361,6 @@ export function createDataProvider<
     return <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
   }
 
-  // Custom hook to use this context
   function useData() {
     const context = React.useContext(DataContext)
 

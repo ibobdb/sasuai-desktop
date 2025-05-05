@@ -96,21 +96,22 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     <div className={cn('grid gap-6', className)} {...props}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
+          <div className="grid gap-4">
             <FormField
               control={form.control}
               name="identifier"
               render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Email or Username</FormLabel>
+                <FormItem className="space-y-1.5">
+                  <FormLabel className="text-base">Email or Username</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="name@example.com or username"
+                      className="h-10 text-base"
                       {...field}
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs font-medium" />
                 </FormItem>
               )}
             />
@@ -118,26 +119,31 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-1">
+                <FormItem className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-base">Password</FormLabel>
                     <Link
                       to="/forgot-password"
-                      className="text-sm font-medium text-muted-foreground hover:opacity-75"
+                      className="text-sm font-medium text-primary hover:opacity-80 transition-opacity"
                       onClick={(e) => isLoading && e.preventDefault()}
                     >
                       Forgot password?
                     </Link>
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder="********" {...field} disabled={isLoading} />
+                    <PasswordInput
+                      placeholder="********"
+                      className="h-10 text-base"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs font-medium" />
                 </FormItem>
               )}
             />
-            <Button className="mt-2" type="submit" disabled={isLoading}>
-              {isLoading ? 'Logging in...' : 'Login'}
+            <Button className="mt-2 h-11 text-base font-medium" type="submit" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Sign in'}
             </Button>
           </div>
         </form>

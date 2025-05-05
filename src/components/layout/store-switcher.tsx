@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { SidebarMenu, SidebarMenuButton } from '@/components/ui/sidebar'
 
 export function StoreSwitcher({
@@ -11,6 +12,19 @@ export function StoreSwitcher({
   }[]
 }) {
   const [activeStore] = React.useState(stores[0])
+  const { t } = useTranslation()
+
+  // Helper function to handle translation with namespaces
+  const translateWithNamespace = (key: string) => {
+    if (typeof key !== 'string') return key
+
+    if (key.includes(':')) {
+      const [namespace, path] = key.split(':')
+      return t(path, { ns: namespace })
+    }
+
+    return t(key)
+  }
 
   return (
     <SidebarMenu>
@@ -27,7 +41,7 @@ export function StoreSwitcher({
         </div>
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-semibold">{activeStore.name}</span>
-          <span className="truncate text-xs">{activeStore.plan}</span>
+          <span className="truncate text-xs">{translateWithNamespace(activeStore.plan)}</span>
         </div>
       </SidebarMenuButton>
     </SidebarMenu>

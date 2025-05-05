@@ -122,7 +122,7 @@ export default function CartList({
       ) : (
         <>
           <div className="rounded-md border overflow-hidden">
-            <div className="h-[calc(100vh-340px)] flex flex-col">
+            <div className="h-[calc(100vh-252px)] flex flex-col">
               <Table className="table-fixed border-collapse">
                 <TableHeader>
                   <TableRow>
@@ -164,8 +164,8 @@ export default function CartList({
                           />
                         </TableCell>
                         <TableCell className="w-[30%] font-medium">
-                          <div className="flex flex-col">
-                            <span>{item.name}</span>
+                          <div className="flex flex-col min-w-0 break-words">
+                            <span className="break-words whitespace-normal">{item.name}</span>
                             {item.barcode && (
                               <span className="text-xs text-muted-foreground flex items-center mt-1">
                                 <Barcode className="h-3 w-3 mr-1" />

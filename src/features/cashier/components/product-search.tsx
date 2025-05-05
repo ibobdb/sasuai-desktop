@@ -412,6 +412,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
                 ? 'text-green-600 dark:text-green-400 font-medium'
                 : 'text-muted-foreground'
             }`}
+            onClick={() => setQuickAddMode(!quickAddMode)}
           >
             {t('cashier.productSearch.quickAdd')}
           </Label>

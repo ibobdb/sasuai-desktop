@@ -61,7 +61,10 @@
       "minCharacters": "Enter at least 3 characters to search",
       "newMember": "New Member",
       "phone": "Phone",
-      "cardId": "Card ID"
+      "cardId": "Card ID",
+      "banned": "Banned",
+      "memberBanned": "Member is banned",
+      "memberBannedDescription": "This member has been banned and cannot be selected."
     },
     "createMember": {
       "title": "Add New Member",
@@ -88,7 +91,9 @@
       "paymentAmount": "Payment Amount",
       "cancel": "Cancel",
       "payNow": "Pay now",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "enterAmount": "Enter payment amount",
+      "clear": "Clear"
     },
     "paymentStatus": {
       "success": "Payment Successful",

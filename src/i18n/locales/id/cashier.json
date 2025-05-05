@@ -61,7 +61,10 @@
       "minCharacters": "Masukkan minimal 3 karakter untuk mencari",
       "newMember": "Pelanggan Baru",
       "phone": "Telepon",
-      "cardId": "ID Kartu"
+      "cardId": "ID Kartu",
+      "banned": "Diblokir",
+      "memberBanned": "Pelanggan diblokir",
+      "memberBannedDescription": "Pelanggan ini telah diblokir dan tidak dapat dipilih."
     },
     "createMember": {
       "title": "Tambah Pelanggan Baru",
@@ -88,7 +91,9 @@
       "paymentAmount": "Jumlah Pembayaran",
       "cancel": "Batal",
       "payNow": "Bayar sekarang",
-      "processing": "Memproses..."
+      "processing": "Memproses...",
+      "enterAmount": "Masukkan jumlah pembayaran",
+      "clear": "Hapus"
     },
     "paymentStatus": {
       "success": "Pembayaran Berhasil",

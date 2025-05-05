@@ -1,7 +1,7 @@
 import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -41,14 +41,17 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
       // Panggil API forgot password melalui Electron
       const response = await window.api.request(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
         method: 'POST',
-        data: { email: data.email }
+        data: {
+          email: data.email,
+          redirectTo: '/reset-password'
+        }
       })
 
-      if (response.success) {
-        toast.success(response.message || 'Password reset link has been sent to your email')
+      if (response.status === true) {
+        toast.success(
+          'If the email exists in our database, an email will be sent to your inbox to reset your password.'
+        )
         navigate({ to: '/sign-in' })
-      } else {
-        toast.error(response.message || 'Failed to send reset link')
       }
     } catch (error) {
       console.error('Forgot password error:', error)
@@ -79,17 +82,6 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
             <Button className="mt-2" type="submit" disabled={isLoading}>
               {isLoading ? 'Sending...' : 'Continue'}
             </Button>
-          </div>
-
-          <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-muted-foreground">Remembered your password?</div>
-            <Link
-              to="/sign-in"
-              className="text-sm font-medium text-muted-foreground hover:opacity-75"
-              onClick={(e) => isLoading && e.preventDefault()}
-            >
-              Sign In
-            </Link>
           </div>
         </form>
       </Form>

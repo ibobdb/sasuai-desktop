@@ -23,6 +23,24 @@ interface CookieFilter {
   httpOnly?: boolean
 }
 
+// Update info interface
+interface UpdateInfo {
+  version: string
+  files: Array<{ url: string; sha512: string; size: number }>
+  path: string
+  sha512: string
+  releaseDate: string
+  releaseName?: string
+  releaseNotes?: string
+}
+
+interface UpdateProgress {
+  bytesPerSecond: number
+  percent: number
+  transferred: number
+  total: number
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -42,6 +60,21 @@ declare global {
       language: {
         get: () => Promise<string>
         set: (lang: string) => Promise<boolean>
+      }
+      updater: {
+        checkForUpdates: () => Promise<any>
+        downloadUpdate: () => Promise<boolean>
+        installUpdate: () => Promise<boolean>
+        onUpdateChecking: (callback: () => void) => () => void
+        onUpdateAvailable: (callback: (info: UpdateInfo) => void) => () => void
+        onUpdateNotAvailable: (callback: (info: UpdateInfo) => void) => () => void
+        onUpdateError: (callback: (error: Error) => void) => () => void
+        onUpdateProgress: (callback: (progress: UpdateProgress) => void) => () => void
+        onUpdateDownloaded: (callback: (info: UpdateInfo) => void) => () => void
+      }
+      app: {
+        getVersion: () => Promise<string>
+        getName: () => Promise<string>
       }
     }
   }

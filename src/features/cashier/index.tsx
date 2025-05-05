@@ -409,8 +409,8 @@ export default function Cashier() {
   // Add global keyboard shortcut for payment (Ctrl+P)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check if Ctrl+P is pressed
-      if (e.ctrlKey && e.key === 'p') {
+      // Check if Ctrl+Spacebar is pressed
+      if (e.ctrlKey && (e.key === ' ' || e.key === 'Space')) {
         e.preventDefault()
 
         // Only open payment dialog if cart is not empty

@@ -15,6 +15,7 @@ import {
 import { Member, MemberSectionProps, Discount, MemberDiscount } from '@/types/cashier'
 import { MemberSearch } from './member-search'
 import { Card } from '@/components/ui/card'
+import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 
 export function MemberSection({
   onMemberSelect,
@@ -124,11 +125,8 @@ export function MemberSection({
               <div>
                 <h4 className="font-medium line-clamp-1">{selectedMember.name}</h4>
                 <div className="flex items-center">
-                  <Badge
-                    variant={selectedMember.tier?.name ? 'default' : 'outline'}
-                    className="font-medium text-xs"
-                  >
-                    {selectedMember.tier?.name || 'Regular'}
+                  <Badge className={getTierBadgeVariant(selectedMember.tier?.name)}>
+                    {selectedMember.tier?.name || t('member.tiers.regular')}
                   </Badge>
                   <div className="ml-2 flex items-center text-amber-500 dark:text-amber-400 font-medium">
                     <span className="text-xs">

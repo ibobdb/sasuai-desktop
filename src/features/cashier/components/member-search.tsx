@@ -12,6 +12,7 @@ import { Member, MemberResponse } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
+import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 
 interface MemberSearchProps {
   onMemberSelect: (member: Member | null) => void
@@ -50,13 +51,20 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
 
   const handleMemberSelect = useCallback(
     (member: Member) => {
+      if (member.isBanned) {
+        toast.error(t('cashier.memberSearch.memberBanned'), {
+          description: t('cashier.memberSearch.memberBannedDescription')
+        })
+        return
+      }
+
       setShowResults(false)
       setQuery('')
       setLastSearchedQuery('')
       setSearchResults([])
       onMemberSelect(member)
     },
-    [onMemberSelect, setQuery, setLastSearchedQuery]
+    [onMemberSelect, setQuery, setLastSearchedQuery, t]
   )
 
   const handleManualSearch = useCallback(() => {
@@ -194,15 +202,25 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                   ref={(el) => {
                     listItemsRef.current[index] = el
                   }}
-                  className={`px-3 py-2 transition-colors cursor-pointer ${
-                    index === focusedIndex ? 'bg-accent' : 'hover:bg-accent'
+                  className={`px-3 py-2 transition-colors ${
+                    member.isBanned
+                      ? 'cursor-not-allowed opacity-70'
+                      : 'cursor-pointer ' +
+                        (index === focusedIndex ? 'bg-accent' : 'hover:bg-accent')
                   }`}
-                  onClick={() => handleMemberSelect(member)}
-                  onMouseEnter={() => handleItemMouseEnter(index)}
+                  onClick={() => !member.isBanned && handleMemberSelect(member)}
+                  onMouseEnter={() => !member.isBanned && handleItemMouseEnter(index)}
                 >
                   <div className="flex flex-col sm:flex-row sm:justify-between">
                     <div className="flex-1">
-                      <p className="font-medium">{member.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{member.name}</p>
+                        {member.isBanned && (
+                          <Badge variant="destructive" className="text-xs">
+                            {t('cashier.memberSearch.banned')}
+                          </Badge>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         <span>
                           {t('cashier.memberSearch.phone')}: {member.phone}
@@ -216,11 +234,8 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                     </div>
                     <div className="sm:text-right mt-2 sm:mt-0">
                       <div className="flex sm:justify-end">
-                        <Badge
-                          variant={member.tier?.name ? 'default' : 'outline'}
-                          className="sm:ml-2"
-                        >
-                          {member.tier?.name || 'Regular'}
+                        <Badge className={`capitalize ${getTierBadgeVariant(member.tier?.name)}`}>
+                          {member.tier?.name || t('member.tiers.regular')}
                         </Badge>
                       </div>
                       <p className="text-xs text-amber-500 mt-1">

@@ -51,6 +51,56 @@ const api = {
   language: {
     get: () => ipcRenderer.invoke('language:get'),
     set: (lang: string) => ipcRenderer.invoke('language:set', lang)
+  },
+
+  // App info APIs
+  app: {
+    getVersion: () => ipcRenderer.invoke('app:getVersion'),
+    getName: () => ipcRenderer.invoke('app:getName')
+  },
+
+  // Updater API
+  updater: {
+    checkForUpdates: () => ipcRenderer.invoke('update:check'),
+    downloadUpdate: () => ipcRenderer.invoke('update:download'),
+    installUpdate: () => ipcRenderer.invoke('update:install'),
+
+    // Event listeners
+    onUpdateChecking: (callback) => {
+      const subscription = () => callback()
+      ipcRenderer.on('update:checking', subscription)
+      return () => ipcRenderer.removeListener('update:checking', subscription)
+    },
+
+    onUpdateAvailable: (callback) => {
+      const subscription = (_event, info) => callback(info)
+      ipcRenderer.on('update:available', subscription)
+      return () => ipcRenderer.removeListener('update:available', subscription)
+    },
+
+    onUpdateNotAvailable: (callback) => {
+      const subscription = (_event, info) => callback(info)
+      ipcRenderer.on('update:not-available', subscription)
+      return () => ipcRenderer.removeListener('update:not-available', subscription)
+    },
+
+    onUpdateError: (callback) => {
+      const subscription = (_event, error) => callback(error)
+      ipcRenderer.on('update:error', subscription)
+      return () => ipcRenderer.removeListener('update:error', subscription)
+    },
+
+    onUpdateProgress: (callback) => {
+      const subscription = (_event, progress) => callback(progress)
+      ipcRenderer.on('update:progress', subscription)
+      return () => ipcRenderer.removeListener('update:progress', subscription)
+    },
+
+    onUpdateDownloaded: (callback) => {
+      const subscription = (_event, info) => callback(info)
+      ipcRenderer.on('update:downloaded', subscription)
+      return () => ipcRenderer.removeListener('update:downloaded', subscription)
+    }
   }
 }
 

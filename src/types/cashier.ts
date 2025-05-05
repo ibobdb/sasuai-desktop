@@ -70,6 +70,7 @@ export type Member = {
   totalPoints: number
   totalPointsEarned: number
   joinDate: string
+  isBanned?: boolean
   tier: {
     name?: string
     level?: string

@@ -1,0 +1,175 @@
+{
+  "member": {
+    "title": "Manajemen Pelanggan",
+    "description": "Kelola pelanggan toko Anda dan informasinya",
+
+    "table": {
+      "name": "Nama",
+      "phone": "Telepon",
+      "email": "Email",
+      "cardId": "ID Kartu",
+      "points": "Poin",
+      "tier": "Tingkatan",
+      "createdAt": "Terdaftar Pada",
+      "status": "Status",
+      "address": "Alamat"
+    },
+
+    "filters": {
+      "searchPlaceholder": "Cari berdasarkan nama, telepon atau ID kartu...",
+      "tier": "Tingkatan"
+    },
+
+    "fields": {
+      "name": "Nama",
+      "namePlaceholder": "Masukkan nama pelanggan",
+      "phone": "Telepon",
+      "phonePlaceholder": "Masukkan nomor telepon",
+      "email": "Email",
+      "emailPlaceholder": "Masukkan alamat email",
+      "cardId": "ID Kartu",
+      "cardIdPlaceholder": "Masukkan ID kartu",
+      "address": "Alamat",
+      "addressPlaceholder": "Masukkan alamat",
+      "tier": "Tingkatan Keanggotaan",
+      "tierPlaceholder": "Pilih tingkatan",
+      "totalPoints": "Poin Tersedia",
+      "totalPointsEarned": "Total Poin Diperoleh",
+      "pointsPlaceholder": "Masukkan poin",
+      "points": "poin",
+      "status": "Status",
+      "active": "Aktif",
+      "banned": "Diblokir",
+      "pointMultiplier": "Pengali Poin",
+      "required": "{field} wajib diisi",
+      "validEmail": "Mohon masukkan alamat email yang valid",
+      "validPhone": "Mohon masukkan nomor telepon yang valid",
+      "optional": "opsional"
+    },
+
+    "form": {
+      "createTitle": "Tambah Pelanggan Baru",
+      "createDescription": "Tambahkan pelanggan baru ke sistem Anda",
+      "editTitle": "Edit Pelanggan",
+      "editDescription": "Perbarui informasi pelanggan",
+      "createSuccess": "Pelanggan berhasil dibuat",
+      "createSuccessDescription": "{name} telah ditambahkan ke daftar pelanggan Anda",
+      "updateSuccess": "Pelanggan berhasil diperbarui",
+      "updateSuccessDescription": "Informasi untuk {name} telah diperbarui",
+      "createError": "Gagal membuat pelanggan",
+      "updateError": "Gagal memperbarui pelanggan",
+      "errorDefault": "Terjadi kesalahan. Silakan coba lagi."
+    },
+
+    "view": {
+      "title": "Detail Pelanggan",
+      "tabs": {
+        "info": "Informasi",
+        "transactions": "Transaksi",
+        "points": "Riwayat Poin",
+        "discounts": "Diskon"
+      },
+      "loading": "Memuat detail pelanggan",
+      "loadingDescription": "Mohon tunggu sementara kami mengambil informasi pelanggan",
+      "contactInfo": "Informasi Kontak",
+      "membershipInfo": "Informasi Keanggotaan",
+      "transactionSummary": "Ringkasan Transaksi",
+      "transactionHistory": "Riwayat Transaksi",
+      "pointsHistory": "Riwayat Poin",
+      "availableDiscounts": "Diskon Tersedia",
+      "totalTransactions": "Total Transaksi",
+      "totalSpent": "Total Pengeluaran",
+      "avgSpent": "Pengeluaran Rata-rata",
+      "lastTransaction": "Transaksi Terakhir",
+      "memberSince": "Anggota Sejak",
+      "minPoints": "Min. {{points}} poin",
+      "never": "Tidak Pernah",
+      "banReason": "Alasan Blokir",
+      "transactionCount": "{{count}} transaksi",
+      "pointsEarned": "Total {{total}} poin diperoleh",
+      "discountCount": "{{count}} diskon tersedia",
+      "noPointsHistory": "Tidak ada riwayat poin ditemukan",
+      "noPointsHistoryDescription": "Pelanggan ini belum memperoleh poin",
+      "noTransactions": "Tidak ada transaksi ditemukan",
+      "noTransactionsDescription": "Pelanggan ini belum melakukan transaksi"
+    },
+
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Perunggu",
+      "silver": "Perak",
+      "gold": "Emas",
+      "platinum": "Platinum",
+      "diamond": "Berlian"
+    },
+
+    "actions": {
+      "addMember": "Tambah Pelanggan",
+      "view": "Lihat Detail",
+      "edit": "Edit Pelanggan",
+      "update": "Perbarui",
+      "delete": "Hapus",
+      "create": "Buat Pelanggan",
+      "creating": "Membuat...",
+      "updating": "Memperbarui...",
+      "refresh": "Segarkan",
+      "ban": "Blokir Pelanggan",
+      "unban": "Buka Blokir",
+      "banning": "Memblokir...",
+      "unbanning": "Membuka blokir..."
+    },
+
+    "ban": {
+      "title": "Blokir Pelanggan",
+      "description": "Apakah Anda yakin ingin memblokir {name}? Mereka tidak akan dapat lagi menggunakan keanggotaannya.",
+      "reasonLabel": "Alasan Blokir",
+      "reasonPlaceholder": "Masukkan alasan untuk memblokir pelanggan ini...",
+      "banning": "Memblokir..."
+    },
+
+    "transactions": {
+      "transId": "ID Transaksi",
+      "date": "Tanggal",
+      "amount": "Jumlah",
+      "finalAmount": "Jumlah Akhir",
+      "discount": "Diskon",
+      "paymentMethod": "Metode Pembayaran"
+    },
+
+    "points": {
+      "date": "Tanggal Diperoleh",
+      "pointsEarned": "Poin Diperoleh",
+      "transactionAmount": "Jumlah Transaksi",
+      "notes": "Catatan"
+    },
+
+    "discounts": {
+      "discountId": "ID Diskon",
+      "noDiscounts": "Tidak ada diskon tersedia untuk pelanggan ini",
+      "noDiscountsDescription": "Pelanggan ini tidak memiliki diskon yang tersedia saat ini"
+    },
+
+    "delete": {
+      "title": "Hapus Pelanggan",
+      "description": "Apakah Anda yakin ingin menghapus {name}? Tindakan ini tidak dapat dibatalkan.",
+      "deleting": "Menghapus..."
+    },
+
+    "messages": {
+      "deleteSuccess": "Pelanggan berhasil dihapus",
+      "deleteSuccessDescription": "{name} telah dihapus dari sistem Anda",
+      "deleteError": "Gagal menghapus pelanggan",
+      "deleteErrorDescription": "Terjadi kesalahan saat mencoba menghapus pelanggan ini",
+      "banSuccess": "Pelanggan berhasil diblokir",
+      "banSuccessDescription": "{name} telah diblokir dari sistem",
+      "banError": "Gagal memblokir pelanggan",
+      "banErrorDescription": "Terjadi kesalahan saat mencoba memblokir pelanggan ini",
+      "unbanSuccess": "Blokir pelanggan berhasil dibuka",
+      "unbanSuccessDescription": "{name} telah dibuka blokirnya dan sekarang dapat menggunakan keanggotaannya kembali",
+      "unbanError": "Gagal membuka blokir pelanggan",
+      "unbanErrorDescription": "Terjadi kesalahan saat mencoba membuka blokir pelanggan ini"
+    },
+
+    "noMembersFound": "Tidak ada pelanggan yang ditemukan"
+  }
+}

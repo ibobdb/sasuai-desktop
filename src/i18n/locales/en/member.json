@@ -1,0 +1,178 @@
+{
+  "member": {
+    "title": "Member Management",
+    "description": "Manage your store members and their information",
+
+    "table": {
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "cardId": "Card ID",
+      "points": "Points",
+      "tier": "Tier",
+      "createdAt": "Registered On",
+      "status": "Status",
+      "address": "Address"
+    },
+
+    "filters": {
+      "searchPlaceholder": "Search by name, phone or card ID...",
+      "tier": "Tier"
+    },
+
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Enter member name",
+      "phone": "Phone",
+      "phonePlaceholder": "Enter phone number",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address",
+      "cardId": "Card ID",
+      "cardIdPlaceholder": "Enter card ID",
+      "address": "Address",
+      "addressPlaceholder": "Enter address",
+      "tier": "Membership Tier",
+      "tierPlaceholder": "Select tier",
+      "totalPoints": "Available Points",
+      "totalPointsEarned": "Total Points Earned",
+      "pointsPlaceholder": "Enter points",
+      "pointMultiplier": "Point Multiplier",
+      "points": "points",
+      "status": "Status",
+      "active": "Active",
+      "banned": "Banned",
+      "required": "{field} is required",
+      "validEmail": "Please enter a valid email address",
+      "validPhone": "Please enter a valid phone number",
+      "optional": "optional"
+    },
+
+    "form": {
+      "createTitle": "Add New Member",
+      "createDescription": "Add a new member to your system",
+      "editTitle": "Edit Member",
+      "editDescription": "Update member information",
+      "createSuccess": "Member created successfully",
+      "createSuccessDescription": "{name} has been added to your members",
+      "updateSuccess": "Member updated successfully",
+      "updateSuccessDescription": "Information for {name} has been updated",
+      "createError": "Failed to create member",
+      "updateError": "Failed to update member",
+      "errorDefault": "An error occurred. Please try again."
+    },
+
+    "view": {
+      "title": "Member Details",
+      "tabs": {
+        "info": "Information",
+        "transactions": "Transactions",
+        "points": "Points History",
+        "discounts": "Discounts"
+      },
+      "loading": "Loading member details",
+      "loadingDescription": "Please wait while we fetch the member information",
+      "contactInfo": "Contact Information",
+      "membershipInfo": "Membership Information",
+      "transactionSummary": "Transaction Summary",
+      "transactionHistory": "Transaction History",
+      "pointsHistory": "Points History",
+      "availableDiscounts": "Available Discounts",
+      "totalTransactions": "Total Transactions",
+      "totalSpent": "Total Spent",
+      "avgSpent": "Average Spent",
+      "lastTransaction": "Last Transaction",
+      "memberSince": "Member Since",
+      "minPoints": "Min. {{points}} points",
+      "never": "Never",
+      "banReason": "Ban Reason",
+      "noTransactions": "No Transactions",
+      "noTransactionsDescription": "This member has no transactions yet.",
+      "noPointsHistory": "No Points History",
+      "noPointsHistoryDescription": "This member has not earned any points yet.",
+      "transactionCount": "{{count}} transactions",
+      "pointsEarned": "Total {{total}} points earned",
+      "discountCount": "{{count}} discounts available",
+      "loadMore": "Load More"
+    },
+
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
+    },
+
+    "actions": {
+      "addMember": "Add Member",
+      "view": "View Details",
+      "edit": "Edit Member",
+      "update": "Update",
+      "delete": "Delete",
+      "create": "Create Member",
+      "creating": "Creating...",
+      "updating": "Updating...",
+      "refresh": "Refresh",
+      "ban": "Ban Member",
+      "unban": "Unban Member",
+      "banning": "Banning...",
+      "unbanning": "Unbanning..."
+    },
+
+    "transactions": {
+      "transId": "Transaction ID",
+      "date": "Date",
+      "amount": "Amount",
+      "finalAmount": "Final Amount",
+      "discount": "Discount",
+      "paymentMethod": "Payment Method"
+    },
+
+    "points": {
+      "date": "Date Earned",
+      "pointsEarned": "Points Earned",
+      "transactionAmount": "Transaction Amount",
+      "notes": "Notes"
+    },
+
+    "discounts": {
+      "discountId": "Discount ID",
+      "noDiscounts": "No discounts available for this member",
+      "noDiscountsDescription": "This member has no active discounts.",
+      "value": "Value",
+      "expires": "Expires"
+    },
+
+    "ban": {
+      "title": "Ban Member",
+      "description": "Are you sure you want to ban {name}? They will no longer be able to use their membership.",
+      "reasonLabel": "Ban Reason",
+      "reasonPlaceholder": "Enter reason for banning this member...",
+      "banning": "Banning..."
+    },
+
+    "delete": {
+      "title": "Delete Member",
+      "description": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "deleting": "Deleting..."
+    },
+
+    "messages": {
+      "deleteSuccess": "Member deleted successfully",
+      "deleteSuccessDescription": "{name} has been removed from your system",
+      "deleteError": "Failed to delete member",
+      "deleteErrorDescription": "An error occurred while trying to delete this member",
+      "banSuccess": "Member banned successfully",
+      "banSuccessDescription": "{name} has been banned from the system",
+      "banError": "Failed to ban member",
+      "banErrorDescription": "An error occurred while trying to ban this member",
+      "unbanSuccess": "Member unbanned successfully",
+      "unbanSuccessDescription": "{name} has been unbanned and can now use their membership again",
+      "unbanError": "Failed to unban member",
+      "unbanErrorDescription": "An error occurred while trying to unban this member"
+    },
+
+    "noMembersFound": "No members found"
+  }
+}
