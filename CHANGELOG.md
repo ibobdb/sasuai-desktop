@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.3](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.2...v1.1.3) (2025-05-06)
+
+
+### Code Refactoring
+
+* **search:** replace placeholder with translation for search button ([6b9defa](https://github.com/ibobdb/sasuai-dekstop/commit/6b9defad73a829c5fc815ee473604ea3ae66da18))
+* **updater:** enhance update checking and handling ([5da270d](https://github.com/ibobdb/sasuai-dekstop/commit/5da270db114ec944889090ecd017d4a4fc8049f9))
+
 ## [1.1.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.1...v1.1.2) (2025-05-05)
 
 ### Code Refactoring
