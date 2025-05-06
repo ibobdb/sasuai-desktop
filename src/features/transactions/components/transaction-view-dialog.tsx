@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
-import { useTranslation } from 'react-i18next' // Import useTranslation hook
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Transaction, TransactionDetail } from '@/types/transactions'
 import { formatCurrency } from '@/utils/format'
@@ -9,6 +9,7 @@ import { useTransactions } from '../context/transactions-context'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { DetailDialog } from '@/components/common/detail-dialog'
+import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 
 interface Props {
   open: boolean
@@ -17,7 +18,7 @@ interface Props {
 }
 
 export function TransactionViewDialog({ open, onOpenChange, currentTransaction }: Props) {
-  const { t } = useTranslation(['transactions', 'common']) // Use translation hook
+  const { t } = useTranslation(['transactions', 'common'])
   const { fetchTransactionDetail } = useTransactions()
   const [detail, setDetail] = useState<TransactionDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
@@ -85,8 +86,8 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 {member ? (
                   <>
                     {member.name}
-                    <Badge variant="secondary" className="text-xs">
-                      {member.tier}
+                    <Badge className={getTierBadgeVariant(member.tier)}>
+                      {member.tier || t('member.tiers.regular')}
                     </Badge>
                   </>
                 ) : (
