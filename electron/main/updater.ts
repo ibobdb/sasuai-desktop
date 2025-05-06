@@ -1,14 +1,13 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
-import log from 'electron-log'
-
-// Configure logging
-log.transports.file.level = 'info'
-autoUpdater.logger = log
 
 // GitHub repository information
 const REPO_OWNER = 'ibobdb'
 const REPO_NAME = 'sasuai-dekstop'
+
+// Track the update check state
+let updateCheckInProgress = false
+let updateCheckTimeout: NodeJS.Timeout | null = null
 
 /**
  * Configure and initialize the auto-updater
@@ -33,7 +32,9 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
   })
 
   autoUpdater.on('update-available', (info) => {
-    mainWindow.webContents.send('update:available', info)
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update:available', info)
+    }
   })
 
   autoUpdater.on('update-not-available', (info) => {
@@ -55,21 +56,35 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
   // Handle IPC events from renderer
   ipcMain.handle('update:check', async () => {
     try {
-      return await autoUpdater.checkForUpdates()
+      // Prevent multiple simultaneous checks
+      if (updateCheckInProgress) {
+        return null
+      }
+
+      updateCheckInProgress = true
+
+      // Clear previous timeout if exists
+      if (updateCheckTimeout) {
+        clearTimeout(updateCheckTimeout)
+      }
+
+      const result = await autoUpdater.checkForUpdates()
+
+      // Reset flag after a delay to prevent rapid consecutive checks
+      updateCheckTimeout = setTimeout(() => {
+        updateCheckInProgress = false
+      }, 1000)
+
+      return result
     } catch (error) {
-      log.error('Error checking for updates:', error)
-      return null
+      updateCheckInProgress = false
+      throw error
     }
   })
 
   ipcMain.handle('update:download', async () => {
-    try {
-      autoUpdater.downloadUpdate()
-      return true
-    } catch (error) {
-      log.error('Error downloading update:', error)
-      return false
-    }
+    await autoUpdater.downloadUpdate()
+    return true
   })
 
   ipcMain.handle('update:install', () => {
@@ -90,8 +105,18 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
 
   // Check for updates automatically on app start (after a short delay)
   setTimeout(() => {
-    autoUpdater.checkForUpdates().catch((error) => {
-      log.error('Auto update check failed:', error)
-    })
+    if (!updateCheckInProgress) {
+      updateCheckInProgress = true
+      autoUpdater
+        .checkForUpdates()
+        .catch(() => {
+          // Silent catch
+        })
+        .finally(() => {
+          setTimeout(() => {
+            updateCheckInProgress = false
+          }, 1000)
+        })
+    }
   }, 6000)
 }

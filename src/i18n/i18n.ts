@@ -6,13 +6,16 @@ import { languageStore } from '@/utils/language-store'
 import commonEN from './locales/en/common.json'
 import transactionsEN from './locales/en/transactions.json'
 import cashierEN from './locales/en/cashier.json'
+import memberEN from './locales/en/member.json'
+import sidebarEN from './locales/en/sidebar.json'
+import updaterEN from './locales/en/updater.json'
+
 import commonID from './locales/id/common.json'
 import transactionsID from './locales/id/transactions.json'
 import cashierID from './locales/id/cashier.json'
-import memberEN from './locales/en/member.json'
 import memberID from './locales/id/member.json'
-import sidebarEN from './locales/en/sidebar.json'
 import sidebarID from './locales/id/sidebar.json'
+import updaterID from './locales/id/updater.json'
 
 // Configure resources
 const resources = {
@@ -21,14 +24,16 @@ const resources = {
     transactions: transactionsEN,
     cashier: cashierEN,
     member: memberEN,
-    sidebar: sidebarEN
+    sidebar: sidebarEN,
+    updater: updaterEN
   },
   id: {
     common: commonID,
     transactions: transactionsID,
     cashier: cashierID,
     member: memberID,
-    sidebar: sidebarID
+    sidebar: sidebarID,
+    updater: updaterID
   }
 }
 

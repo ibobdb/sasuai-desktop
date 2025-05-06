@@ -1,0 +1,48 @@
+{
+  "dialog": {
+    "available": {
+      "title": "Update Available",
+      "description": "A new version is available for your application"
+    },
+    "downloading": {
+      "title": "Downloading Update",
+      "description": "Downloading version {{version}}"
+    },
+    "ready": {
+      "title": "Update Ready to Install",
+      "description": "Update to version {{version}} has been downloaded and is ready to install. The application will restart to apply the update.",
+      "saveWorkMessage": "Make sure all your work is saved before continuing."
+    },
+    "error": {
+      "title": "Update Error",
+      "description": "An error occurred while checking for updates: {{message}}",
+      "suggestion": "Check your internet connection and try again later."
+    },
+    "actions": {
+      "updateNow": "Update Now",
+      "later": "Later",
+      "restartAndInstall": "Restart and Install",
+      "close": "Close",
+      "tryAgain": "Try Again"
+    },
+    "releaseNotes": "Release Notes:",
+    "downloadStats": {
+      "downloaded": "Downloaded",
+      "total": "Total",
+      "speed": "Speed",
+      "timeRemaining": "{{time}} remaining"
+    },
+    "tooltip": {
+      "later": "You'll be reminded later"
+    },
+    "version": {
+      "current": "Current version",
+      "new": "New version",
+      "types": {
+        "major": "major",
+        "minor": "minor",
+        "patch": "patch"
+      }
+    }
+  }
+}
