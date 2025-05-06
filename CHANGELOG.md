@@ -2,25 +2,22 @@
 
 ## [1.1.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.1...v1.1.2) (2025-05-05)
 
-
 ### Code Refactoring
 
-* streamline release workflow for Windows, macOS, and Linux builds ([a318af6](https://github.com/ibobdb/sasuai-dekstop/commit/a318af64676bdea3f72852fadca1598c19543e77))
+- streamline release workflow for Windows, macOS, and Linux builds ([a318af6](https://github.com/ibobdb/sasuai-dekstop/commit/a318af64676bdea3f72852fadca1598c19543e77))
 
 ## [1.1.1](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.0...v1.1.1) (2025-05-05)
 
-
 ### Bug Fixes
 
-* merge release workflow ([6021c0d](https://github.com/ibobdb/sasuai-dekstop/commit/6021c0dd903740ce749c43ecc437328f5010aa8a))
-* update release workflow and add manual electron build steps ([27c12f6](https://github.com/ibobdb/sasuai-dekstop/commit/27c12f6530ae825f79b48b97cdfe00120f19ffb3))
-
+- merge release workflow ([6021c0d](https://github.com/ibobdb/sasuai-dekstop/commit/6021c0dd903740ce749c43ecc437328f5010aa8a))
+- update release workflow and add manual electron build steps ([27c12f6](https://github.com/ibobdb/sasuai-dekstop/commit/27c12f6530ae825f79b48b97cdfe00120f19ffb3))
 
 ### Chores
 
-* **release:** add GH_TOKEN to environment variables in release workflow ([ff93ec4](https://github.com/ibobdb/sasuai-dekstop/commit/ff93ec4dd48085d22761af153711df88bded97ec))
-* **release:** update Node.js version to 22 in release workflow ([68bebd3](https://github.com/ibobdb/sasuai-dekstop/commit/68bebd3bd55594920f1647461864221cc1b4c9d3))
-* **release:** update release workflow to support multiple OS builds ([cee0e82](https://github.com/ibobdb/sasuai-dekstop/commit/cee0e8212c1d7305c363f406eb693f1ad9b2dd88))
+- **release:** add GH_TOKEN to environment variables in release workflow ([ff93ec4](https://github.com/ibobdb/sasuai-dekstop/commit/ff93ec4dd48085d22761af153711df88bded97ec))
+- **release:** update Node.js version to 22 in release workflow ([68bebd3](https://github.com/ibobdb/sasuai-dekstop/commit/68bebd3bd55594920f1647461864221cc1b4c9d3))
+- **release:** update release workflow to support multiple OS builds ([cee0e82](https://github.com/ibobdb/sasuai-dekstop/commit/cee0e8212c1d7305c363f406eb693f1ad9b2dd88))
 
 ## [1.1.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.0.0...v1.1.0) (2025-05-05)
 

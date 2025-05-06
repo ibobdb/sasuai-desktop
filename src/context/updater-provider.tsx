@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 
 interface UpdateInfo {
   version: string
@@ -45,6 +45,9 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
   const [downloaded, setDownloaded] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [appInfo, setAppInfo] = useState<AppInfo>({ name: '', version: '' })
+
+  // Use a ref to track if an update check is in progress
+  const checkInProgressRef = useRef(false)
 
   // Fetch app info on mount
   useEffect(() => {
@@ -120,17 +123,28 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Check for updates
-  const checkForUpdates = async () => {
+  // Check for updates with debounce
+  const checkForUpdates = useCallback(async () => {
+    // Prevent multiple simultaneous checks
+    if (checkInProgressRef.current) {
+      return
+    }
+
     try {
+      checkInProgressRef.current = true
       setChecking(true)
       setError(null)
       await window.api.updater.checkForUpdates()
     } catch (err) {
       setError(err as Error)
+    } finally {
       setChecking(false)
+      // Allow next check after a short delay
+      setTimeout(() => {
+        checkInProgressRef.current = false
+      }, 2000)
     }
-  }
+  }, [])
 
   // Download update
   const downloadUpdate = async () => {
@@ -171,6 +185,7 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useUpdater = () => {
   const context = useContext(UpdaterContext)
   if (context === undefined) {

@@ -1,0 +1,48 @@
+{
+  "dialog": {
+    "available": {
+      "title": "Update Tersedia",
+      "description": "Versi baru tersedia untuk aplikasi Anda"
+    },
+    "downloading": {
+      "title": "Mengunduh Update",
+      "description": "Mengunduh versi {{version}}"
+    },
+    "ready": {
+      "title": "Update Siap Diinstal",
+      "description": "Update ke versi {{version}} telah diunduh dan siap diinstal. Aplikasi akan dimulai ulang untuk menerapkan update.",
+      "saveWorkMessage": "Pastikan semua pekerjaan Anda telah disimpan sebelum melanjutkan."
+    },
+    "error": {
+      "title": "Kesalahan Update",
+      "description": "Terjadi kesalahan saat memeriksa update: {{message}}",
+      "suggestion": "Coba periksa koneksi internet Anda dan coba lagi nanti."
+    },
+    "actions": {
+      "updateNow": "Update Sekarang",
+      "later": "Nanti",
+      "restartAndInstall": "Restart dan Instal",
+      "close": "Tutup",
+      "tryAgain": "Coba Lagi"
+    },
+    "releaseNotes": "Catatan Rilis:",
+    "downloadStats": {
+      "downloaded": "Diunduh",
+      "total": "Total",
+      "speed": "Kecepatan",
+      "timeRemaining": "{{time}} tersisa"
+    },
+    "tooltip": {
+      "later": "Anda akan diingatkan lagi nanti"
+    },
+    "version": {
+      "current": "Versi saat ini",
+      "new": "Versi baru",
+      "types": {
+        "major": "mayor",
+        "minor": "minor",
+        "patch": "patch"
+      }
+    }
+  }
+}
