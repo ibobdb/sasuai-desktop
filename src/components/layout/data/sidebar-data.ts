@@ -1,4 +1,4 @@
-import { IconCreditCard, IconReceipt2, IconUsersGroup } from '@tabler/icons-react'
+import { IconCreditCard, IconReceipt2, IconUsersGroup, IconGift } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
 import logo from '../../../../resources/public/logo.png?asset'
 
@@ -33,6 +33,11 @@ export const sidebarData: SidebarData = {
           title: 'sidebar:navGroups.items.members',
           url: '/member',
           icon: IconUsersGroup
+        },
+        {
+          title: 'Rewards',
+          url: '/rewards',
+          icon: IconGift
         }
       ]
     }
