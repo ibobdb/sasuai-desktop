@@ -17,5 +17,8 @@ export const API_ENDPOINTS = {
   },
   TRANSACTIONS: {
     BASE: `${API_BASE_URL}/transactions`
+  },
+  REWARDS: {
+    BASE: `${API_BASE_URL}/rewards`
   }
 }

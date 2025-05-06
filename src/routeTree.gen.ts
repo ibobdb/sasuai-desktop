@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
+import { Route as AuthenticatedRewardsImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedMemberImport } from './routes/_authenticated/member'
 import { Route as legalTermsImport } from './routes/(legal)/terms'
 import { Route as legalPrivacyImport } from './routes/(legal)/privacy'
@@ -98,6 +99,12 @@ const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
   getParentRoute: () => AuthenticatedRouteRoute
 } as any)
 
+const AuthenticatedRewardsRoute = AuthenticatedRewardsImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AuthenticatedRouteRoute
+} as any)
+
 const AuthenticatedMemberRoute = AuthenticatedMemberImport.update({
   id: '/member',
   path: '/member',
@@ -174,6 +181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemberImport
       parentRoute: typeof AuthenticatedRouteImport
     }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/transactions': {
       id: '/_authenticated/transactions'
       path: '/transactions'
@@ -237,12 +251,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberRoute: typeof AuthenticatedMemberRoute
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberRoute: AuthenticatedMemberRoute,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute
 }
@@ -258,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof legalPrivacyRoute
   '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -273,6 +290,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof legalPrivacyRoute
   '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
+  '/rewards': typeof AuthenticatedRewardsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -290,6 +308,7 @@ export interface FileRoutesById {
   '/(legal)/privacy': typeof legalPrivacyRoute
   '/(legal)/terms': typeof legalTermsRoute
   '/_authenticated/member': typeof AuthenticatedMemberRoute
+  '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
@@ -309,6 +328,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/member'
+    | '/rewards'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -323,6 +343,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/member'
+    | '/rewards'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -338,6 +359,7 @@ export interface FileRouteTypes {
     | '/(legal)/privacy'
     | '/(legal)/terms'
     | '/_authenticated/member'
+    | '/_authenticated/rewards'
     | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
     | '/(errors)/401'
@@ -404,6 +426,7 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/route.tsx",
       "children": [
         "/_authenticated/member",
+        "/_authenticated/rewards",
         "/_authenticated/transactions",
         "/_authenticated/"
       ]
@@ -422,6 +445,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/member": {
       "filePath": "_authenticated/member.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/rewards": {
+      "filePath": "_authenticated/rewards.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/transactions": {
