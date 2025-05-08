@@ -1,0 +1,60 @@
+{
+  "title": "Manajemen Hadiah",
+  "description": "Klaim dan kelola hadiah pelanggan",
+  "actions": {
+    "claimReward": "Klaim Hadiah",
+    "refresh": "Segarkan"
+  },
+  "tabs": {
+    "rewards": "Hadiah",
+    "claims": "Riwayat Klaim"
+  },
+  "filters": {
+    "searchRewards": "Cari hadiah...",
+    "searchClaims": "Cari riwayat klaim hadiah...",
+    "status": "Status"
+  },
+  "statusOptions": {
+    "active": "Aktif",
+    "inactive": "Non-aktif",
+    "expired": "Kedaluwarsa",
+    "claimed": "Diklaim",
+    "pending": "Tertunda",
+    "cancelled": "Dibatalkan"
+  },
+  "claimDialog": {
+    "title": "Klaim Hadiah",
+    "description": "Pelanggan akan menerima hadiah ini dan poin akan dikurangi dari akun mereka.",
+    "selectReward": "Pilih Hadiah",
+    "searchMember": "Cari Pelanggan",
+    "searchPlaceholder": "Cari berdasarkan nama, telepon, atau ID kartu",
+    "noMembersFound": "Pelanggan tidak ditemukan",
+    "insufficientPoints": "Poin tidak cukup",
+    "availableStock": "Tersedia: {{count}} tersisa",
+    "pointsCost": "Biaya: {{points}} poin",
+    "cancel": "Batal",
+    "process": "Memproses...",
+    "submit": "Klaim Hadiah",
+    "available": "tersedia"
+  },
+  "table": {
+    "name": "Nama",
+    "description": "Deskripsi",
+    "pointsCost": "Biaya Poin",
+    "stock": "Stok",
+    "status": "Status",
+    "statusActive": "Aktif",
+    "statusInactive": "Non-aktif",
+    "statusExpired": "Kedaluwarsa",
+    "statusOutOfStock": "Stok Habis",
+    "expiryDate": "Tanggal Kedaluwarsa",
+    "claims": "Klaim",
+    "noDescription": "Tidak ada deskripsi",
+    "noExpiry": "Tidak ada kedaluwarsa",
+    "daysLeft": "{{count}} hari lagi",
+    "dateClaimed": "Tanggal Diklaim",
+    "reward": "Hadiah",
+    "member": "Pelanggan",
+    "currentPoints": "Poin Saat Ini"
+  }
+}

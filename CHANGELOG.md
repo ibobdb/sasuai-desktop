@@ -2,15 +2,13 @@
 
 ## [1.2.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.3...v1.2.0) (2025-05-06)
 
-
 ### Features
 
-* **rewards:** implement rewards management feature ([cba46ed](https://github.com/ibobdb/sasuai-dekstop/commit/cba46ed2d4c46bcbdac43205e431a90714ff3e35))
-
+- **rewards:** implement rewards management feature ([cba46ed](https://github.com/ibobdb/sasuai-dekstop/commit/cba46ed2d4c46bcbdac43205e431a90714ff3e35))
 
 ### Code Refactoring
 
-* **transaction-view-dialog:** improve member tier badge display ([c42d14d](https://github.com/ibobdb/sasuai-dekstop/commit/c42d14d77617bfc1bb1f6399a04afdcbc52305a3))
+- **transaction-view-dialog:** improve member tier badge display ([c42d14d](https://github.com/ibobdb/sasuai-dekstop/commit/c42d14d77617bfc1bb1f6399a04afdcbc52305a3))
 
 ## [1.1.3](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.2...v1.1.3) (2025-05-06)
 
