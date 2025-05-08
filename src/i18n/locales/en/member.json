@@ -67,7 +67,8 @@
         "info": "Information",
         "transactions": "Transactions",
         "points": "Points History",
-        "discounts": "Discounts"
+        "discounts": "Discounts",
+        "rewards": "Rewards"
       },
       "loading": "Loading member details",
       "loadingDescription": "Please wait while we fetch the member information",
@@ -142,6 +143,15 @@
       "noDiscountsDescription": "This member has no active discounts.",
       "value": "Value",
       "expires": "Expires"
+    },
+
+    "rewards": {
+      "noRewards": "No rewards claimed by this member",
+      "noRewardsDescription": "This member has no claimed rewards.",
+      "pointsCost": "Points Cost",
+      "claimDate": "Claim Date",
+      "status": "Status",
+      "description": "Description"
     },
 
     "ban": {

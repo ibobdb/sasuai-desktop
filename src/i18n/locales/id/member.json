@@ -67,7 +67,8 @@
         "info": "Informasi",
         "transactions": "Transaksi",
         "points": "Riwayat Poin",
-        "discounts": "Diskon"
+        "discounts": "Diskon",
+        "rewards": "Hadiah"
       },
       "loading": "Memuat detail pelanggan",
       "loadingDescription": "Mohon tunggu sementara kami mengambil informasi pelanggan",
@@ -147,6 +148,15 @@
       "discountId": "ID Diskon",
       "noDiscounts": "Tidak ada diskon tersedia untuk pelanggan ini",
       "noDiscountsDescription": "Pelanggan ini tidak memiliki diskon yang tersedia saat ini"
+    },
+
+    "rewards": {
+      "noRewards": "Tidak ada hadiah yang diklaim oleh pelanggan ini",
+      "noRewardsDescription": "Pelanggan ini belum mengklaim hadiah apapun",
+      "pointsCost": "Poin Digunakan",
+      "claimDate": "Tanggal Klaim",
+      "status": "Status",
+      "description": "Deskripsi"
     },
 
     "delete": {

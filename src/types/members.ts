@@ -66,8 +66,33 @@ export interface MemberDetail extends Member {
     updatedAt: string
     transaction: Transaction
   }[]
-  rewardClaims?: any[]
+  rewardClaims?: RewardClaim[]
   transactions?: Transaction[]
+}
+
+// Reward claim information
+export interface RewardClaim {
+  id: string
+  memberId: string
+  rewardId: string
+  claimDate: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  reward: Reward
+}
+
+export interface Reward {
+  id: string
+  name: string
+  pointsCost: number
+  stock: number
+  isActive: boolean
+  expiryDate: string | null
+  imageUrl: string | null
+  description: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Transaction {
