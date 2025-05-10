@@ -130,13 +130,21 @@
       "insufficientPayment": "Insufficient payment amount",
       "insufficientPaymentDescription": "Payment amount must be at least Rp {{amount}}",
       "cannotApplyDiscount": "Cannot apply member discount",
-      "cannotApplyDiscountDescription": "Minimum purchase of Rp {{amount}} required"
+      "cannotApplyDiscountDescription": "Minimum purchase of Rp {{amount}} required",
+      "invalidDiscount": "Invalid product discount",
+      "invalidDiscountDescription": "The discount for {{product}} ({{discount}}) has reached its usage limit or is no longer valid",
+      "invalidMemberDiscount": "Invalid member discount",
+      "invalidMemberDiscountDescription": "The discount {{discount}} has reached its usage limit or is no longer valid"
     },
     "fields": {
       "required": "{{field}} is required",
       "validEmail": "Please enter a valid email address",
       "validPhone": "Please enter a valid phone number",
       "optional": "(optional)"
+    },
+    "errors": {
+      "calculatePoints": "Failed to calculate points",
+      "calculatePointsDescription": "An error occurred while calculating points. Please try again."
     }
   }
 }

@@ -4,21 +4,23 @@
 export type Discount = {
   id: string
   name: string
-  valueType: 'percentage' | 'fixed'
+  code?: string
+  description?: string
+  type: 'FIXED_AMOUNT' | 'PERCENTAGE' // Updated from valueType
   value: number
-  discountType: 'product' | 'member'
   minPurchase: number
   startDate: string
   endDate: string
   isActive: boolean
+  isGlobal?: boolean
+  maxUses?: number
+  usedCount?: number
+  applyTo?: 'SPECIFIC_PRODUCTS' | 'ALL_PRODUCTS' | 'SPECIFIC_MEMBERS'
+  createdAt?: string
+  updatedAt?: string
 }
 
 // Product related types
-export type ProductDiscount = {
-  discountId: string
-  productId: string
-  discount: Discount
-}
 
 export type Product = {
   id: string
@@ -27,14 +29,14 @@ export type Product = {
   barcode?: string
   currentStock: number
   skuCode?: string
-  unitId: string // Add this field
+  unitId: string
   batches?: Array<{
     id: string
     buyPrice: number
     expiryDate: string
     remainingQuantity: number
   }>
-  discountRelationProduct?: ProductDiscount[]
+  discounts?: Discount[] // New direct discounts array replacing discountRelationProduct
 }
 
 export type ProductResponse = {
@@ -71,19 +73,14 @@ export type Member = {
   totalPointsEarned: number
   joinDate: string
   isBanned?: boolean
+  banReason?: string
   tier: {
     name?: string
     level?: string
     multiplier?: number // Add multiplier to tier type
   } | null
   cardId?: string | null
-  discountRelationsMember?: MemberDiscount[]
-}
-
-export type MemberDiscount = {
-  discountId: string
-  memberId: string
-  discount: Discount
+  discounts?: Discount[] // New direct discounts array replacing discountRelationsMember
 }
 
 export type MemberResponse = {
@@ -149,13 +146,11 @@ export type CartListProps = {
 }
 
 export type MemberSectionProps = {
-  onMemberSelect?: (
-    member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  ) => void
+  onMemberSelect?: (member: Member | null) => void
   onMemberDiscountSelect?: (discount: Discount | null) => void
   selectedDiscount: Discount | null
   subtotal?: number
-  member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null // Add this prop
+  member: Member | null
 }
 
 export type PaymentSectionProps = {

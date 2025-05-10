@@ -20,7 +20,8 @@
     "expired": "Expired",
     "claimed": "Claimed",
     "pending": "Pending",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "outOfStock": "Out of Stock"
   },
   "claimDialog": {
     "title": "Claim Reward",

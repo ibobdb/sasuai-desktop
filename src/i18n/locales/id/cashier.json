@@ -130,13 +130,21 @@
       "insufficientPayment": "Jumlah pembayaran tidak mencukupi",
       "insufficientPaymentDescription": "Jumlah pembayaran harus setidaknya Rp {{amount}}",
       "cannotApplyDiscount": "Tidak dapat menerapkan diskon anggota",
-      "cannotApplyDiscountDescription": "Minimal pembelian Rp {{amount}} diperlukan"
+      "cannotApplyDiscountDescription": "Minimal pembelian Rp {{amount}} diperlukan",
+      "invalidDiscount": "Diskon produk tidak valid",
+      "invalidDiscountDescription": "Diskon untuk {{product}} ({{discount}}) telah mencapai batas penggunaan atau tidak berlaku lagi",
+      "invalidMemberDiscount": "Diskon anggota tidak valid",
+      "invalidMemberDiscountDescription": "Diskon {{discount}} telah mencapai batas penggunaan atau tidak berlaku lagi"
     },
     "fields": {
       "required": "{{field}} wajib diisi",
       "validEmail": "Silakan masukkan alamat email yang valid",
       "validPhone": "Silakan masukkan nomor telepon yang valid",
       "optional": "(opsional)"
+    },
+    "errors": {
+      "calculatePoints": "Gagal menghitung poin",
+      "calculatePointsDescription": "Terjadi kesalahan saat menghitung poin. Silakan coba lagi."
     }
   }
 }

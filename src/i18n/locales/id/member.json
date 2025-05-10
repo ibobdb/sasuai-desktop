@@ -147,7 +147,14 @@
     "discounts": {
       "discountId": "ID Diskon",
       "noDiscounts": "Tidak ada diskon tersedia untuk pelanggan ini",
-      "noDiscountsDescription": "Pelanggan ini tidak memiliki diskon yang tersedia saat ini"
+      "noDiscountsDescription": "Pelanggan ini tidak memiliki diskon yang tersedia saat ini",
+      "active": "Aktif",
+      "inactive": "Tidak Aktif",
+      "discountValue": "Nilai Diskon",
+      "minimumPurchase": "Minimal Pembelian",
+      "usageLimit": "Batas Penggunaan",
+      "validFrom": "Berlaku Dari",
+      "validUntil": "Berlaku Hingga"
     },
 
     "rewards": {

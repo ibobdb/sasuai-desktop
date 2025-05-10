@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Discount, CartListProps } from '@/types/cashier'
+import { isDiscountValid } from '../utils'
 
 export default function CartList({
   items,
@@ -87,7 +88,7 @@ export default function CartList({
 
   // Format discount for display
   const formatDiscount = (discount: Discount) => {
-    return discount.valueType === 'percentage'
+    return discount.type === 'PERCENTAGE'
       ? `${discount.value}%`
       : `Rp ${discount.value.toLocaleString()}`
   }
@@ -223,8 +224,7 @@ export default function CartList({
                           )}
                         </TableCell>
                         <TableCell className="w-[20%] text-left">
-                          {item.discountRelationProduct &&
-                          item.discountRelationProduct.length > 0 ? (
+                          {item.discounts && item.discounts.length > 0 ? (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
@@ -243,17 +243,15 @@ export default function CartList({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                {item.discountRelationProduct.map((relation) => (
+                                {item.discounts.filter(isDiscountValid).map((discount) => (
                                   <DropdownMenuItem
-                                    key={relation.discountId}
-                                    onClick={() => onUpdateDiscount(item.id, relation.discount)}
+                                    key={discount.id}
+                                    onClick={() => onUpdateDiscount(item.id, discount)}
                                     className={
-                                      item.selectedDiscount?.id === relation.discountId
-                                        ? 'bg-accent'
-                                        : ''
+                                      item.selectedDiscount?.id === discount.id ? 'bg-accent' : ''
                                     }
                                   >
-                                    {relation.discount.name} ({formatDiscount(relation.discount)})
+                                    {discount.name} ({formatDiscount(discount)})
                                   </DropdownMenuItem>
                                 ))}
                                 {item.selectedDiscount && (

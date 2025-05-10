@@ -20,18 +20,16 @@ import {
   Product,
   TransactionData,
   Member,
-  MemberDiscount,
   TransactionItem
 } from '@/types/cashier'
+import { isDiscountValid } from './utils'
 
 export default function Cashier() {
   const { t } = useTranslation(['cashier'])
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
-  const [member, setMember] = useState<
-    (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  >(null)
+  const [member, setMember] = useState<Member | null>(null)
   const [selectedMemberDiscount, setSelectedMemberDiscount] = useState<Discount | null>(null)
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
@@ -53,7 +51,7 @@ export default function Cashier() {
 
   // Calculate member discount amount if applicable
   const memberDiscountAmount = selectedMemberDiscount
-    ? selectedMemberDiscount.valueType === 'percentage'
+    ? selectedMemberDiscount.type === 'PERCENTAGE'
       ? (subtotal - productDiscountsTotal) * (selectedMemberDiscount.value / 100)
       : Math.min(selectedMemberDiscount.value, subtotal - productDiscountsTotal)
     : 0
@@ -148,7 +146,7 @@ export default function Cashier() {
 
     const itemTotal = price * quantity
 
-    if (discount.valueType === 'percentage') {
+    if (discount.type === 'PERCENTAGE') {
       return itemTotal * (discount.value / 100)
     } else {
       return Math.min(discount.value, itemTotal)
@@ -216,17 +214,15 @@ export default function Cashier() {
   }
 
   // Handle member selection and their available discounts
-  const handleMemberSelect = (
-    selectedMember: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  ) => {
+  const handleMemberSelect = (selectedMember: Member | null) => {
     setMember(selectedMember)
 
     // Reset member discount when changing members
     setSelectedMemberDiscount(null)
 
     // Auto-select member discount if only one is available and meets minimum purchase
-    if (selectedMember?.discountRelationsMember?.length === 1) {
-      const memberDiscount = selectedMember.discountRelationsMember[0].discount
+    if (selectedMember?.discounts?.length === 1) {
+      const memberDiscount = selectedMember.discounts[0]
       if (subtotal >= memberDiscount.minPurchase) {
         setSelectedMemberDiscount(memberDiscount)
       }
@@ -284,6 +280,31 @@ export default function Cashier() {
       toast.error(t('cashier.validation.cannotApplyDiscount'), {
         description: t('cashier.validation.cannotApplyDiscountDescription', {
           amount: selectedMemberDiscount.minPurchase.toLocaleString()
+        })
+      })
+      return false
+    }
+
+    // Check if any selected discounts have reached usage limits
+    const cartItemWithInvalidDiscount = cart.find(
+      (item) => item.selectedDiscount && !isDiscountValid(item.selectedDiscount)
+    )
+
+    if (cartItemWithInvalidDiscount) {
+      toast.error(t('cashier.validation.invalidDiscount'), {
+        description: t('cashier.validation.invalidDiscountDescription', {
+          product: cartItemWithInvalidDiscount.name,
+          discount: cartItemWithInvalidDiscount.selectedDiscount?.name
+        })
+      })
+      return false
+    }
+
+    // Check member discount validity
+    if (selectedMemberDiscount && !isDiscountValid(selectedMemberDiscount)) {
+      toast.error(t('cashier.validation.invalidMemberDiscount'), {
+        description: t('cashier.validation.invalidMemberDiscountDescription', {
+          discount: selectedMemberDiscount.name
         })
       })
       return false

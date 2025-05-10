@@ -12,10 +12,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
-import { Member, MemberSectionProps, Discount, MemberDiscount } from '@/types/cashier'
+import { Member, MemberSectionProps, Discount } from '@/types/cashier'
 import { MemberSearch } from './member-search'
 import { Card } from '@/components/ui/card'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
+import { isDiscountValid } from '../utils'
 
 export function MemberSection({
   onMemberSelect,
@@ -25,9 +26,7 @@ export function MemberSection({
   member
 }: MemberSectionProps) {
   const { t } = useTranslation(['cashier'])
-  const [selectedMember, setSelectedMember] = useState<
-    (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  >(null)
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
 
   // Synchronize internal state with parent state
   useEffect(() => {
@@ -35,9 +34,7 @@ export function MemberSection({
   }, [member])
 
   // Handle member selection and their available discounts
-  const handleMemberSelect = (
-    member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  ) => {
+  const handleMemberSelect = (member: Member | null) => {
     setSelectedMember(member)
 
     // Pass to parent component
@@ -51,8 +48,8 @@ export function MemberSection({
     }
 
     // Auto-select member discount if only one is available and meets minimum purchase
-    if (member?.discountRelationsMember?.length === 1) {
-      const memberDiscount = member.discountRelationsMember[0].discount
+    if (member?.discounts?.length === 1) {
+      const memberDiscount = member.discounts[0]
       if (subtotal >= memberDiscount.minPurchase && onMemberDiscountSelect) {
         onMemberDiscountSelect(memberDiscount)
       }
@@ -72,7 +69,7 @@ export function MemberSection({
 
   // Format discount for display
   const formatDiscount = (discount: Discount) => {
-    if (discount.valueType === 'percentage') {
+    if (discount.type === 'PERCENTAGE') {
       return `${discount.value}%`
     }
     return `Rp ${discount.value.toLocaleString()}`
@@ -85,10 +82,8 @@ export function MemberSection({
 
   // Get available member discounts
   const getAvailableMemberDiscounts = () => {
-    if (!selectedMember?.discountRelationsMember) return []
-    return selectedMember.discountRelationsMember
-      .filter((relation) => relation.discount.isActive)
-      .map((relation) => relation.discount)
+    if (!selectedMember?.discounts) return []
+    return selectedMember.discounts.filter(isDiscountValid)
   }
 
   const availableDiscounts = getAvailableMemberDiscounts()

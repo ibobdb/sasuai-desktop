@@ -20,7 +20,8 @@
     "expired": "Kedaluwarsa",
     "claimed": "Diklaim",
     "pending": "Tertunda",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "outOfStock": "Stok Habis"
   },
   "claimDialog": {
     "title": "Klaim Hadiah",

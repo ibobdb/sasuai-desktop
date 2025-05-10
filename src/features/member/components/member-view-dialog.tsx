@@ -316,11 +316,7 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
                     <TableCell>
                       {transaction.discountAmount ? (
                         <Badge variant="default" className="gap-1">
-                          <span>
-                            {transaction.discountValueType === 'percentage'
-                              ? `${transaction.discountValue}%`
-                              : formatCurrency(transaction.discountValue || 0)}
-                          </span>
+                          {formatCurrency(transaction.discountAmount)}
                         </Badge>
                       ) : (
                         '-'
@@ -482,7 +478,7 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
   }
 
   const renderDiscountsTab = () => {
-    if (!detail || !detail.discountRelationsMember || detail.discountRelationsMember.length === 0) {
+    if (!detail || !detail.discounts || detail.discounts.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <IconTag className="h-10 w-10 text-muted-foreground mb-4" />
@@ -496,15 +492,68 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {detail.discountRelationsMember.map((discount, index) => (
-          <Card key={index} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+        {detail.discounts.map((discount) => (
+          <Card key={discount.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-base">{discount.discountId}</CardTitle>
+                <CardTitle className="text-base">{discount.name}</CardTitle>
+                <Badge
+                  variant={discount.isActive ? 'default' : 'outline'}
+                  className={
+                    discount.isActive ? 'bg-green-100 text-green-800 hover:bg-green-200' : ''
+                  }
+                >
+                  {discount.isActive
+                    ? t('member.discounts.active')
+                    : t('member.discounts.inactive')}
+                </Badge>
+              </div>
+              {discount.code && (
+                <p className="text-xs text-muted-foreground mt-1 font-mono">{discount.code}</p>
+              )}
+            </CardHeader>
+            <CardContent className="pt-0 space-y-2">
+              {discount.description && <p className="text-sm">{discount.description}</p>}
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t('member.discounts.discountValue')}</span>
+                <Badge className="text-md font-semibold">
+                  {discount.type === 'PERCENTAGE'
+                    ? `${discount.value}%`
+                    : `${formatCurrency(discount.value)}`}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {t('member.discounts.minimumPurchase')}
+                </span>
+                <span>{formatCurrency(discount.minPurchase)}</span>
+              </div>
+
+              {/* Usage limit */}
+              {discount.maxUses !== null && discount.maxUses !== undefined && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('member.discounts.usageLimit')}</span>
+                  <div className="flex items-center gap-1">
+                    <span>{discount.usedCount || 0}</span>
+                    <span className="text-muted-foreground">/</span>
+                    <span>{discount.maxUses}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
+                <div className="flex justify-between">
+                  <span>{t('member.discounts.validFrom')}</span>
+                  <span>{format(new Date(discount.startDate), 'PP')}</span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>{t('member.discounts.validUntil')}</span>
+                  <span>{format(new Date(discount.endDate), 'PP')}</span>
                 </div>
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
         ))}
       </div>

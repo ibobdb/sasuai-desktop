@@ -141,6 +141,13 @@
       "discountId": "Discount ID",
       "noDiscounts": "No discounts available for this member",
       "noDiscountsDescription": "This member has no active discounts.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "discountValue": "Discount Value",
+      "minimumPurchase": "Minimum Purchase",
+      "usageLimit": "Usage Limit",
+      "validFrom": "Valid From",
+      "validUntil": "Valid Until",
       "value": "Value",
       "expires": "Expires"
     },

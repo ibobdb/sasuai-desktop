@@ -14,6 +14,7 @@ import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 import { QuantityInputDialog } from './quantity-input-dialog'
+import { isDiscountValid } from '../utils'
 
 interface ProductSearchProps {
   onProductSelect: (product: Product, quantity?: number) => void
@@ -125,7 +126,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
           currentStock: item.currentStock,
           skuCode: item.skuCode || undefined,
           batches: item.batches,
-          discountRelationProduct: item.discountRelationProduct,
+          discounts: item.discounts,
           unitId: item.unitId || ''
         }))
 
@@ -199,21 +200,16 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
   // Helper to check if product has active discounts
   const hasActiveDiscounts = (product: Product): boolean => {
-    return (
-      !!product.discountRelationProduct &&
-      product.discountRelationProduct.filter((d) => d.discount.isActive).length > 0
-    )
+    return !!product.discounts && product.discounts.filter(isDiscountValid).length > 0
   }
 
   // Helper to get best discount (highest percentage or value)
   const getBestDiscount = (product: Product): Discount | null => {
-    if (!product.discountRelationProduct || product.discountRelationProduct.length === 0) {
+    if (!product.discounts || product.discounts.length === 0) {
       return null
     }
 
-    const activeDiscounts = product.discountRelationProduct
-      .filter((d) => d.discount.isActive)
-      .map((d) => d.discount)
+    const activeDiscounts = product.discounts.filter(isDiscountValid)
 
     if (activeDiscounts.length === 0) return null
 
@@ -221,7 +217,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
   }
 
   const formatDiscountLabel = (discount: Discount): string => {
-    return discount.valueType === 'percentage'
+    return discount.type === 'PERCENTAGE'
       ? `${discount.value}%`
       : `Rp ${discount.value.toLocaleString()}`
   }

@@ -108,16 +108,16 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
           let variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'warning'
 
           if (!isActive) {
-            status = t('table.statusInactive')
+            status = t('statusOptions.inactive')
             variant = 'outline'
           } else if (isExpired) {
-            status = t('table.statusExpired')
+            status = t('statusOptions.expired')
             variant = 'destructive'
           } else if (outOfStock) {
-            status = t('table.statusOutOfStock')
+            status = t('statusOptions.outOfStock')
             variant = 'secondary'
           } else {
-            status = t('table.statusActive')
+            status = t('statusOptions.active')
             variant = 'default'
           }
 
