@@ -200,7 +200,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
 
   // Helper to check if product has active discounts
   const hasActiveDiscounts = (product: Product): boolean => {
-    return !!product.discounts && product.discounts.filter(isDiscountValid).length > 0
+    return !!product.discounts && product.discounts.some(isDiscountValid)
   }
 
   // Helper to get best discount (highest percentage or value)
