@@ -173,13 +173,63 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
-          {pricing.discounts.member && (
+          {/* Show product discounts total if present */}
+          {pricing.discounts.product && pricing.discounts.product > 0 && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">
+                {t('transaction.details.productDiscounts')}
+              </span>
+              <span className="text-rose-600">-{formatCurrency(pricing.discounts.product)}</span>
+            </div>
+          )}
+
+          {/* Show member discount if present */}
+          {pricing.discounts.member && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
                 {t('transaction.details.memberDiscount')}
+                {pricing.discounts.member.name && (
+                  <Badge variant="outline" className="text-xs">
+                    {pricing.discounts.member.name}
+                  </Badge>
+                )}
               </span>
               <span className="text-rose-600">
                 -{formatCurrency(pricing.discounts.member.amount)}
+              </span>
+            </div>
+          )}
+
+          {/* Show tier discount if present */}
+          {pricing.discounts.tier && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
+                {t('transaction.details.tierDiscount')}
+                {pricing.discounts.tier.name && (
+                  <Badge variant="outline" className="text-xs">
+                    {pricing.discounts.tier.name}
+                  </Badge>
+                )}
+              </span>
+              <span className="text-rose-600">
+                -{formatCurrency(pricing.discounts.tier.amount)}
+              </span>
+            </div>
+          )}
+
+          {/* Show global discount if present */}
+          {pricing.discounts.global && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
+                {t('transaction.details.globalDiscount')}
+                {pricing.discounts.global.name && (
+                  <Badge variant="outline" className="text-xs">
+                    {pricing.discounts.global.code} - {pricing.discounts.global.name}
+                  </Badge>
+                )}
+              </span>
+              <span className="text-rose-600">
+                -{formatCurrency(pricing.discounts.global.amount)}
               </span>
             </div>
           )}

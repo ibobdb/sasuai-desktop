@@ -31,13 +31,16 @@
       "paymentMethod": "Metode Pembayaran",
       "itemsPurchased": "Item Dibeli",
       "subtotal": "Subtotal",
-      "memberDiscount": "Diskon Member",
       "totalDiscount": "Total Diskon",
       "total": "Total",
       "paymentAmount": "Jumlah Pembayaran",
       "change": "Kembalian",
       "pointsEarned": "Poin Diperoleh",
-      "pointsDescription": "Pelanggan memperoleh {{points}} poin loyalitas"
+      "pointsDescription": "Pelanggan memperoleh {{points}} poin loyalitas",
+      "productDiscounts": "Diskon Produk:",
+      "memberDiscount": "Diskon Pelanggan:",
+      "tierDiscount": "Diskon Tier:",
+      "globalDiscount": "Diskon Voucher:"
     },
     "actions": {
       "viewDetails": "Lihat Detail",

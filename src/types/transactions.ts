@@ -32,7 +32,25 @@ export interface Discounts {
 
 export interface Pricing {
   originalAmount: number
-  discounts: Discounts
+  discounts: {
+    total: number
+    product?: number
+    member?: {
+      id: string
+      name: string
+      amount: number
+    }
+    tier?: {
+      id: string
+      name: string
+      amount: number
+    }
+    global?: {
+      code: string
+      name: string
+      amount: number
+    }
+  }
   finalAmount: number
 }
 
@@ -91,7 +109,29 @@ export interface TransactionDetail {
   tranId: string | null
   cashier: DetailedCashier
   member: DetailedMember | null
-  pricing: Pricing
+  pricing: {
+    originalAmount: number
+    finalAmount: number
+    discounts: {
+      total: number
+      product?: number
+      member?: {
+        id: string
+        name: string
+        amount: number
+      }
+      tier?: {
+        id: string
+        name: string
+        amount: number
+      }
+      global?: {
+        code: string
+        name: string
+        amount: number
+      }
+    }
+  }
   payment: Payment
   paymentMethod?: PaymentMethod
   items: TransactionItem[]

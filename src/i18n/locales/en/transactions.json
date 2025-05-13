@@ -37,7 +37,10 @@
       "paymentAmount": "Payment Amount",
       "change": "Change",
       "pointsEarned": "Points Earned",
-      "pointsDescription": "Customer earned {{points}} loyalty points"
+      "pointsDescription": "Customer earned {{points}} loyalty points",
+      "productDiscounts": "Product Discounts:",
+      "tierDiscount": "Tier Discount:",
+      "globalDiscount": "Voucher Discount:"
     },
     "actions": {
       "viewDetails": "View Details",
