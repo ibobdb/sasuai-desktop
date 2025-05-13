@@ -11,7 +11,7 @@ import MemberProvider, { useMembers } from './context/member-context'
 import { FilterToolbar } from './components/filter-toolbar'
 
 function MemberContent() {
-  const { t } = useTranslation(['member'])
+  const { t } = useTranslation(['member', 'common'])
   const columns = useMemberColumns()
   const {
     isLoading,

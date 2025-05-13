@@ -31,6 +31,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { getTierBadgeVariant } from './member-columns'
+import { Badge as BadgeIcon } from 'lucide-react'
 
 interface MemberViewDialogProps {
   open: boolean
@@ -100,6 +101,15 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
               {t('member.view.memberSince')}:{' '}
               {format(new Date(detail.joinDate || detail.createdAt), 'PP')}
             </span>
+            {detail.discounts && detail.discounts.length > 0 && (
+              <>
+                <span>•</span>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <BadgeIcon className="h-3 w-3" />
+                  {detail.discounts.length} {t('member.view.activeDiscounts')}
+                </Badge>
+              </>
+            )}
           </div>
 
           {detail.isBanned && detail.banReason && (
@@ -229,6 +239,16 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
     const lastTransaction = detail.transactions[0]
     const avgSpent = totalSpent / detail.transactions.length
 
+    // Calculate total discount amount
+    const totalDiscount = detail.transactions.reduce((total, transaction) => {
+      return total + (transaction.discountAmount || 0)
+    }, 0)
+
+    // Calculate total amount paid after discounts
+    const totalPaid = detail.transactions.reduce((total, transaction) => {
+      return total + transaction.finalAmount
+    }, 0)
+
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -238,7 +258,7 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">{t('member.view.totalTransactions')}</p>
               <p className="text-2xl font-semibold">{detail.transactions.length}</p>
@@ -248,18 +268,30 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
               <p className="text-2xl font-semibold text-primary">{formatCurrency(totalSpent)}</p>
             </div>
             <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">{t('member.view.totalSaved')}</p>
+              <p className="text-2xl font-semibold text-green-600">
+                {formatCurrency(totalDiscount)}
+              </p>
+            </div>
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">{t('member.view.avgSpent')}</p>
               <p className="text-2xl font-semibold">{formatCurrency(avgSpent)}</p>
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-sm text-muted-foreground">{t('member.view.lastTransaction')}</p>
-            <p className="font-medium">
-              {lastTransaction.createdAt
-                ? format(new Date(lastTransaction.createdAt), 'PPpp')
-                : t('member.view.never')}
-            </p>
+          <div className="mt-4 pt-4 border-t flex flex-col md:flex-row md:justify-between gap-2">
+            <div>
+              <p className="text-sm text-muted-foreground">{t('member.view.lastTransaction')}</p>
+              <p className="font-medium">
+                {lastTransaction.createdAt
+                  ? format(new Date(lastTransaction.createdAt), 'PPpp')
+                  : t('member.view.never')}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">{t('member.view.totalPaid')}</p>
+              <p className="font-medium text-lg">{formatCurrency(totalPaid)}</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -290,45 +322,65 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
                   <TableHead>{t('member.transactions.transId')}</TableHead>
                   <TableHead>{t('member.transactions.date')}</TableHead>
                   <TableHead className="text-right">{t('member.transactions.amount')}</TableHead>
+                  <TableHead className="text-right">{t('member.transactions.discount')}</TableHead>
                   <TableHead className="text-right">
                     {t('member.transactions.finalAmount')}
                   </TableHead>
-                  <TableHead>{t('member.transactions.discount')}</TableHead>
                   <TableHead>{t('member.transactions.paymentMethod')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {detail.transactions.map((transaction, index) => (
-                  <TableRow key={transaction.id} className="hover:bg-muted/50">
-                    <TableCell className="text-muted-foreground text-sm font-medium">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {transaction.tranId || transaction.id.substring(0, 8)}
-                    </TableCell>
-                    <TableCell>{format(new Date(transaction.createdAt), 'PP')}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(transaction.totalAmount)}
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(transaction.finalAmount)}
-                    </TableCell>
-                    <TableCell>
-                      {transaction.discountAmount ? (
-                        <Badge variant="default" className="gap-1">
-                          {formatCurrency(transaction.discountAmount)}
+                {detail.transactions.map((transaction, index) => {
+                  return (
+                    <TableRow key={transaction.id} className="hover:bg-muted/50">
+                      <TableCell className="text-muted-foreground text-sm font-medium">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {transaction.tranId || transaction.id.substring(0, 8)}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(transaction.createdAt), 'PP')}
+                        {format(new Date(transaction.createdAt), 'HH:mm')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(transaction.totalAmount)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {transaction.discountAmount && transaction.discountAmount > 0 ? (
+                          <div className="flex flex-col items-end">
+                            <Badge
+                              variant="default"
+                              className="gap-1 bg-green-100 text-green-800 hover:bg-green-200"
+                            >
+                              {formatCurrency(transaction.discountAmount)}
+                            </Badge>
+                          </div>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatCurrency(transaction.finalAmount)}
+                        {transaction.discountAmount && transaction.discountAmount > 0 && (
+                          <div className="text-xs text-muted-foreground">
+                            {t('member.transactions.after')}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {transaction.paymentMethod.toLowerCase()}
                         </Badge>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {transaction.paymentMethod.toLowerCase()}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {transaction.change && transaction.change > 0 && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {t('member.transactions.change')}: {formatCurrency(transaction.change)}
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -367,6 +419,7 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
                 <TableHead className="w-14">#</TableHead>
                 <TableHead>{t('member.points.date')}</TableHead>
                 <TableHead className="text-right">{t('member.points.pointsEarned')}</TableHead>
+                <TableHead>{t('member.transactions.transId')}</TableHead>
                 <TableHead className="text-right">{t('member.points.transactionAmount')}</TableHead>
                 <TableHead>{t('member.points.notes')}</TableHead>
               </TableRow>
@@ -382,6 +435,9 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
                     <Badge variant="default" className="font-semibold gap-1">
                       <span>+{point.pointsEarned}</span>
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {point.transaction?.tranId || point.transactionId.substring(0, 8)}
                   </TableCell>
                   <TableCell className="text-right">
                     {point.transaction ? formatCurrency(point.transaction.totalAmount) : '-'}
@@ -536,7 +592,15 @@ export function MemberViewDialog({ open, onOpenChange, currentMember }: MemberVi
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('member.discounts.usageLimit')}</span>
                   <div className="flex items-center gap-1">
-                    <span>{discount.usedCount || 0}</span>
+                    <span
+                      className={
+                        (discount.usedCount || 0) >= (discount.maxUses || 0)
+                          ? 'text-red-500 font-bold'
+                          : ''
+                      }
+                    >
+                      {discount.usedCount || 0}
+                    </span>
                     <span className="text-muted-foreground">/</span>
                     <span>{discount.maxUses}</span>
                   </div>

@@ -92,7 +92,11 @@
       "noPointsHistory": "Tidak ada riwayat poin ditemukan",
       "noPointsHistoryDescription": "Pelanggan ini belum memperoleh poin",
       "noTransactions": "Tidak ada transaksi ditemukan",
-      "noTransactionsDescription": "Pelanggan ini belum melakukan transaksi"
+      "noTransactionsDescription": "Pelanggan ini belum melakukan transaksi",
+      "totalSaved": "Total Disimpan",
+      "totalPaid": "Total Dibayar",
+      "activeDiscounts": "Diskon Aktif",
+      "totalDiscount": "Total Diskon"
     },
 
     "tiers": {
@@ -134,7 +138,10 @@
       "amount": "Jumlah",
       "finalAmount": "Jumlah Akhir",
       "discount": "Diskon",
-      "paymentMethod": "Metode Pembayaran"
+      "paymentMethod": "Metode Pembayaran",
+      "after": "setelah diskon",
+      "change": "Kembalian",
+      "total": "Total"
     },
 
     "points": {

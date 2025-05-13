@@ -93,7 +93,11 @@
       "transactionCount": "{{count}} transactions",
       "pointsEarned": "Total {{total}} points earned",
       "discountCount": "{{count}} discounts available",
-      "loadMore": "Load More"
+      "loadMore": "Load More",
+      "totalSaved": "Total Saved",
+      "totalPaid": "Total Paid",
+      "activeDiscounts": "Active Discounts",
+      "totalDiscount": "Total Discount"
     },
 
     "tiers": {
@@ -127,7 +131,10 @@
       "amount": "Amount",
       "finalAmount": "Final Amount",
       "discount": "Discount",
-      "paymentMethod": "Payment Method"
+      "paymentMethod": "Payment Method",
+      "after": "after discount",
+      "change": "Change",
+      "total": "Total"
     },
 
     "points": {
