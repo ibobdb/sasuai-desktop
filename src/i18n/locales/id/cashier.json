@@ -53,7 +53,10 @@
       "memberDiscount": "Diskon Pelanggan:",
       "selectDiscount": "Pilih diskon",
       "removeDiscount": "Hapus Diskon",
-      "minPurchase": "Min. pembelian: Rp {{amount}}"
+      "minPurchase": "Min. pembelian: Rp {{amount}}",
+      "discounts": "Diskon Tersedia",
+      "tierDiscount": "tier",
+      "personalDiscount": "personal"
     },
     "memberSearch": {
       "placeholder": "Cari pelanggan ...",
@@ -114,7 +117,9 @@
       "productDiscounts": "Diskon Produk:",
       "memberDiscount": "Diskon Pelanggan:",
       "total": "Total:",
-      "pointsToEarn": "Poin yang akan didapat:"
+      "pointsToEarn": "Poin yang akan didapat:",
+      "globalDiscount": "Diskon Voucher:",
+      "tierDiscount": "Diskon Tier:"
     },
     "actions": {
       "clearCart": "Kosongkan Keranjang",
@@ -134,7 +139,11 @@
       "invalidDiscount": "Diskon produk tidak valid",
       "invalidDiscountDescription": "Diskon untuk {{product}} ({{discount}}) telah mencapai batas penggunaan atau tidak berlaku lagi",
       "invalidMemberDiscount": "Diskon anggota tidak valid",
-      "invalidMemberDiscountDescription": "Diskon {{discount}} telah mencapai batas penggunaan atau tidak berlaku lagi"
+      "invalidMemberDiscountDescription": "Diskon {{discount}} telah mencapai batas penggunaan atau tidak berlaku lagi",
+      "invalidGlobalDiscount": "Kode voucher tidak valid",
+      "invalidGlobalDiscountDescription": "Kode voucher {{discount}} telah kedaluwarsa atau mencapai batas penggunaan",
+      "invalidTierDiscount": "Diskon tier tidak valid",
+      "invalidTierDiscountDescription": "Diskon tier {{discount}} tidak berlaku lagi"
     },
     "fields": {
       "required": "{{field}} wajib diisi",
@@ -145,6 +154,23 @@
     "errors": {
       "calculatePoints": "Gagal menghitung poin",
       "calculatePointsDescription": "Terjadi kesalahan saat menghitung poin. Silakan coba lagi."
+    },
+    "redeemCode": {
+      "title": "Gunakan Voucher",
+      "placeholder": "Masukkan kode voucher",
+      "apply": "Terapkan",
+      "emptyCode": "Silakan masukkan kode voucher",
+      "invalidCode": "Kode voucher tidak valid",
+      "tryAnotherCode": "Silakan coba kode lain atau periksa kesalahan ketik",
+      "validationError": "Error validasi kode",
+      "tryAgainLater": "Silakan coba lagi nanti",
+      "codeApplied": "Kode voucher diterapkan",
+      "discountAdded": "Diskon {{name}} telah ditambahkan",
+      "discountRemoved": "Diskon telah dihapus",
+      "alreadyHasDiscount": "Anda sudah menggunakan diskon anggota. Hapus terlebih dahulu untuk menggunakan kode voucher.",
+      "memberDiscountAlreadyApplied": "Diskon anggota sudah diterapkan. Hapus untuk menggunakan kode voucher.",
+      "minimumPurchaseNotMet": "Syarat pembelian minimum tidak terpenuhi",
+      "minimumPurchaseRequired": "Voucher ini membutuhkan pembelian minimum Rp {{amount}}"
     }
   }
 }

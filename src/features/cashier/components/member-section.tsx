@@ -18,6 +18,11 @@ import { Card } from '@/components/ui/card'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 import { isDiscountValid } from '../utils'
 
+// Enhanced discount interface that includes source information for UI
+interface EnhancedDiscount extends Discount {
+  source: 'member' | 'tier'
+}
+
 export function MemberSection({
   onMemberSelect,
   onMemberDiscountSelect,
@@ -48,10 +53,13 @@ export function MemberSection({
     }
 
     // Auto-select member discount if only one is available and meets minimum purchase
-    if (member?.discounts?.length === 1) {
-      const memberDiscount = member.discounts[0]
-      if (subtotal >= memberDiscount.minPurchase && onMemberDiscountSelect) {
-        onMemberDiscountSelect(memberDiscount)
+    if (member) {
+      const availableDiscounts = getAvailableMemberDiscounts()
+      if (availableDiscounts.length === 1) {
+        const memberDiscount = availableDiscounts[0]
+        if (subtotal >= memberDiscount.minPurchase && onMemberDiscountSelect) {
+          onMemberDiscountSelect(memberDiscount)
+        }
       }
     }
   }
@@ -77,13 +85,52 @@ export function MemberSection({
 
   // Check if discount is applicable based on minimum purchase
   const isDiscountApplicable = (discount: Discount) => {
-    return subtotal >= discount.minPurchase
+    return !discount.minPurchase || subtotal >= discount.minPurchase
   }
 
-  // Get available member discounts
-  const getAvailableMemberDiscounts = () => {
-    if (!selectedMember?.discounts) return []
-    return selectedMember.discounts.filter(isDiscountValid)
+  // Get available member discounts from both member and tier
+  const getAvailableMemberDiscounts = (): EnhancedDiscount[] => {
+    if (!selectedMember) return []
+
+    // Get member's direct discounts
+    const memberDiscounts: EnhancedDiscount[] = (selectedMember.discounts || [])
+      .filter(isDiscountValid)
+      .map((discount) => ({
+        ...discount,
+        source: 'member'
+      }))
+
+    // Get tier discounts
+    const tierDiscounts: EnhancedDiscount[] = (selectedMember.tier?.discounts || [])
+      .filter(isDiscountValid)
+      .map((discount) => ({
+        ...discount,
+        source: 'tier'
+      }))
+
+    // Combine both sources
+    return [...memberDiscounts, ...tierDiscounts]
+  }
+
+  // Get source label for discount (for display purposes)
+  const getSourceLabel = (discount: EnhancedDiscount) => {
+    return discount.source === 'member'
+      ? t('cashier.memberSection.personalDiscount')
+      : t('cashier.memberSection.tierDiscount')
+  }
+
+  // Handle discount selection with source information
+  const handleDiscountSelect = (discount: EnhancedDiscount, applicable: boolean) => {
+    if (applicable && onMemberDiscountSelect) {
+      // Pass both the discount and its source to the parent component
+      onMemberDiscountSelect(discount)
+    } else if (!applicable) {
+      toast.error(
+        `${t('cashier.memberSection.minPurchase', {
+          amount: discount.minPurchase?.toLocaleString()
+        })}`
+      )
+    }
   }
 
   const availableDiscounts = getAvailableMemberDiscounts()
@@ -169,7 +216,7 @@ export function MemberSection({
                 <div className="flex items-center">
                   <Ticket className="h-4 w-4 mr-1 text-green-600 dark:text-green-500" />
                   <span className="font-medium text-sm">
-                    {t('cashier.memberSection.memberDiscount')}
+                    {t('cashier.memberSection.discounts')}
                   </span>
                 </div>
 
@@ -196,11 +243,13 @@ export function MemberSection({
                         <DropdownMenuItem
                           key={discount.id}
                           onClick={() => {
-                            if (applicable && onMemberDiscountSelect) {
-                              onMemberDiscountSelect(discount)
-                            } else if (!applicable) {
+                            if (applicable) {
+                              handleDiscountSelect(discount, applicable)
+                            } else {
                               toast.error(
-                                `Minimum purchase of Rp ${discount.minPurchase.toLocaleString()} required`
+                                `${t('cashier.memberSection.minPurchase', {
+                                  amount: discount.minPurchase?.toLocaleString()
+                                })}`
                               )
                             }
                           }}
@@ -209,7 +258,12 @@ export function MemberSection({
                         >
                           <div className="flex flex-col w-full">
                             <div className="flex items-center justify-between">
-                              <span>{discount.name}</span>
+                              <span>
+                                {discount.name}
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  ({getSourceLabel(discount)})
+                                </span>
+                              </span>
                               <span className="ml-2 text-xs">
                                 {selectedDiscount?.id === discount.id && (
                                   <Check className="h-3 w-3 inline mr-1" />
@@ -219,7 +273,9 @@ export function MemberSection({
                             </div>
                             {discount.minPurchase > 0 && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Min. purchase: Rp {discount.minPurchase.toLocaleString()}
+                                {t('cashier.memberSection.minPurchase', {
+                                  amount: discount.minPurchase.toLocaleString()
+                                })}
                               </p>
                             )}
                           </div>
@@ -235,7 +291,7 @@ export function MemberSection({
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 font-medium"
                         >
                           <X className="h-4 w-4 mr-1.5" />
-                          Remove Discount
+                          {t('cashier.memberSection.removeDiscount')}
                         </DropdownMenuItem>
                       </>
                     )}

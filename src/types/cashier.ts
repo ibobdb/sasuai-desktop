@@ -77,10 +77,11 @@ export type Member = {
   tier: {
     name?: string
     level?: string
-    multiplier?: number // Add multiplier to tier type
+    multiplier?: number
+    discounts?: Discount[] // Add tier discounts
   } | null
   cardId?: string | null
-  discounts?: Discount[] // New direct discounts array replacing discountRelationsMember
+  discounts?: Discount[] // Direct member discounts
 }
 
 export type MemberResponse = {
@@ -111,6 +112,8 @@ export type TransactionData = {
   cashierId: string
   memberId?: string | null
   selectedMemberDiscountId?: string | null
+  selectedTierDiscountId?: string | null // Add this field for tier discounts
+  globalDiscountCode?: string | null
   totalAmount: number
   finalAmount: number
   paymentMethod: PaymentMethod
@@ -124,6 +127,8 @@ export type TransactionSummaryProps = {
   subtotal: number
   productDiscounts: number
   memberDiscount: number
+  tierDiscount: number // Add this field for tier discounts
+  globalDiscount: number
   tax: number
   total: number
   pointsToEarn?: number // Points that will be earned from this transaction

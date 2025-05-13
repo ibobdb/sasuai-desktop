@@ -7,6 +7,8 @@ export default function TransactionSummary({
   subtotal,
   productDiscounts,
   memberDiscount,
+  tierDiscount, // Add tierDiscount parameter
+  globalDiscount,
   total,
   pointsToEarn = 0
 }: TransactionSummaryProps) {
@@ -15,7 +17,10 @@ export default function TransactionSummary({
   // Calculate if we have any special values
   const hasProductDiscount = productDiscounts > 0
   const hasMemberDiscount = memberDiscount > 0
-  const hasAnyDiscount = hasProductDiscount || hasMemberDiscount
+  const hasTierDiscount = tierDiscount > 0 // Add check for tier discount
+  const hasGlobalDiscount = globalDiscount > 0
+  const hasAnyDiscount =
+    hasProductDiscount || hasMemberDiscount || hasTierDiscount || hasGlobalDiscount
   const hasPointsToEarn = pointsToEarn > 0
 
   return (
@@ -51,6 +56,28 @@ export default function TransactionSummary({
               {t('cashier.summary.memberDiscount')}
             </span>
             <span>Rp {memberDiscount.toLocaleString()}</span>
+          </div>
+        )}
+
+        {/* Show tier discount if any */}
+        {hasTierDiscount && (
+          <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+            <span className="flex items-center">
+              <Minus className="h-3 w-3 mr-1" />
+              {t('cashier.summary.tierDiscount')}
+            </span>
+            <span>Rp {tierDiscount.toLocaleString()}</span>
+          </div>
+        )}
+
+        {/* Show global discount if any */}
+        {hasGlobalDiscount && (
+          <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+            <span className="flex items-center">
+              <Minus className="h-3 w-3 mr-1" />
+              {t('cashier.summary.globalDiscount')}
+            </span>
+            <span>Rp {globalDiscount.toLocaleString()}</span>
           </div>
         )}
 
