@@ -242,13 +242,12 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                         {t('cashier.memberSection.points')}: {member.totalPoints}
                       </p>
 
-                      {member.discountRelationsMember &&
-                        member.discountRelationsMember.length > 0 && (
-                          <p className="text-xs text-green-600 mt-1">
-                            <Ticket className="h-3 w-3 inline mr-1" />
-                            {member.discountRelationsMember.length} discount(s)
-                          </p>
-                        )}
+                      {member.discounts && member.discounts.length > 0 && (
+                        <p className="text-xs text-green-600 mt-1">
+                          <Ticket className="h-3 w-3 inline mr-1" />
+                          {member.discounts.length} discount(s)
+                        </p>
+                      )}
                     </div>
                   </div>
                 </li>

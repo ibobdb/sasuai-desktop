@@ -1,0 +1,54 @@
+{
+  "title": "Rewards Management",
+  "description": "Claim and manage customer rewards",
+  "actions": {
+    "claimReward": "Claim Reward",
+    "refresh": "Refresh"
+  },
+  "tabs": {
+    "rewards": "Rewards",
+    "claims": "Claims History"
+  },
+  "filters": {
+    "searchRewards": "Search rewards by name or description...",
+    "searchClaims": "Search by member name or reward...",
+    "status": "Status"
+  },
+  "statusOptions": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "expired": "Expired",
+    "claimed": "Claimed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "outOfStock": "Out of Stock"
+  },
+  "claimDialog": {
+    "title": "Claim Reward",
+    "description": "The customer will receive this reward and the points will be deducted from their account.",
+    "selectReward": "Select Reward",
+    "searchMember": "Search Member",
+    "searchPlaceholder": "Search by name, phone, or card ID",
+    "noMembersFound": "No members found",
+    "insufficientPoints": "Insufficient points",
+    "availableStock": "Available: {{count}} remaining",
+    "pointsCost": "Cost: {{points}} points",
+    "cancel": "Cancel",
+    "process": "Processing...",
+    "submit": "Claim Reward",
+    "available": "available"
+  },
+  "table": {
+    "name": "Name",
+    "description": "Description",
+    "pointsCost": "Points Cost",
+    "stock": "Stock",
+    "status": "Status",
+    "expiryDate": "Expiry Date",
+    "claims": "Claims",
+    "noDescription": "No description",
+    "noExpiry": "No expiry",
+    "daysLeft": "{{count}} days left",
+    "dateClaimed": "Date Claimed"
+  }
+}

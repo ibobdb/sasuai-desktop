@@ -19,6 +19,10 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/transactions`
   },
   REWARDS: {
-    BASE: `${API_BASE_URL}/rewards`
+    BASE: `${API_BASE_URL}/rewards`,
+    CLAIM: `${API_BASE_URL}/rewards/claim`
+  },
+  DISCOUNTS: {
+    BASE: `${API_BASE_URL}/discount`
   }
 }

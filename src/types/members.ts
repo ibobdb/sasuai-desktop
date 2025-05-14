@@ -1,4 +1,5 @@
 import { BaseFilterParams, BaseFilterUIState } from './common'
+import { Discount } from './cashier'
 
 // Available dialog types
 export type MemberDialogType = 'view' | 'create' | 'edit'
@@ -11,21 +12,6 @@ export interface MemberTier {
   multiplier: number
   createdAt: string
   updatedAt: string
-}
-
-// Member discount relation
-export interface MemberDiscountRelation {
-  id: string
-  memberId: string
-  discountId: string
-  discount: {
-    id: string
-    name: string
-    value: number
-    valueType: string
-    minPurchase: number
-    isActive: boolean
-  }
 }
 
 // Basic member information for table listing
@@ -45,7 +31,7 @@ export interface Member {
   isBanned?: boolean
   banReason?: string | null
   tier?: MemberTier
-  discountRelationsMember?: MemberDiscountRelation[]
+  discounts?: Discount[] // Updated to direct discounts array
 }
 
 // Extended member information for detail view
@@ -66,8 +52,33 @@ export interface MemberDetail extends Member {
     updatedAt: string
     transaction: Transaction
   }[]
-  rewardClaims?: any[]
+  rewardClaims?: RewardClaim[]
   transactions?: Transaction[]
+}
+
+// Reward claim information
+export interface RewardClaim {
+  id: string
+  memberId: string
+  rewardId: string
+  claimDate: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  reward: Reward
+}
+
+export interface Reward {
+  id: string
+  name: string
+  pointsCost: number
+  stock: number
+  isActive: boolean
+  expiryDate: string | null
+  imageUrl: string | null
+  description: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Transaction {
@@ -78,12 +89,10 @@ export interface Transaction {
   totalAmount: number
   finalAmount: number
   paymentMethod: string
-  discountMemberId: string | null
-  discountValueType: string | null
-  discountValue: number | null
-  discountAmount: number | null
-  paymentAmount: number | null
-  change: number | null
+  discountId?: string | null // Updated to match API response
+  discountAmount?: number | null // Updated to match API response
+  paymentAmount?: number | null
+  change?: number | null
   createdAt: string
   updatedAt: string
 }

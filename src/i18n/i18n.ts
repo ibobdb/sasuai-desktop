@@ -9,6 +9,7 @@ import cashierEN from './locales/en/cashier.json'
 import memberEN from './locales/en/member.json'
 import sidebarEN from './locales/en/sidebar.json'
 import updaterEN from './locales/en/updater.json'
+import rewardsEN from './locales/en/rewards.json'
 
 import commonID from './locales/id/common.json'
 import transactionsID from './locales/id/transactions.json'
@@ -16,6 +17,7 @@ import cashierID from './locales/id/cashier.json'
 import memberID from './locales/id/member.json'
 import sidebarID from './locales/id/sidebar.json'
 import updaterID from './locales/id/updater.json'
+import rewardsID from './locales/id/rewards.json'
 
 // Configure resources
 const resources = {
@@ -25,7 +27,8 @@ const resources = {
     cashier: cashierEN,
     member: memberEN,
     sidebar: sidebarEN,
-    updater: updaterEN
+    updater: updaterEN,
+    rewards: rewardsEN
   },
   id: {
     common: commonID,
@@ -33,7 +36,8 @@ const resources = {
     cashier: cashierID,
     member: memberID,
     sidebar: sidebarID,
-    updater: updaterID
+    updater: updaterID,
+    rewards: rewardsID
   }
 }
 

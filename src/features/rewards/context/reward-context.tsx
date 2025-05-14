@@ -9,6 +9,7 @@ import {
 } from '@/types/rewards'
 import { API_ENDPOINTS } from '@/config/api'
 import { createDataProvider } from '@/context/data-context'
+import { toast } from 'sonner'
 
 // Create the reward-specific data provider
 const { DataProvider, useData } = createDataProvider<
@@ -42,6 +43,7 @@ interface RewardsContextType {
   pageSize: number
   fetchRewardDetail: (id: string) => Promise<RewardDetail | null>
   applyFilters: () => Promise<void>
+  claimReward: (memberId: string, rewardId: string) => Promise<boolean>
 }
 
 const RewardsContext = React.createContext<RewardsContextType | null>(null)
@@ -129,6 +131,39 @@ function RewardsWrapper({
 }) {
   const dataContext = useData()
 
+  // Update the claimReward function to use data instead of body
+  const claimReward = React.useCallback(
+    async (memberId: string, rewardId: string) => {
+      try {
+        const response = await window.api.request(API_ENDPOINTS.REWARDS.CLAIM, {
+          method: 'POST',
+          data: { memberId, rewardId }
+        })
+
+        if (!response.success) {
+          toast.error('Failed to claim reward', {
+            description: response.error || 'An unknown error occurred'
+          })
+          return false
+        }
+
+        toast.success('Reward claimed successfully', {
+          description: 'The reward has been claimed for the member'
+        })
+
+        // Refresh the rewards list
+        dataContext.fetchItems()
+        return true
+      } catch (error) {
+        toast.error('Failed to claim reward', {
+          description: error instanceof Error ? error.message : 'An unknown error occurred'
+        })
+        return false
+      }
+    },
+    [dataContext]
+  )
+
   const contextValue = React.useMemo(
     () => ({
       ...dataContext,
@@ -145,9 +180,10 @@ function RewardsWrapper({
       currentPage: dataContext.pagination.currentPage,
       pageSize: dataContext.pagination.pageSize,
       fetchRewardDetail: dataContext.fetchItemDetail,
-      applyFilters: dataContext.fetchItems
+      applyFilters: dataContext.fetchItems,
+      claimReward
     }),
-    [dataContext, open, setOpen]
+    [dataContext, open, setOpen, claimReward]
   )
 
   return <RewardsContext.Provider value={contextValue}>{children}</RewardsContext.Provider>

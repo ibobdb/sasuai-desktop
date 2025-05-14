@@ -25,9 +25,31 @@ export interface RewardClaim {
   rewardId: string
   claimDate: string
   status: string
+  createdAt: string
+  updatedAt: string
   member: {
     id: string
+    cardId: string | null
     name: string
+    email: string | null
+    phone: string
+    address: string | null
+    tierId: string | null
+    totalPoints: number
+    totalPointsEarned: number
+    joinDate: string
+    isBanned: boolean
+    banReason: string | null
+  }
+  reward: {
+    id: string
+    name: string
+    pointsCost: number
+    stock: number
+    isActive: boolean
+    expiryDate: string | null
+    imageUrl: string | null
+    description: string | null
   }
 }
 
@@ -46,3 +68,20 @@ export interface RewardFilterUIState {
 }
 
 export type RewardDialogType = 'view' | 'create' | 'edit'
+
+export interface RewardClaimFilterParams {
+  page: number
+  pageSize: number
+  sortBy: string
+  sortDirection: 'asc' | 'desc'
+  search?: string
+  statusFilter?: string // Added this property for status filtering
+}
+
+export interface RewardClaimFilterUIState {
+  search: string
+  dateRange?: {
+    from: Date | null
+    to: Date | null
+  }
+}

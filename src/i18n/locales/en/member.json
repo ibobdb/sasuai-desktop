@@ -67,7 +67,8 @@
         "info": "Information",
         "transactions": "Transactions",
         "points": "Points History",
-        "discounts": "Discounts"
+        "discounts": "Discounts",
+        "rewards": "Rewards"
       },
       "loading": "Loading member details",
       "loadingDescription": "Please wait while we fetch the member information",
@@ -92,7 +93,11 @@
       "transactionCount": "{{count}} transactions",
       "pointsEarned": "Total {{total}} points earned",
       "discountCount": "{{count}} discounts available",
-      "loadMore": "Load More"
+      "loadMore": "Load More",
+      "totalSaved": "Total Saved",
+      "totalPaid": "Total Paid",
+      "activeDiscounts": "Active Discounts",
+      "totalDiscount": "Total Discount"
     },
 
     "tiers": {
@@ -126,7 +131,10 @@
       "amount": "Amount",
       "finalAmount": "Final Amount",
       "discount": "Discount",
-      "paymentMethod": "Payment Method"
+      "paymentMethod": "Payment Method",
+      "after": "after discount",
+      "change": "Change",
+      "total": "Total"
     },
 
     "points": {
@@ -140,8 +148,24 @@
       "discountId": "Discount ID",
       "noDiscounts": "No discounts available for this member",
       "noDiscountsDescription": "This member has no active discounts.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "discountValue": "Discount Value",
+      "minimumPurchase": "Minimum Purchase",
+      "usageLimit": "Usage Limit",
+      "validFrom": "Valid From",
+      "validUntil": "Valid Until",
       "value": "Value",
       "expires": "Expires"
+    },
+
+    "rewards": {
+      "noRewards": "No rewards claimed by this member",
+      "noRewardsDescription": "This member has no claimed rewards.",
+      "pointsCost": "Points Cost",
+      "claimDate": "Claim Date",
+      "status": "Status",
+      "description": "Description"
     },
 
     "ban": {

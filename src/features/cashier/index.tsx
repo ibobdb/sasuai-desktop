@@ -7,6 +7,7 @@ import TransactionSummary from './components/summary'
 import PaymentDialog from './components/payment-dialog'
 import { PaymentStatusDialog } from './components/payment-status-dialog'
 import { MemberSection } from './components/member-section'
+import { RedeemCodeSection } from './components/redeem-code-section'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CreditCard, X } from 'lucide-react'
@@ -20,19 +21,19 @@ import {
   Product,
   TransactionData,
   Member,
-  MemberDiscount,
   TransactionItem
 } from '@/types/cashier'
+import { isDiscountValid } from './utils'
 
 export default function Cashier() {
   const { t } = useTranslation(['cashier'])
   const [cart, setCart] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
-  const [member, setMember] = useState<
-    (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  >(null)
+  const [member, setMember] = useState<Member | null>(null)
   const [selectedMemberDiscount, setSelectedMemberDiscount] = useState<Discount | null>(null)
+  const [selectedTierDiscount, setSelectedTierDiscount] = useState<Discount | null>(null)
+  const [globalDiscount, setGlobalDiscount] = useState<Discount | null>(null)
   const [isProcessingTransaction, setIsProcessingTransaction] = useState(false)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [pointsToEarn, setPointsToEarn] = useState<number>(0)
@@ -53,12 +54,33 @@ export default function Cashier() {
 
   // Calculate member discount amount if applicable
   const memberDiscountAmount = selectedMemberDiscount
-    ? selectedMemberDiscount.valueType === 'percentage'
+    ? selectedMemberDiscount.type === 'PERCENTAGE'
       ? (subtotal - productDiscountsTotal) * (selectedMemberDiscount.value / 100)
       : Math.min(selectedMemberDiscount.value, subtotal - productDiscountsTotal)
     : 0
 
-  const totalDiscount = productDiscountsTotal + memberDiscountAmount
+  // Calculate tier discount amount if applicable
+  const tierDiscountAmount = selectedTierDiscount
+    ? selectedTierDiscount.type === 'PERCENTAGE'
+      ? (subtotal - productDiscountsTotal) * (selectedTierDiscount.value / 100)
+      : Math.min(selectedTierDiscount.value, subtotal - productDiscountsTotal)
+    : 0
+
+  // Calculate global discount amount if applicable
+  const globalDiscountAmount = globalDiscount
+    ? globalDiscount.type === 'PERCENTAGE'
+      ? (subtotal - productDiscountsTotal) * (globalDiscount.value / 100)
+      : Math.min(globalDiscount.value, subtotal - productDiscountsTotal)
+    : 0
+
+  // Only apply one type of discount (member, tier, or global)
+  const totalGeneralDiscount =
+    memberDiscountAmount > 0
+      ? memberDiscountAmount
+      : tierDiscountAmount > 0
+        ? tierDiscountAmount
+        : globalDiscountAmount
+  const totalDiscount = productDiscountsTotal + totalGeneralDiscount
   const tax = 0 // Implement tax calculation if needed
   const total = subtotal - totalDiscount
 
@@ -148,7 +170,7 @@ export default function Cashier() {
 
     const itemTotal = price * quantity
 
-    if (discount.valueType === 'percentage') {
+    if (discount.type === 'PERCENTAGE') {
       return itemTotal * (discount.value / 100)
     } else {
       return Math.min(discount.value, itemTotal)
@@ -216,26 +238,60 @@ export default function Cashier() {
   }
 
   // Handle member selection and their available discounts
-  const handleMemberSelect = (
-    selectedMember: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  ) => {
+  const handleMemberSelect = (selectedMember: Member | null) => {
     setMember(selectedMember)
 
-    // Reset member discount when changing members
+    // Reset discounts when changing members
     setSelectedMemberDiscount(null)
+    setSelectedTierDiscount(null)
+    setGlobalDiscount(null)
 
-    // Auto-select member discount if only one is available and meets minimum purchase
-    if (selectedMember?.discountRelationsMember?.length === 1) {
-      const memberDiscount = selectedMember.discountRelationsMember[0].discount
-      if (subtotal >= memberDiscount.minPurchase) {
-        setSelectedMemberDiscount(memberDiscount)
+    if (selectedMember) {
+      // Check if member has personal discounts
+      const memberDiscounts = (selectedMember.discounts || []).filter(isDiscountValid)
+
+      // Check if tier has discounts
+      const tierDiscounts = (selectedMember.tier?.discounts || []).filter(isDiscountValid)
+
+      // Auto-select member personal discount if only one is available and meets minimum purchase
+      if (memberDiscounts.length === 1 && subtotal >= memberDiscounts[0].minPurchase) {
+        setSelectedMemberDiscount(memberDiscounts[0])
+      }
+      // Otherwise, auto-select tier discount if only one is available and meets minimum purchase
+      else if (tierDiscounts.length === 1 && subtotal >= tierDiscounts[0].minPurchase) {
+        setSelectedTierDiscount(tierDiscounts[0])
       }
     }
   }
 
   // Handle member discount selection
   const handleMemberDiscountSelect = (discount: Discount | null) => {
-    setSelectedMemberDiscount(discount)
+    // Check if this is a tier discount
+    const isTierDiscount = member?.tier?.discounts?.some((d) => d.id === discount?.id)
+
+    if (isTierDiscount) {
+      setSelectedTierDiscount(discount)
+      setSelectedMemberDiscount(null) // Clear member personal discount
+    } else {
+      setSelectedMemberDiscount(discount)
+      setSelectedTierDiscount(null) // Clear tier discount
+    }
+
+    // Clear global discount if any member discount is selected
+    if (discount) {
+      setGlobalDiscount(null)
+    }
+  }
+
+  // Handle global discount code application
+  const handleGlobalDiscountApply = (discount: Discount | null) => {
+    setGlobalDiscount(discount)
+
+    // Clear member and tier discounts if global discount is applied
+    if (discount) {
+      setSelectedMemberDiscount(null)
+      setSelectedTierDiscount(null)
+    }
   }
 
   // Clear cart and reset transaction state
@@ -244,6 +300,8 @@ export default function Cashier() {
     setPaymentAmount(0)
     setMember(null)
     setSelectedMemberDiscount(null)
+    setSelectedTierDiscount(null)
+    setGlobalDiscount(null)
   }
 
   // Validate transaction before processing
@@ -289,6 +347,61 @@ export default function Cashier() {
       return false
     }
 
+    // Validate tier discount minimum purchase
+    if (selectedTierDiscount && subtotal < selectedTierDiscount.minPurchase) {
+      toast.error(t('cashier.validation.cannotApplyDiscount'), {
+        description: t('cashier.validation.cannotApplyDiscountDescription', {
+          amount: selectedTierDiscount.minPurchase.toLocaleString()
+        })
+      })
+      return false
+    }
+
+    // Check if any selected discounts have reached usage limits
+    const cartItemWithInvalidDiscount = cart.find(
+      (item) => item.selectedDiscount && !isDiscountValid(item.selectedDiscount)
+    )
+
+    if (cartItemWithInvalidDiscount) {
+      toast.error(t('cashier.validation.invalidDiscount'), {
+        description: t('cashier.validation.invalidDiscountDescription', {
+          product: cartItemWithInvalidDiscount.name,
+          discount: cartItemWithInvalidDiscount.selectedDiscount?.name
+        })
+      })
+      return false
+    }
+
+    // Check member personal discount validity
+    if (selectedMemberDiscount && !isDiscountValid(selectedMemberDiscount)) {
+      toast.error(t('cashier.validation.invalidMemberDiscount'), {
+        description: t('cashier.validation.invalidMemberDiscountDescription', {
+          discount: selectedMemberDiscount.name
+        })
+      })
+      return false
+    }
+
+    // Check tier discount validity
+    if (selectedTierDiscount && !isDiscountValid(selectedTierDiscount)) {
+      toast.error(t('cashier.validation.invalidTierDiscount'), {
+        description: t('cashier.validation.invalidTierDiscountDescription', {
+          discount: selectedTierDiscount.name
+        })
+      })
+      return false
+    }
+
+    // Check global discount validity
+    if (globalDiscount && !isDiscountValid(globalDiscount)) {
+      toast.error(t('cashier.validation.invalidGlobalDiscount'), {
+        description: t('cashier.validation.invalidGlobalDiscountDescription', {
+          discount: globalDiscount.name
+        })
+      })
+      return false
+    }
+
     return true
   }
 
@@ -323,11 +436,13 @@ export default function Cashier() {
         }
       })
 
-      // Prepare complete transaction data
+      // Prepare complete transaction data including tier discount
       const transactionData: TransactionData = {
         cashierId: user?.id || '',
         memberId: member?.id,
         selectedMemberDiscountId: selectedMemberDiscount?.id || null,
+        selectedTierDiscountId: selectedTierDiscount?.id || null,
+        globalDiscountCode: globalDiscount?.code || null,
         totalAmount,
         finalAmount,
         paymentMethod,
@@ -448,10 +563,21 @@ export default function Cashier() {
         <MemberSection
           onMemberSelect={handleMemberSelect}
           onMemberDiscountSelect={handleMemberDiscountSelect}
-          selectedDiscount={selectedMemberDiscount}
+          selectedDiscount={selectedMemberDiscount || selectedTierDiscount}
           subtotal={subtotal}
           member={member}
         />
+
+        {/* 3.5 Redeem Code Section - Only if member is selected */}
+        {member && (
+          <RedeemCodeSection
+            onApplyDiscount={handleGlobalDiscountApply}
+            appliedDiscount={globalDiscount}
+            disabled={!!selectedMemberDiscount || !!selectedTierDiscount}
+            disabledReason={t('cashier.redeemCode.memberDiscountAlreadyApplied')}
+            subtotal={subtotal}
+          />
+        )}
 
         {/* 4. Transaction Summary */}
         <Card>
@@ -461,6 +587,8 @@ export default function Cashier() {
               subtotal={subtotal}
               productDiscounts={productDiscountsTotal}
               memberDiscount={memberDiscountAmount}
+              tierDiscount={tierDiscountAmount}
+              globalDiscount={globalDiscountAmount}
               tax={tax}
               total={total}
               pointsToEarn={pointsToEarn}
@@ -517,10 +645,23 @@ export default function Cashier() {
             <MemberSection
               onMemberSelect={handleMemberSelect}
               onMemberDiscountSelect={handleMemberDiscountSelect}
-              selectedDiscount={selectedMemberDiscount}
+              selectedDiscount={selectedMemberDiscount || selectedTierDiscount}
               subtotal={subtotal}
               member={member}
             />
+
+            {/* Add Redeem Code Section - Only if member is selected */}
+            {member && (
+              <div className="mt-3">
+                <RedeemCodeSection
+                  onApplyDiscount={handleGlobalDiscountApply}
+                  appliedDiscount={globalDiscount}
+                  disabled={!!selectedMemberDiscount || !!selectedTierDiscount}
+                  disabledReason={t('cashier.redeemCode.memberDiscountAlreadyApplied')}
+                  subtotal={subtotal}
+                />
+              </div>
+            )}
 
             <Card className="mt-4">
               <CardContent className="pt-6">
@@ -529,6 +670,8 @@ export default function Cashier() {
                   subtotal={subtotal}
                   productDiscounts={productDiscountsTotal}
                   memberDiscount={memberDiscountAmount}
+                  tierDiscount={tierDiscountAmount}
+                  globalDiscount={globalDiscountAmount}
                   tax={tax}
                   total={total}
                   pointsToEarn={pointsToEarn}

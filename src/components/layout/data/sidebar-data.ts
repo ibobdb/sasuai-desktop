@@ -35,7 +35,7 @@ export const sidebarData: SidebarData = {
           icon: IconUsersGroup
         },
         {
-          title: 'Rewards',
+          title: 'sidebar:navGroups.items.rewards',
           url: '/rewards',
           icon: IconGift
         }

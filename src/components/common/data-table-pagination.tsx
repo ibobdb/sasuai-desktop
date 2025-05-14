@@ -31,12 +31,13 @@ export function DataTablePagination<TData>({ table, totalCount }: DataTablePagin
       <div className="text-muted-foreground flex-1 text-sm">
         <span className="hidden sm:inline-block">
           {table.getFilteredSelectedRowModel().rows.length} {t('table.pagination.of')}{' '}
-          {table.getFilteredRowModel().rows.length} {t('table.pagination.entries')}
+          {table.getFilteredRowModel().rows.length} {t('table.pagination.entries')}.
         </span>
         {/* Add total count display */}
         <span className="ml-2">
-          {t('table.pagination.showing')}:{' '}
+          {'Total '}
           {totalCount !== undefined ? totalCount : table.getFilteredRowModel().rows.length}
+          {' data.'}
         </span>
       </div>
       <div className="flex items-center sm:space-x-6 lg:space-x-8">

@@ -53,7 +53,10 @@
       "memberDiscount": "Member Discount:",
       "selectDiscount": "Select discount",
       "removeDiscount": "Remove Discount",
-      "minPurchase": "Min. purchase: Rp {{amount}}"
+      "minPurchase": "Min. purchase: Rp {{amount}}",
+      "discounts": "Available Discounts",
+      "tierDiscount": "tier",
+      "personalDiscount": "personal"
     },
     "memberSearch": {
       "placeholder": "Search member ...",
@@ -114,7 +117,9 @@
       "productDiscounts": "Product Discounts:",
       "memberDiscount": "Member Discount:",
       "total": "Total:",
-      "pointsToEarn": "Points to earn:"
+      "pointsToEarn": "Points to earn:",
+      "globalDiscount": "Voucher Discount:",
+      "tierDiscount": "Tier Discount:"
     },
     "actions": {
       "clearCart": "Clear Cart",
@@ -130,13 +135,42 @@
       "insufficientPayment": "Insufficient payment amount",
       "insufficientPaymentDescription": "Payment amount must be at least Rp {{amount}}",
       "cannotApplyDiscount": "Cannot apply member discount",
-      "cannotApplyDiscountDescription": "Minimum purchase of Rp {{amount}} required"
+      "cannotApplyDiscountDescription": "Minimum purchase of Rp {{amount}} required",
+      "invalidDiscount": "Invalid product discount",
+      "invalidDiscountDescription": "The discount for {{product}} ({{discount}}) has reached its usage limit or is no longer valid",
+      "invalidMemberDiscount": "Invalid member discount",
+      "invalidMemberDiscountDescription": "The discount {{discount}} has reached its usage limit or is no longer valid",
+      "invalidGlobalDiscount": "Invalid voucher code",
+      "invalidGlobalDiscountDescription": "The voucher code {{discount}} has expired or reached its usage limit",
+      "invalidTierDiscount": "Invalid tier discount",
+      "invalidTierDiscountDescription": "The tier discount {{discount}} is no longer valid"
     },
     "fields": {
       "required": "{{field}} is required",
       "validEmail": "Please enter a valid email address",
       "validPhone": "Please enter a valid phone number",
       "optional": "(optional)"
+    },
+    "errors": {
+      "calculatePoints": "Failed to calculate points",
+      "calculatePointsDescription": "An error occurred while calculating points. Please try again."
+    },
+    "redeemCode": {
+      "title": "Redeem Voucher",
+      "placeholder": "Enter voucher code",
+      "apply": "Apply",
+      "emptyCode": "Please enter a voucher code",
+      "invalidCode": "Invalid voucher code",
+      "tryAnotherCode": "Please try another code or check for typos",
+      "validationError": "Error validating code",
+      "tryAgainLater": "Please try again later",
+      "codeApplied": "Voucher code applied",
+      "discountAdded": "Discount {{name}} has been added",
+      "discountRemoved": "Discount has been removed",
+      "alreadyHasDiscount": "You already have a member discount applied. Remove it first to apply a voucher code.",
+      "memberDiscountAlreadyApplied": "Member discount is already applied. Remove it to use a voucher code.",
+      "minimumPurchaseNotMet": "Minimum purchase requirement not met",
+      "minimumPurchaseRequired": "This voucher requires a minimum purchase of Rp {{amount}}"
     }
   }
 }

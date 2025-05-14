@@ -4,21 +4,23 @@
 export type Discount = {
   id: string
   name: string
-  valueType: 'percentage' | 'fixed'
+  code?: string
+  description?: string
+  type: 'FIXED_AMOUNT' | 'PERCENTAGE' // Updated from valueType
   value: number
-  discountType: 'product' | 'member'
   minPurchase: number
   startDate: string
   endDate: string
   isActive: boolean
+  isGlobal?: boolean
+  maxUses?: number
+  usedCount?: number
+  applyTo?: 'SPECIFIC_PRODUCTS' | 'ALL_PRODUCTS' | 'SPECIFIC_MEMBERS'
+  createdAt?: string
+  updatedAt?: string
 }
 
 // Product related types
-export type ProductDiscount = {
-  discountId: string
-  productId: string
-  discount: Discount
-}
 
 export type Product = {
   id: string
@@ -27,14 +29,14 @@ export type Product = {
   barcode?: string
   currentStock: number
   skuCode?: string
-  unitId: string // Add this field
+  unitId: string
   batches?: Array<{
     id: string
     buyPrice: number
     expiryDate: string
     remainingQuantity: number
   }>
-  discountRelationProduct?: ProductDiscount[]
+  discounts?: Discount[] // New direct discounts array replacing discountRelationProduct
 }
 
 export type ProductResponse = {
@@ -71,19 +73,15 @@ export type Member = {
   totalPointsEarned: number
   joinDate: string
   isBanned?: boolean
+  banReason?: string
   tier: {
     name?: string
     level?: string
-    multiplier?: number // Add multiplier to tier type
+    multiplier?: number
+    discounts?: Discount[] // Add tier discounts
   } | null
   cardId?: string | null
-  discountRelationsMember?: MemberDiscount[]
-}
-
-export type MemberDiscount = {
-  discountId: string
-  memberId: string
-  discount: Discount
+  discounts?: Discount[] // Direct member discounts
 }
 
 export type MemberResponse = {
@@ -114,6 +112,8 @@ export type TransactionData = {
   cashierId: string
   memberId?: string | null
   selectedMemberDiscountId?: string | null
+  selectedTierDiscountId?: string | null // Add this field for tier discounts
+  globalDiscountCode?: string | null
   totalAmount: number
   finalAmount: number
   paymentMethod: PaymentMethod
@@ -127,6 +127,8 @@ export type TransactionSummaryProps = {
   subtotal: number
   productDiscounts: number
   memberDiscount: number
+  tierDiscount: number // Add this field for tier discounts
+  globalDiscount: number
   tax: number
   total: number
   pointsToEarn?: number // Points that will be earned from this transaction
@@ -149,13 +151,11 @@ export type CartListProps = {
 }
 
 export type MemberSectionProps = {
-  onMemberSelect?: (
-    member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null
-  ) => void
+  onMemberSelect?: (member: Member | null) => void
   onMemberDiscountSelect?: (discount: Discount | null) => void
   selectedDiscount: Discount | null
   subtotal?: number
-  member: (Member & { discountRelationsMember?: MemberDiscount[] }) | null // Add this prop
+  member: Member | null
 }
 
 export type PaymentSectionProps = {

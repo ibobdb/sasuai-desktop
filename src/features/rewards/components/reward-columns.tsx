@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,6 +10,8 @@ import { format } from 'date-fns'
 
 // Create a custom hook for getting columns
 export function useRewardColumns(): ColumnDef<Reward>[] {
+  const { t } = useTranslation(['rewards'])
+
   // Use useMemo to prevent unnecessary recreations of the columns array
   return useMemo(
     () => [
@@ -44,25 +47,31 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
       },
       {
         accessorKey: 'name',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
         cell: ({ row }) => <div className="font-medium">{row.getValue('name') as string}</div>,
         enableHiding: false
       },
       {
         accessorKey: 'description',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('table.description')} />
+        ),
         cell: ({ row }) => {
           const description = row.getValue('description') as string | null
           return (
             <div className="max-w-[400px] truncate">
-              {description || <span className="text-muted-foreground">No description</span>}
+              {description || (
+                <span className="text-muted-foreground">{t('table.noDescription')}</span>
+              )}
             </div>
           )
         }
       },
       {
         accessorKey: 'pointsCost',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Points Cost" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('table.pointsCost')} />
+        ),
         cell: ({ row }) => (
           <div className="font-medium">
             {(row.getValue('pointsCost') as number).toLocaleString()} pts
@@ -72,7 +81,7 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
       },
       {
         accessorKey: 'stock',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Stock" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.stock')} />,
         cell: ({ row }) => {
           const stock = row.getValue('stock') as number
           // Apply color based on stock level
@@ -87,7 +96,7 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
       },
       {
         id: 'isActive',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
         cell: ({ row }) => {
           const isActive = row.original.isActive
           const expiryDate = row.original.expiryDate ? new Date(row.original.expiryDate) : null
@@ -99,16 +108,16 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
           let variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'warning'
 
           if (!isActive) {
-            status = 'Inactive'
+            status = t('statusOptions.inactive')
             variant = 'outline'
           } else if (isExpired) {
-            status = 'Expired'
+            status = t('statusOptions.expired')
             variant = 'destructive'
           } else if (outOfStock) {
-            status = 'Out of Stock'
+            status = t('statusOptions.outOfStock')
             variant = 'secondary'
           } else {
-            status = 'Active'
+            status = t('statusOptions.active')
             variant = 'default'
           }
 
@@ -132,12 +141,14 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
       },
       {
         accessorKey: 'expiryDate',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Expiry Date" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('table.expiryDate')} />
+        ),
         cell: ({ row }) => {
           const expiryDate = row.getValue('expiryDate') as string | null
 
           if (!expiryDate) {
-            return <span className="text-muted-foreground">No expiry</span>
+            return <span className="text-muted-foreground">{t('table.noExpiry')}</span>
           }
 
           const date = new Date(expiryDate)
@@ -158,7 +169,9 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
             <div className={textClass}>
               {format(date, 'PPP')}
               {daysRemaining >= 0 && daysRemaining < 30 && (
-                <div className="text-xs opacity-75">{daysRemaining} days left</div>
+                <div className="text-xs opacity-75">
+                  {t('table.daysLeft', { count: daysRemaining })}
+                </div>
               )}
             </div>
           )
@@ -166,7 +179,7 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
       },
       {
         id: 'rewardClaims',
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Claims" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.claims')} />,
         cell: ({ row }) => {
           const claimCount = row.original._count?.rewardClaims || 0
           return (
@@ -182,6 +195,6 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
         }
       }
     ],
-    []
+    [t]
   )
 }
