@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.1...v1.6.2) (2025-05-19)
+
+
+### Bug Fixes
+
+* **cookies:** enhance cookie handling with secure prefixes ([fc110be](https://github.com/ibobdb/sasuai-dekstop/commit/fc110be9667ece9026efeefbd8fcfb9647cc983d))
+
 ## [1.6.1](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.0...v1.6.1) (2025-05-19)
 
 
