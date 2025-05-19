@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.2.0...v1.3.0) (2025-05-14)
+
+
+### Features
+
+* **cashier:** implement tier and global discount functionality ([e808030](https://github.com/ibobdb/sasuai-dekstop/commit/e8080305ea22b11017d9dfd8eb64ce8058a35c10))
+* **cashier:** refactor discount handling and validation ([2100844](https://github.com/ibobdb/sasuai-dekstop/commit/210084447ec3f5abdc59a6493cf7e4423b759ce6))
+* Implement rewards management feature with claims functionality ([56563ce](https://github.com/ibobdb/sasuai-dekstop/commit/56563ce7b2794b2a0bcf0d88e31bb45c19e3a525))
+* **member:** add rewards claims tab and localization support ([1daf6d6](https://github.com/ibobdb/sasuai-dekstop/commit/1daf6d6696d864d57623c843d6303be5d35af617))
+* **member:** enhance member view dialog with discount details and localization ([f39f415](https://github.com/ibobdb/sasuai-dekstop/commit/f39f415246324e399743a8749d281ab14f504eff))
+* **transactions:** enhance discount display and localization support ([28afdfb](https://github.com/ibobdb/sasuai-dekstop/commit/28afdfbccf3314b742c4dc5bec317966016bcc9b))
+
+
+### Bug Fixes
+
+* **data-table-pagination:** correct total count display and punctuation in pagination text ([3c53d1c](https://github.com/ibobdb/sasuai-dekstop/commit/3c53d1c63206a32f35188ffa98d1100dd69e6745))
+
 ## [1.2.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.1.3...v1.2.0) (2025-05-06)
 
 ### Features
