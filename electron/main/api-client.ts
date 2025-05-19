@@ -33,6 +33,9 @@ export const createApiClient = () => {
               url: `http://${COOKIE_DOMAIN}`,
               name: AUTH_COOKIE_NAME,
               value: authToken,
+              secure: true,
+              httpOnly: true,
+              sameSite: 'strict',
               domain: COOKIE_DOMAIN
             })
             .catch(() => {})
