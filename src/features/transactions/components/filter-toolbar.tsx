@@ -1,11 +1,12 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DateRange } from 'react-day-picker'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
-import { DateRangeFilter } from '@/components/common/date-range-filter'
 import { AmountRangeFilter } from '@/components/common/amount-range-filter'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
 import { paymentMethods } from '@/lib/payment-methods'
 import { useTransactions } from '../context/transactions-context'
+import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker-with-presets'
 
 function FilterToolbarComponent() {
   const { t } = useTranslation(['transactions'])
@@ -46,27 +47,18 @@ function FilterToolbarComponent() {
     })
   }
 
-  // Update start date in UI state
-  const handleStartDateChange = (date: Date | undefined) => {
+  // Handle date range change
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
     setFilterUIState((prev) => ({
       ...prev,
-      startDate: date
+      startDate: dateRange?.from || undefined,
+      endDate: dateRange?.to || undefined
     }))
-  }
 
-  // Update end date in UI state
-  const handleEndDateChange = (date: Date | undefined) => {
-    setFilterUIState((prev) => ({
-      ...prev,
-      endDate: date
-    }))
-  }
-
-  // Apply date range filter
-  const applyDateFilter = () => {
+    // Apply the filter immediately when a date range is selected
     updateFilters({
-      startDate,
-      endDate,
+      startDate: dateRange?.from || undefined,
+      endDate: dateRange?.to || undefined,
       page: 1
     })
   }
@@ -101,6 +93,10 @@ function FilterToolbarComponent() {
     handleSearchChange('')
   }
 
+  // Create date range object for the picker
+  const dateRange: DateRange | undefined =
+    startDate || endDate ? { from: startDate, to: endDate } : undefined
+
   // Determine if any filters are applied
   const hasFilters = !!(
     search ||
@@ -132,12 +128,10 @@ function FilterToolbarComponent() {
             selectedValues={selectedPaymentMethods}
           />
 
-          <DateRangeFilter
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={handleStartDateChange}
-            onEndDateChange={handleEndDateChange}
-            onApply={applyDateFilter}
+          <DateRangePickerWithPresets
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            isCompact={true}
           />
 
           <AmountRangeFilter
