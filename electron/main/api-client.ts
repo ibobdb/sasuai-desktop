@@ -30,7 +30,7 @@ export const createApiClient = () => {
           // Restore the cookie from the store value
           await persistentSession.cookies
             .set({
-              url: `http://${COOKIE_DOMAIN}`,
+              url: `https://${COOKIE_DOMAIN}`,
               name: AUTH_COOKIE_NAME,
               value: authToken,
               secure: true,
