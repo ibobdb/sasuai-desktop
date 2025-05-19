@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.5.0...v1.6.0) (2025-05-19)
+
+
+### Features
+
+* **api:** enhance cookie security settings for authentication ([163ffe3](https://github.com/ibobdb/sasuai-dekstop/commit/163ffe3f6eb83d1fe03cb2371644a57444f634d8))
+
 ## [1.5.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.4.0...v1.5.0) (2025-05-19)
 
 
