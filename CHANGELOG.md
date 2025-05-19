@@ -2,19 +2,17 @@
 
 ## [1.4.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.3.0...v1.4.0) (2025-05-19)
 
-
 ### Features
 
-* **api:** change API base URL to production ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
-* **constants:** update cookie configuration for production environment ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
-* **index:** update Content Security Policy to use production domain ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
-* **styles:** update theme to modern minimal ([88767ff](https://github.com/ibobdb/sasuai-dekstop/commit/88767fff474d0c68522b42a889d97479ed7d42cf))
-* **transactions:** enhance filter toolbar with date range picker functionality ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
-
+- **api:** change API base URL to production ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
+- **constants:** update cookie configuration for production environment ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
+- **index:** update Content Security Policy to use production domain ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
+- **styles:** update theme to modern minimal ([88767ff](https://github.com/ibobdb/sasuai-dekstop/commit/88767fff474d0c68522b42a889d97479ed7d42cf))
+- **transactions:** enhance filter toolbar with date range picker functionality ([7e56295](https://github.com/ibobdb/sasuai-dekstop/commit/7e5629526b466e8f31016bdee1ceb6f5c24b7b51))
 
 ### Chores
 
-* **changelog:** update changelog for version 1.3.0 ([59f90e6](https://github.com/ibobdb/sasuai-dekstop/commit/59f90e608fdb559fbf4452db43bd55a73fd0d514))
+- **changelog:** update changelog for version 1.3.0 ([59f90e6](https://github.com/ibobdb/sasuai-dekstop/commit/59f90e608fdb559fbf4452db43bd55a73fd0d514))
 
 ## [1.3.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.2.0...v1.3.0) (2025-05-14)
 
