@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.4.0...v1.5.0) (2025-05-19)
+
+
+### Features
+
+* **constants:** update cookie names for production environment ([d965dae](https://github.com/ibobdb/sasuai-dekstop/commit/d965dae80219436785132ff1de0dcaedfef9fe75))
+
 ## [1.4.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.3.0...v1.4.0) (2025-05-19)
 
 ### Features
