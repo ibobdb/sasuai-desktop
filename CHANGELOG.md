@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.0...v1.6.1) (2025-05-19)
+
+
+### Bug Fixes
+
+* **api:** update cookie URL to use HTTPS for secure transmission ([e796dd6](https://github.com/ibobdb/sasuai-dekstop/commit/e796dd66e23014de367f181637ae48298ba98582))
+
 ## [1.6.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.5.0...v1.6.0) (2025-05-19)
 
 
