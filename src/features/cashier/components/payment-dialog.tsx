@@ -69,18 +69,35 @@ export default function PaymentDialog({
   // Reset amount string and focus input when dialog opens
   useEffect(() => {
     if (open) {
-      const valueString = paymentAmount > 0 ? paymentAmount.toString() : ''
-      setAmountString(valueString)
+      // For non-cash payments, automatically set to total amount
+      if (paymentMethod !== 'cash') {
+        setAmountString(total.toString())
+        onPaymentAmountChange(total)
+      } else {
+        const valueString = paymentAmount > 0 ? paymentAmount.toString() : ''
+        setAmountString(valueString)
+      }
 
-      // Focus the input field after a short delay to ensure the dialog is fully rendered
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus()
-          setInputFocused(true)
-        }
-      }, 50)
+      // Focus the input field after a short delay to ensure the dialog is fully rendered (only for cash)
+      if (paymentMethod === 'cash') {
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus()
+            setInputFocused(true)
+          }
+        }, 50)
+      }
     }
-  }, [open, paymentAmount])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, paymentAmount, paymentMethod, total])
+
+  // Auto-set amount for non-cash payments when method changes
+  useEffect(() => {
+    if (paymentMethod !== 'cash') {
+      setAmountString(total.toString())
+      onPaymentAmountChange(total)
+    }
+  }, [paymentMethod, total, onPaymentAmountChange])
 
   // Handle numeric keypad input
   const handleKeypadInput = (value: string) => {
@@ -157,15 +174,25 @@ export default function PaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={isProcessing ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden">
+      <DialogContent
+        className={cn(
+          'p-0 overflow-hidden',
+          paymentMethod === 'cash' ? 'sm:max-w-[850px]' : 'sm:max-w-[500px]'
+        )}
+      >
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>{t('cashier.payment.title')}</DialogTitle>
           <DialogDescription>{t('cashier.payment.description')}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+        <div
+          className={cn(
+            'h-full',
+            paymentMethod === 'cash' ? 'grid grid-cols-1 lg:grid-cols-2' : 'block'
+          )}
+        >
           {/* Left column - Payment info */}
-          <div className="p-6 pt-0 border-r">
+          <div className={cn('p-6 pt-0', paymentMethod === 'cash' ? 'border-r' : '')}>
             <div className="space-y-4">
               {/* Total to be paid */}
               <div className="bg-primary/10 rounded-md p-3 flex justify-between items-center">
@@ -204,11 +231,46 @@ export default function PaymentDialog({
                 </Select>
               </div>
 
+              {/* Non-cash payment amount display */}
+              {paymentMethod !== 'cash' && (
+                <div className="space-y-3">
+                  <div className="bg-accent/20 rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center mb-3">
+                      {getPaymentMethodIcon(paymentMethod)}
+                      <span className="font-medium text-lg ml-2">
+                        {paymentMethods.find((p) => p.value === paymentMethod)?.label}
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {t('cashier.payment.paymentAmount')}
+                    </div>
+                    <div className="text-3xl font-bold text-primary">Rp {formatNumber(total)}</div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3">
+                      {paymentMethod === 'debit' && t('cashier.payment.instructions.debit')}
+                      {paymentMethod === 'e-wallet' && t('cashier.payment.instructions.ewallet')}
+                      {paymentMethod === 'qris' && t('cashier.payment.instructions.qris')}
+                      {paymentMethod === 'transfer' && t('cashier.payment.instructions.transfer')}
+                      {paymentMethod === 'other' && t('cashier.payment.instructions.other')}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Quick cash selection buttons - only show for cash payment */}
               {paymentMethod === 'cash' && (
                 <div className="space-y-2">
                   <Label>{t('cashier.payment.quickCash')}</Label>
                   <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={paymentAmount === total ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleQuickAmount(total)}
+                      className="text-sm h-12 font-medium"
+                    >
+                      💰 {t('cashier.payment.exactAmount')}
+                    </Button>
                     {[20000, 50000, 100000, 200000].map((amount) => (
                       <Button
                         key={amount}
@@ -236,87 +298,89 @@ export default function PaymentDialog({
             </div>
           </div>
 
-          {/* Right column - Numeric keypad */}
-          <div className="p-6 pt-0 flex flex-col">
-            <div className="space-y-2 mb-4">
-              <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
-                {t('cashier.payment.paymentAmount')}
-              </Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground text-2xl">
-                  Rp
+          {/* Right column - Numeric keypad (only show for cash) */}
+          {paymentMethod === 'cash' && (
+            <div className="p-6 pt-0 flex flex-col">
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
+                  {t('cashier.payment.paymentAmount')}
+                </Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted-foreground text-2xl">
+                    Rp
+                  </div>
+                  <Input
+                    ref={inputRef}
+                    id="paymentAmount"
+                    value={getFormattedInputValue()}
+                    onChange={handleInputChange}
+                    onFocus={() => {
+                      setInputFocused(true)
+                      setTimeout(() => {
+                        if (inputRef.current) {
+                          const len = inputRef.current.value.length
+                          inputRef.current.setSelectionRange(len, len)
+                        }
+                      }, 0)
+                    }}
+                    onBlur={() => setInputFocused(false)}
+                    onKeyDown={handleKeyDown}
+                    className="pl-12 text-right font-bold h-16 [&:not(:focus)]:text-2xl [&:focus]:text-2xl"
+                    style={{ fontSize: '1.5rem' }}
+                    autoFocus
+                    tabIndex={1}
+                  />
                 </div>
-                <Input
-                  ref={inputRef}
-                  id="paymentAmount"
-                  value={getFormattedInputValue()}
-                  onChange={handleInputChange}
-                  onFocus={() => {
-                    setInputFocused(true)
-                    setTimeout(() => {
-                      if (inputRef.current) {
-                        const len = inputRef.current.value.length
-                        inputRef.current.setSelectionRange(len, len)
-                      }
-                    }, 0)
-                  }}
-                  onBlur={() => setInputFocused(false)}
-                  onKeyDown={handleKeyDown}
-                  className="pl-12 text-right font-bold h-16 [&:not(:focus)]:text-2xl [&:focus]:text-2xl"
-                  style={{ fontSize: '1.5rem' }}
-                  autoFocus
-                  tabIndex={1}
-                />
               </div>
-            </div>
 
-            {/* Numeric keypad */}
-            <div className="flex-1 flex flex-col">
-              <div className="grid grid-cols-3 gap-2 flex-1">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              {/* Numeric keypad */}
+              <div className="flex-1 flex flex-col min-h-[400px]">
+                <div className="grid grid-cols-3 gap-2 flex-1">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                    <Button
+                      key={num}
+                      variant="outline"
+                      className="h-16 text-2xl font-semibold hover:bg-primary/10"
+                      onClick={() => handleKeypadInput(num.toString())}
+                    >
+                      {num}
+                    </Button>
+                  ))}
                   <Button
-                    key={num}
                     variant="outline"
                     className="h-16 text-2xl font-semibold hover:bg-primary/10"
-                    onClick={() => handleKeypadInput(num.toString())}
+                    onClick={() => handleKeypadInput('0')}
                   >
-                    {num}
+                    0
                   </Button>
-                ))}
-                <Button
-                  variant="outline"
-                  className="h-16 text-2xl font-semibold hover:bg-primary/10"
-                  onClick={() => handleKeypadInput('0')}
-                >
-                  0
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-16 text-2xl font-semibold hover:bg-primary/10"
-                  onClick={() => handleKeypadInput('000')}
-                >
-                  000
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-16 hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => handleKeypadInput('backspace')}
-                >
-                  <ArrowLeft className="h-6 w-6" />
-                </Button>
-              </div>
+                  <Button
+                    variant="outline"
+                    className="h-16 text-2xl font-semibold hover:bg-primary/10"
+                    onClick={() => handleKeypadInput('000')}
+                  >
+                    000
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-16 hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => handleKeypadInput('backspace')}
+                  >
+                    <ArrowLeft className="h-6 w-6" />
+                  </Button>
+                </div>
 
-              <div className="mt-2 grid grid-cols-1 gap-2">
-                <Button
-                  variant="ghost"
-                  className="h-12 hover:bg-destructive/10 hover:text-destructive"
-                  onClick={() => handleKeypadInput('clear')}
-                >
-                  <Delete className="mr-2 h-4 w-4" /> {t('cashier.actions.clear')}
-                </Button>
+                <div className="mt-2 grid grid-cols-1 gap-2">
+                  <Button
+                    variant="ghost"
+                    className="h-12 hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => handleKeypadInput('clear')}
+                  >
+                    <Delete className="mr-2 h-4 w-4" /> {t('cashier.actions.clear')}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <DialogFooter className="p-6 pt-2 border-t">

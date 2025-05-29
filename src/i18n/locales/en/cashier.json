@@ -96,7 +96,15 @@
       "payNow": "Pay now",
       "processing": "Processing...",
       "enterAmount": "Enter payment amount",
-      "clear": "Clear"
+      "clear": "Clear",
+      "exactAmount": "Exact Amount",
+      "instructions": {
+        "debit": "Please insert your debit card and follow the instructions on the EDC machine",
+        "ewallet": "Please use your e-wallet app to make the payment",
+        "qris": "Please scan the QR code to make the payment",
+        "transfer": "Please transfer to the specified account",
+        "other": "Please follow the payment instructions"
+      }
     },
     "paymentStatus": {
       "success": "Payment Successful",
