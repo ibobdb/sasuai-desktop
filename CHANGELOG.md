@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.4](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.3...v1.6.4) (2025-05-29)
+
+
+### Bug Fixes
+
+* **device-info:** add device information retrieval for enhanced session tracking ([be4b71e](https://github.com/ibobdb/sasuai-desktop/commit/be4b71e533020d91c3dd4f0e8301ec9d7b28c83c))
+* **profile-dropdown, update-dialog, i18n:** implement internationalization for update messages and actions ([f1bad83](https://github.com/ibobdb/sasuai-desktop/commit/f1bad838cf392b8c3e1521622baa982b12832940))
+* **updater:** enhance auto-update functionality and user preferences ([c7844e1](https://github.com/ibobdb/sasuai-desktop/commit/c7844e1ee6530f3f2f1fea038bced608331a649b))
+
 ## [1.6.3](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.2...v1.6.3) (2025-05-29)
 
 
