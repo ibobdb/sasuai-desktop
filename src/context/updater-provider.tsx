@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
 interface UpdateInfo {
   version: string
@@ -17,19 +17,14 @@ interface UpdateProgress {
   total: number
 }
 
-interface AppInfo {
-  name: string
-  version: string
-}
-
 interface UpdaterContextType {
-  checking: boolean
   available: boolean
   updateInfo: UpdateInfo | null
   downloadProgress: UpdateProgress | null
   downloaded: boolean
   error: Error | null
-  appInfo: AppInfo
+  checking: boolean
+  appInfo: { version: string; name: string } | null
   checkForUpdates: () => Promise<void>
   downloadUpdate: () => Promise<void>
   installUpdate: () => Promise<void>
@@ -38,16 +33,13 @@ interface UpdaterContextType {
 const UpdaterContext = createContext<UpdaterContextType | undefined>(undefined)
 
 export function UpdaterProvider({ children }: { children: React.ReactNode }) {
-  const [checking, setChecking] = useState(false)
   const [available, setAvailable] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [downloadProgress, setDownloadProgress] = useState<UpdateProgress | null>(null)
   const [downloaded, setDownloaded] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const [appInfo, setAppInfo] = useState<AppInfo>({ name: '', version: '' })
-
-  // Use a ref to track if an update check is in progress
-  const checkInProgressRef = useRef(false)
+  const [checking, setChecking] = useState(false)
+  const [appInfo, setAppInfo] = useState<{ version: string; name: string } | null>(null)
 
   // Fetch app info on mount
   useEffect(() => {
@@ -125,24 +117,14 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
 
   // Check for updates with debounce
   const checkForUpdates = useCallback(async () => {
-    // Prevent multiple simultaneous checks
-    if (checkInProgressRef.current) {
-      return
-    }
-
     try {
-      checkInProgressRef.current = true
       setChecking(true)
       setError(null)
       await window.api.updater.checkForUpdates()
     } catch (err) {
-      setError(err as Error)
+      setError(err instanceof Error ? err : new Error('Failed to check for updates'))
     } finally {
-      setChecking(false)
-      // Allow next check after a short delay
-      setTimeout(() => {
-        checkInProgressRef.current = false
-      }, 2000)
+      setTimeout(() => setChecking(false), 500) // Minimum checking duration for UX
     }
   }, [])
 
@@ -165,24 +147,20 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  return (
-    <UpdaterContext.Provider
-      value={{
-        checking,
-        available,
-        updateInfo,
-        downloadProgress,
-        downloaded,
-        error,
-        appInfo,
-        checkForUpdates,
-        downloadUpdate,
-        installUpdate
-      }}
-    >
-      {children}
-    </UpdaterContext.Provider>
-  )
+  const value: UpdaterContextType = {
+    available,
+    updateInfo,
+    downloadProgress,
+    downloaded,
+    error,
+    checking,
+    appInfo,
+    checkForUpdates,
+    downloadUpdate,
+    installUpdate
+  }
+
+  return <UpdaterContext.Provider value={value}>{children}</UpdaterContext.Provider>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

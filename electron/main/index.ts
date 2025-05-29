@@ -17,7 +17,7 @@ export const PERSIST_PARTITION = 'persist:sasuai-store-app'
 // Reference to the persistent session
 export let persistentSession: Electron.Session
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -29,8 +29,8 @@ app.whenReady().then(() => {
   // Initialize persistent session
   persistentSession = session.fromPartition(PERSIST_PARTITION)
 
-  // Create the main window
-  createWindow()
+  // Create the main window (now async)
+  await createWindow()
 
   // Setup the auto updater (only if the window exists)
   const mainWindow = getMainWindow()
@@ -45,8 +45,8 @@ app.whenReady().then(() => {
   setupStoreHandlers()
   setupLanguageHandlers()
 
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  app.on('activate', async function () {
+    if (BrowserWindow.getAllWindows().length === 0) await createWindow()
   })
 })
 

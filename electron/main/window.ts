@@ -3,10 +3,14 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { PERSIST_PARTITION, persistentSession } from './index'
+import { getDeviceInfo } from './device-info'
 
 let mainWindow: BrowserWindow | null = null
 
-export function createWindow(): BrowserWindow {
+export async function createWindow(): Promise<BrowserWindow> {
+  // Get device info for user agent
+  const deviceInfo = await getDeviceInfo()
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -22,6 +26,9 @@ export function createWindow(): BrowserWindow {
       partition: PERSIST_PARTITION
     }
   })
+
+  // Set custom user agent for the webContents
+  mainWindow.webContents.setUserAgent(deviceInfo.userAgent)
 
   // Add navigation event handlers to flush cookies
   mainWindow.webContents.on('did-start-navigation', () => {
