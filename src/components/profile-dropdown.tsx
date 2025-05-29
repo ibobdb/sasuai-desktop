@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { LogOut, RefreshCw, Download, CheckCircle, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { UpdateDialog } from './update-dialog'
+import { useTranslation } from 'react-i18next'
 
 export function ProfileDropdown() {
   const { user, signOut } = useAuth()
@@ -24,6 +25,7 @@ export function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)
   const [showUpdateDialog, setShowUpdateDialog] = useState(false)
   const [isManualCheck, setIsManualCheck] = useState(false)
+  const { t } = useTranslation(['common', 'updater'])
 
   const handleLogout = async () => {
     try {
@@ -46,13 +48,13 @@ export function ProfileDropdown() {
         if (available && updateInfo) {
           setShowUpdateDialog(true)
         } else {
-          toast.success('You are using the latest version!')
+          toast.success(t('updater:messages.upToDate'))
         }
         setIsManualCheck(false)
       }, 1000)
     } catch (error) {
       console.error('Update check failed:', error)
-      toast.error('Failed to check for updates. Please try again.')
+      toast.error(t('updater:messages.checkFailed'))
       setIsManualCheck(false)
     }
   }
@@ -61,7 +63,7 @@ export function ProfileDropdown() {
     if (checking || isManualCheck) {
       return {
         icon: RefreshCw,
-        text: 'Checking for updates...',
+        text: t('updater:status.checking'),
         iconClassName: 'animate-spin',
         textClassName: 'text-muted-foreground'
       }
@@ -70,7 +72,7 @@ export function ProfileDropdown() {
     if (error) {
       return {
         icon: AlertCircle,
-        text: 'Check for updates',
+        text: t('updater:status.checkForUpdates'),
         iconClassName: 'text-destructive',
         textClassName: ''
       }
@@ -79,7 +81,7 @@ export function ProfileDropdown() {
     if (available) {
       return {
         icon: Download,
-        text: `Update available`,
+        text: t('updater:status.updateAvailable'),
         iconClassName: 'text-primary animate-pulse',
         textClassName: 'text-primary font-medium'
       }
@@ -87,7 +89,7 @@ export function ProfileDropdown() {
 
     return {
       icon: CheckCircle,
-      text: 'Check for updates',
+      text: t('updater:status.checkForUpdates'),
       iconClassName: 'text-muted-foreground',
       textClassName: ''
     }
@@ -162,7 +164,7 @@ export function ProfileDropdown() {
             onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            <span>{t('common:actions.logout')}</span>
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>

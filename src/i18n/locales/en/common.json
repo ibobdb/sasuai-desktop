@@ -5,18 +5,20 @@
     "error": "An error occurred. Please try again."
   },
   "actions": {
-    "save": "Save",
+    "logout": "Log out",
+    "close": "Close",
     "cancel": "Cancel",
+    "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "close": "Close",
-    "print": "Print",
-    "search": "Search",
-    "reset": "Reset",
-    "apply": "Apply",
-    "minimize": "Minimize",
-    "maximize": "Maximize",
-    "restore": "Restore"
+    "add": "Add",
+    "confirm": "Confirm"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "processing": "Processing..."
   },
   "commandMenu": {
     "placeholder": "Type a command or search...",
