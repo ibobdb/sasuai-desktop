@@ -96,7 +96,15 @@
       "payNow": "Bayar sekarang",
       "processing": "Memproses...",
       "enterAmount": "Masukkan jumlah pembayaran",
-      "clear": "Hapus"
+      "clear": "Hapus",
+      "exactAmount": "Uang Pas",
+      "instructions": {
+        "debit": "Silakan masukkan kartu debit dan ikuti instruksi pada mesin EDC",
+        "ewallet": "Silakan gunakan aplikasi e-wallet untuk melakukan pembayaran",
+        "qris": "Silakan scan QR code untuk melakukan pembayaran",
+        "transfer": "Silakan transfer ke rekening yang tertera",
+        "other": "Silakan ikuti instruksi pembayaran"
+      }
     },
     "paymentStatus": {
       "success": "Pembayaran Berhasil",
