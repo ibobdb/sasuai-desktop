@@ -66,7 +66,7 @@ export default function PaymentDialog({
     return numericValue.toLocaleString('id-ID')
   }
 
-  // Reset amount string and focus input when dialog opens
+  // Reset amount string and focus input when dialog opens or payment method changes
   useEffect(() => {
     if (open) {
       // For non-cash payments, automatically set to total amount
@@ -76,10 +76,8 @@ export default function PaymentDialog({
       } else {
         const valueString = paymentAmount > 0 ? paymentAmount.toString() : ''
         setAmountString(valueString)
-      }
 
-      // Focus the input field after a short delay to ensure the dialog is fully rendered (only for cash)
-      if (paymentMethod === 'cash') {
+        // Focus the input field after a short delay to ensure the dialog is fully rendered (only for cash)
         setTimeout(() => {
           if (inputRef.current) {
             inputRef.current.focus()
@@ -88,16 +86,7 @@ export default function PaymentDialog({
         }, 50)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, paymentAmount, paymentMethod, total])
-
-  // Auto-set amount for non-cash payments when method changes
-  useEffect(() => {
-    if (paymentMethod !== 'cash') {
-      setAmountString(total.toString())
-      onPaymentAmountChange(total)
-    }
-  }, [paymentMethod, total, onPaymentAmountChange])
+  }, [open, paymentMethod, total, paymentAmount, onPaymentAmountChange])
 
   // Handle numeric keypad input
   const handleKeypadInput = (value: string) => {
