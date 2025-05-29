@@ -2,31 +2,27 @@
 
 ## [1.6.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.1...v1.6.2) (2025-05-19)
 
-
 ### Bug Fixes
 
-* **cookies:** enhance cookie handling with secure prefixes ([fc110be](https://github.com/ibobdb/sasuai-dekstop/commit/fc110be9667ece9026efeefbd8fcfb9647cc983d))
+- **cookies:** enhance cookie handling with secure prefixes ([fc110be](https://github.com/ibobdb/sasuai-dekstop/commit/fc110be9667ece9026efeefbd8fcfb9647cc983d))
 
 ## [1.6.1](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.0...v1.6.1) (2025-05-19)
 
-
 ### Bug Fixes
 
-* **api:** update cookie URL to use HTTPS for secure transmission ([e796dd6](https://github.com/ibobdb/sasuai-dekstop/commit/e796dd66e23014de367f181637ae48298ba98582))
+- **api:** update cookie URL to use HTTPS for secure transmission ([e796dd6](https://github.com/ibobdb/sasuai-dekstop/commit/e796dd66e23014de367f181637ae48298ba98582))
 
 ## [1.6.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.5.0...v1.6.0) (2025-05-19)
 
-
 ### Features
 
-* **api:** enhance cookie security settings for authentication ([163ffe3](https://github.com/ibobdb/sasuai-dekstop/commit/163ffe3f6eb83d1fe03cb2371644a57444f634d8))
+- **api:** enhance cookie security settings for authentication ([163ffe3](https://github.com/ibobdb/sasuai-dekstop/commit/163ffe3f6eb83d1fe03cb2371644a57444f634d8))
 
 ## [1.5.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.4.0...v1.5.0) (2025-05-19)
 
-
 ### Features
 
-* **constants:** update cookie names for production environment ([d965dae](https://github.com/ibobdb/sasuai-dekstop/commit/d965dae80219436785132ff1de0dcaedfef9fe75))
+- **constants:** update cookie names for production environment ([d965dae](https://github.com/ibobdb/sasuai-dekstop/commit/d965dae80219436785132ff1de0dcaedfef9fe75))
 
 ## [1.4.0](https://github.com/ibobdb/sasuai-dekstop/compare/v1.3.0...v1.4.0) (2025-05-19)
 
