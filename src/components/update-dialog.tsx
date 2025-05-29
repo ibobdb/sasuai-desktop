@@ -61,14 +61,23 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
   }, [downloadProgress])
 
   // Store update preference if user chooses "Later"
-  const handleLater = () => {
+  const handleLater = async () => {
     if (mode === 'auto') {
       // Store the update to be shown next time
-      window.api.store.set('update.pending', {
+      await window.api.store.set('update.pending', {
         version: updateInfo?.version,
         releaseNotes: updateInfo?.releaseNotes,
         date: new Date().toISOString()
       })
+    }
+    onOpenChange(false)
+  }
+
+  // Handle "Don't show again for this version"
+  const handleDontShowAgain = async () => {
+    if (updateInfo?.version) {
+      await window.api.store.set('update.dismissedVersion', updateInfo.version)
+      await window.api.store.set('preferences.autoUpdateNotifications', false)
     }
     onOpenChange(false)
   }
@@ -108,10 +117,10 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
     if (!updateInfo?.version || !appInfo?.version) return null
 
     return (
-      <div className="flex items-center text-sm space-x-2 mt-1">
-        <span className="font-mono">{appInfo.version}</span>
-        <ArrowRight className="h-3 w-3" />
-        <span className="font-mono font-medium">{updateInfo.version}</span>
+      <div className="flex items-center justify-center text-sm space-x-2 mt-3 p-2 bg-muted/30 rounded-md">
+        <span className="font-mono text-muted-foreground">{appInfo.version}</span>
+        <ArrowRight className="h-3 w-3 text-muted-foreground" />
+        <span className="font-mono font-semibold text-foreground">{updateInfo.version}</span>
         {updateType && (
           <Badge
             variant={
@@ -121,6 +130,7 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
                   ? 'default'
                   : 'outline'
             }
+            className="ml-2"
           >
             {t(`dialog.version.types.${updateType}`)}
           </Badge>
@@ -174,16 +184,20 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
             <DialogDescription className="mt-2">
               {t('dialog.ready.description', { version: updateInfo?.version })}
             </DialogDescription>
-            {getVersionDiff()}
           </DialogHeader>
 
-          <div className="bg-primary/10 border border-primary/20 rounded-md p-3 mt-4">
-            <p className="text-sm">{t('dialog.ready.saveWorkMessage')}</p>
+          {getVersionDiff()}
+
+          <div className="bg-primary/10 border border-primary/20 rounded-md p-4 mt-4">
+            <div className="flex items-center">
+              <RefreshCw className="h-4 w-4 mr-2 text-primary" />
+              <p className="text-sm font-medium">{t('dialog.ready.saveWorkMessage')}</p>
+            </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button onClick={handleUpdate} variant="default" className="relative group">
-              <span className="flex items-center">
+            <Button onClick={handleUpdate} variant="default" className="relative group w-full">
+              <span className="flex items-center justify-center">
                 <RefreshCw className="h-4 w-4 mr-2 transition-transform group-hover:rotate-90" />
                 {t('dialog.actions.restartAndInstall')}
               </span>
@@ -198,19 +212,20 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
         <>
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Download className="h-5 w-5 mr-2 text-primary" />
+              <Download className="h-5 w-5 mr-2 text-primary animate-pulse" />
               {t('dialog.downloading.title')}
             </DialogTitle>
             <DialogDescription className="mt-2">
               {t('dialog.downloading.description', { version: updateInfo?.version })}
             </DialogDescription>
-            {getVersionDiff()}
           </DialogHeader>
 
-          <div className="mt-4 space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>{Math.round(downloadProgress.percent)}%</span>
+          {getVersionDiff()}
+
+          <div className="mt-6 space-y-4">
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm font-medium">
+                <span>{Math.round(downloadProgress.percent)}% Complete</span>
                 {remainingTime && (
                   <span className="flex items-center text-muted-foreground">
                     <Clock className="h-3 w-3 mr-1" />
@@ -218,27 +233,29 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
                   </span>
                 )}
               </div>
-              <Progress value={downloadProgress.percent} className="h-2" />
+              <Progress value={downloadProgress.percent} className="h-3" />
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <div className="bg-muted/30 rounded p-2 flex flex-col">
-                <span>{t('dialog.downloadStats.downloaded')}</span>
-                <span className="font-medium text-foreground">
-                  {(downloadProgress.transferred / 1048576).toFixed(2)} MB
-                </span>
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="bg-muted/30 rounded-lg p-3 text-center">
+                <div className="text-muted-foreground mb-1">
+                  {t('dialog.downloadStats.downloaded')}
+                </div>
+                <div className="font-semibold text-sm">
+                  {(downloadProgress.transferred / 1048576).toFixed(1)} MB
+                </div>
               </div>
-              <div className="bg-muted/30 rounded p-2 flex flex-col">
-                <span>{t('dialog.downloadStats.total')}</span>
-                <span className="font-medium text-foreground">
-                  {(downloadProgress.total / 1048576).toFixed(2)} MB
-                </span>
+              <div className="bg-muted/30 rounded-lg p-3 text-center">
+                <div className="text-muted-foreground mb-1">{t('dialog.downloadStats.total')}</div>
+                <div className="font-semibold text-sm">
+                  {(downloadProgress.total / 1048576).toFixed(1)} MB
+                </div>
               </div>
-              <div className="bg-muted/30 rounded p-2 flex flex-col col-span-2">
-                <span>{t('dialog.downloadStats.speed')}</span>
-                <span className="font-medium text-foreground">
-                  {(downloadProgress.bytesPerSecond / 1048576).toFixed(2)} MB/s
-                </span>
+              <div className="bg-muted/30 rounded-lg p-3 text-center">
+                <div className="text-muted-foreground mb-1">{t('dialog.downloadStats.speed')}</div>
+                <div className="font-semibold text-sm">
+                  {(downloadProgress.bytesPerSecond / 1048576).toFixed(1)} MB/s
+                </div>
               </div>
             </div>
           </div>
@@ -250,19 +267,20 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
       <>
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <RefreshCw className="h-5 w-5 mr-2 text-primary" />
+            <Download className="h-5 w-5 mr-2 text-primary" />
             {t('dialog.available.title')}
           </DialogTitle>
           <DialogDescription className="mt-2">
             {t('dialog.available.description')}
           </DialogDescription>
-          {getVersionDiff()}
         </DialogHeader>
 
+        {getVersionDiff()}
+
         {updateInfo?.releaseNotes && (
-          <div className="my-4">
+          <div className="my-6">
             <div
-              className="flex justify-between items-center cursor-pointer mb-2"
+              className="flex justify-between items-center cursor-pointer mb-3 p-2 rounded-md hover:bg-muted/30 transition-colors"
               onClick={() => setShowNotes(!showNotes)}
             >
               <h4 className="font-medium">{t('dialog.releaseNotes')}</h4>
@@ -273,7 +291,7 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
               )}
             </div>
             {showNotes && (
-              <div className="max-h-60 overflow-y-auto border rounded-md p-3 bg-muted/30">
+              <div className="max-h-60 overflow-y-auto border rounded-lg p-4 bg-muted/20">
                 <div
                   className="prose prose-sm max-w-none dark:prose-invert"
                   dangerouslySetInnerHTML={{ __html: updateInfo.releaseNotes }}
@@ -284,20 +302,39 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
         )}
 
         <DialogFooter className="mt-6 gap-2">
-          {showLater && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={handleLater}>
-                    <Clock className="h-4 w-4 mr-2" />
-                    {t('dialog.actions.later')}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">{t('dialog.tooltip.later')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {showLater && mode === 'auto' && (
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" onClick={handleDontShowAgain} size="sm">
+                      Don&apos;t show again
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Won&apos;t show auto notifications for this version</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={handleLater}>
+                      <Clock className="h-4 w-4 mr-2" />
+                      {t('dialog.actions.later')}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">{t('dialog.tooltip.later')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          )}
+          {mode === 'manual' && (
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
           )}
           <Button onClick={handleUpdate} className="relative group">
             <span className="flex items-center">
