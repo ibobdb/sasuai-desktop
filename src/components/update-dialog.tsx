@@ -308,11 +308,11 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" onClick={handleDontShowAgain} size="sm">
-                      Don&apos;t show again
+                      {t('dialog.actions.dontShowAgain')}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p className="text-xs">Won&apos;t show auto notifications for this version</p>
+                    <p className="text-xs">{t('dialog.tooltip.dontShowAgain')}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -333,7 +333,7 @@ export function UpdateDialog({ open, onOpenChange, mode = 'auto' }: UpdateDialog
           )}
           {mode === 'manual' && (
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close
+              {t('dialog.actions.close')}
             </Button>
           )}
           <Button onClick={handleUpdate} className="relative group">

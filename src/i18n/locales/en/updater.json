@@ -1,4 +1,13 @@
 {
+  "status": {
+    "checking": "Checking for updates...",
+    "checkForUpdates": "Check for updates",
+    "updateAvailable": "Update available"
+  },
+  "messages": {
+    "upToDate": "You are using the latest version!",
+    "checkFailed": "Failed to check for updates. Please try again."
+  },
   "dialog": {
     "available": {
       "title": "Update Available",
@@ -23,7 +32,8 @@
       "later": "Later",
       "restartAndInstall": "Restart and Install",
       "close": "Close",
-      "tryAgain": "Try Again"
+      "tryAgain": "Try Again",
+      "dontShowAgain": "Don't show again"
     },
     "releaseNotes": "Release Notes:",
     "downloadStats": {
@@ -33,7 +43,8 @@
       "timeRemaining": "{{time}} remaining"
     },
     "tooltip": {
-      "later": "You'll be reminded later"
+      "later": "You'll be reminded later",
+      "dontShowAgain": "Won't show auto notifications for this version"
     },
     "version": {
       "current": "Current version",

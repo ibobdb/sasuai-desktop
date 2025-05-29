@@ -1,4 +1,13 @@
 {
+  "status": {
+    "checking": "Memeriksa update...",
+    "checkForUpdates": "Periksa update",
+    "updateAvailable": "Update tersedia"
+  },
+  "messages": {
+    "upToDate": "Anda menggunakan versi terbaru!",
+    "checkFailed": "Gagal memeriksa update. Silakan coba lagi."
+  },
   "dialog": {
     "available": {
       "title": "Update Tersedia",
@@ -23,7 +32,8 @@
       "later": "Nanti",
       "restartAndInstall": "Restart dan Instal",
       "close": "Tutup",
-      "tryAgain": "Coba Lagi"
+      "tryAgain": "Coba Lagi",
+      "dontShowAgain": "Jangan tampilkan lagi"
     },
     "releaseNotes": "Catatan Rilis:",
     "downloadStats": {
@@ -33,7 +43,8 @@
       "timeRemaining": "{{time}} tersisa"
     },
     "tooltip": {
-      "later": "Anda akan diingatkan lagi nanti"
+      "later": "Anda akan diingatkan lagi nanti",
+      "dontShowAgain": "Tidak akan menampilkan notifikasi otomatis untuk versi ini"
     },
     "version": {
       "current": "Versi saat ini",

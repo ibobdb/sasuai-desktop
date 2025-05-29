@@ -16,7 +16,10 @@
     "apply": "Terapkan",
     "minimize": "Kecilkan",
     "maximize": "Perbesar",
-    "restore": "Pulihkan"
+    "restore": "Pulihkan",
+    "logout": "Keluar",
+    "add": "Tambah",
+    "confirm": "Konfirmasi"
   },
   "commandMenu": {
     "placeholder": "Ketik perintah atau cari...",
@@ -48,5 +51,11 @@
     "light": "Terang",
     "dark": "Gelap",
     "system": "Sistem"
+  },
+  "status": {
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "success": "Berhasil",
+    "processing": "Memproses..."
   }
 }
