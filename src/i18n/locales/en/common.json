@@ -50,5 +50,17 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "datePicker": {
+    "placeholder": "Pick a date range",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "last7days": "Last 7 Days",
+      "last30days": "Last 30 Days",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisYear": "This Year"
+    }
   }
 }

@@ -22,8 +22,7 @@ function FilterToolbarComponent() {
     setFilterUIState,
     updateFilters,
     resetFilters: contextResetFilters,
-    debouncedSearch,
-    executeSearch
+    debouncedSearch
   } = useMembers()
 
   const { search, tier: selectedTiers } = filterUIState
@@ -61,7 +60,6 @@ function FilterToolbarComponent() {
       onResetFilters={handleResetFilters}
       searchValue={search}
       searchPlaceholder={t('member.filters.searchPlaceholder')}
-      onSearchSubmit={() => executeSearch(search)}
       hasFilters={hasFilters}
       filterComponents={
         <div className="flex flex-wrap gap-2">

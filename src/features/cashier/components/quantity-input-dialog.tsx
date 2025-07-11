@@ -36,14 +36,15 @@ export function QuantityInputDialog({
   useEffect(() => {
     if (open && product) {
       setQuantity(1)
-      // Focus the input after dialog opens
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.select()
-        }
-      }, 100)
     }
   }, [open, product])
+
+  // Focus input when dialog opens
+  useEffect(() => {
+    if (open && inputRef.current) {
+      inputRef.current.select()
+    }
+  }, [open])
 
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1)
@@ -234,7 +235,6 @@ export function QuantityInputDialog({
                 min="1"
                 max={maxQuantity}
                 aria-label={t('cashier.quantityDialog.productQuantity')}
-                autoFocus
               />
 
               <Button

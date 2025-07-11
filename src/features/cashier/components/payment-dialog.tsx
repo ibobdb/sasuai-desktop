@@ -76,17 +76,17 @@ export default function PaymentDialog({
       } else {
         const valueString = paymentAmount > 0 ? paymentAmount.toString() : ''
         setAmountString(valueString)
-
-        // Focus the input field after a short delay to ensure the dialog is fully rendered (only for cash)
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.focus()
-            setInputFocused(true)
-          }
-        }, 50)
       }
     }
   }, [open, paymentMethod, total, paymentAmount, onPaymentAmountChange])
+
+  // Focus input after dialog is fully rendered (cash only)
+  useEffect(() => {
+    if (open && paymentMethod === 'cash' && inputRef.current) {
+      inputRef.current.focus()
+      setInputFocused(true)
+    }
+  }, [open, paymentMethod])
 
   // Handle numeric keypad input
   const handleKeypadInput = (value: string) => {
@@ -316,7 +316,6 @@ export default function PaymentDialog({
                     onKeyDown={handleKeyDown}
                     className="pl-12 text-right font-bold h-16 [&:not(:focus)]:text-2xl [&:focus]:text-2xl"
                     style={{ fontSize: '1.5rem' }}
-                    autoFocus
                     tabIndex={1}
                   />
                 </div>

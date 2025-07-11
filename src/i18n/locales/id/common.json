@@ -57,5 +57,17 @@
     "error": "Terjadi kesalahan",
     "success": "Berhasil",
     "processing": "Memproses..."
+  },
+  "datePicker": {
+    "placeholder": "Pilih rentang tanggal",
+    "presets": {
+      "today": "Hari Ini",
+      "yesterday": "Kemarin",
+      "last7days": "7 Hari Terakhir",
+      "last30days": "30 Hari Terakhir",
+      "thisWeek": "Minggu Ini",
+      "thisMonth": "Bulan Ini",
+      "thisYear": "Tahun Ini"
+    }
   }
 }

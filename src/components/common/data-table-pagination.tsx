@@ -28,7 +28,7 @@ export function DataTablePagination<TData>({ table, totalCount }: DataTablePagin
       className="flex items-center justify-between overflow-clip px-2"
       style={{ overflowClipMargin: 1 }}
     >
-      <div className="text-muted-foreground flex-1 text-sm">
+      <div className="text-muted-foreground flex-1 text-xs">
         <span className="hidden sm:inline-block">
           {table.getFilteredSelectedRowModel().rows.length} {t('table.pagination.of')}{' '}
           {table.getFilteredRowModel().rows.length} {t('table.pagination.entries')}.
@@ -61,7 +61,7 @@ export function DataTablePagination<TData>({ table, totalCount }: DataTablePagin
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+        <div className="flex w-[120px] items-center justify-center text-xs font-medium">
           {t('table.pagination.page', { defaultValue: 'Page' })}{' '}
           {table.getState().pagination.pageIndex + 1} {t('table.pagination.of')}{' '}
           {table.getPageCount()}

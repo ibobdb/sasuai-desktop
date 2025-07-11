@@ -4,6 +4,7 @@ import * as React from 'react'
 import { CalendarIcon } from '@radix-ui/react-icons'
 import { format } from 'date-fns'
 import { DateRange } from 'react-day-picker'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -35,6 +36,7 @@ export function DateRangePickerWithPresets({
   align = 'center',
   isCompact = false
 }: DateRangePickerProps) {
+  const { t } = useTranslation(['common'])
   const [date, setDate] = React.useState<DateRange | undefined>(value)
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -45,12 +47,12 @@ export function DateRangePickerWithPresets({
 
   // Format date based on compact mode
   const formatDate = (date: Date) => {
-    return isCompact ? format(date, 'MM/dd/yy') : format(date, 'LLL dd, y')
+    return isCompact ? format(date, 'dd/MM/yy') : format(date, 'dd MMM yyyy')
   }
 
   // Get display text for date range
   const getDateRangeText = () => {
-    if (!date?.from) return <span>Pick a date range</span>
+    if (!date?.from) return <span>{t('datePicker.placeholder')}</span>
 
     if (!date.to) return formatDate(date.from)
 
@@ -141,10 +143,10 @@ export function DateRangePickerWithPresets({
           <Button
             id="date"
             variant={'outline'}
+            size="sm"
             className={cn(
-              'w-full justify-start text-left font-normal',
-              !date && 'text-muted-foreground',
-              date && 'border-primary text-primary'
+              'h-8 w-full justify-start text-left font-normal border-dashed',
+              date && 'border-primary text-primary bg-primary/5'
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
@@ -175,7 +177,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('today')}
                 className="justify-start text-xs"
               >
-                Today
+                {t('datePicker.presets.today')}
               </Button>
               <Button
                 variant="outline"
@@ -183,7 +185,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('yesterday')}
                 className="justify-start text-xs"
               >
-                Yesterday
+                {t('datePicker.presets.yesterday')}
               </Button>
               <Button
                 variant="outline"
@@ -191,7 +193,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('last7days')}
                 className="justify-start text-xs"
               >
-                Last 7 Days
+                {t('datePicker.presets.last7days')}
               </Button>
               <Button
                 variant="outline"
@@ -199,7 +201,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('last30days')}
                 className="justify-start text-xs"
               >
-                Last 30 Days
+                {t('datePicker.presets.last30days')}
               </Button>
               <Button
                 variant="outline"
@@ -207,7 +209,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('thisWeek')}
                 className="justify-start text-xs"
               >
-                This Week
+                {t('datePicker.presets.thisWeek')}
               </Button>
               <Button
                 variant="outline"
@@ -215,7 +217,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('thisMonth')}
                 className="justify-start text-xs"
               >
-                This Month
+                {t('datePicker.presets.thisMonth')}
               </Button>
               <Button
                 variant="outline"
@@ -223,7 +225,7 @@ export function DateRangePickerWithPresets({
                 onClick={() => applyDatePreset('thisYear')}
                 className="justify-start text-xs"
               >
-                This Year
+                {t('datePicker.presets.thisYear')}
               </Button>
             </div>
           </div>

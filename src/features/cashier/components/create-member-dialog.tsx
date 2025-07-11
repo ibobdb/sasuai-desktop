@@ -163,7 +163,6 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className={errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}
                 disabled={isLoading}
-                autoFocus
               />
               {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
             </div>

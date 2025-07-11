@@ -84,4 +84,5 @@ export interface RewardClaimFilterUIState {
     from: Date | null
     to: Date | null
   }
+  status: string[]
 }

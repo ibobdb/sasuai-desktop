@@ -51,13 +51,15 @@
       "paymentMethod": "Payment Method",
       "dateRange": "Date Range",
       "amountRange": "Amount Range",
+      "amountRangeDescription": "Set the minimum and maximum amount range for filtering transactions.",
       "startDate": "Start Date",
       "endDate": "End Date",
       "applyDates": "Apply Dates",
       "minAmount": "Min amount",
       "maxAmount": "Max amount",
       "to": "to",
-      "applyAmount": "Apply Amount"
+      "applyAmount": "Apply Amount",
+      "clear": "Clear"
     },
     "detail-dialog": {
       "loading": "Loading Transaction Details"

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { UserPlus, RefreshCw } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { useMemberColumns } from './components/member-columns'
 import { MemberDialogs } from './components/member-dialogs'
 import { MemberTable } from './components/member-table'
@@ -48,28 +48,18 @@ function MemberContent() {
     [updateFilters]
   )
 
-  // Handle refresh button click
-  const handleRefresh = () => {
-    applyFilters()
-  }
-
   // Ensure we're working with an array
   const memberData = Array.isArray(members) ? members : []
 
   return (
     <>
       <Main>
-        <div className="mb-2 flex flex-wrap items-center justify-between space-y-2">
+        <div className="mb-4 flex flex-wrap items-center justify-between space-y-2">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">{t('member.title')}</h2>
             <p className="text-muted-foreground">{t('member.description')}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t('member.actions.refresh')}
-            </Button>
-
             <Button onClick={() => setOpen('create')}>
               <UserPlus className="mr-2 h-4 w-4" />
               {t('member.actions.addMember')}

@@ -186,7 +186,6 @@ export default function CartList({
                                 value={quantityInput}
                                 onChange={(e) => setQuantityInput(e.target.value)}
                                 className="w-16 h-8 text-center"
-                                autoFocus
                                 min="1"
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') finishEditingQuantity(item.id)

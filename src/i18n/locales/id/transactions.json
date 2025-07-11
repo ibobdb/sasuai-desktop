@@ -51,13 +51,15 @@
       "paymentMethod": "Metode Pembayaran",
       "dateRange": "Rentang Tanggal",
       "amountRange": "Rentang Jumlah",
+      "amountRangeDescription": "Atur rentang jumlah minimum dan maksimum untuk menyaring transaksi.",
       "startDate": "Tanggal Mulai",
       "endDate": "Tanggal Selesai",
       "applyDates": "Terapkan Tanggal",
       "minAmount": "Jumlah minimum",
       "maxAmount": "Jumlah maksimum",
       "to": "sampai",
-      "applyAmount": "Terapkan Jumlah"
+      "applyAmount": "Terapkan Jumlah",
+      "clear": "Hapus"
     },
     "detail-dialog": {
       "loading": "Memuat Detail Transaksi"

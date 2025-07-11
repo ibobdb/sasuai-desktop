@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
@@ -85,27 +85,30 @@ export default function Cashier() {
   const total = subtotal - totalDiscount
 
   // Function to calculate points
-  const calculatePoints = async (amount: number, memberId?: string) => {
-    try {
-      const data = await window.api.request(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
-        method: 'POST',
-        data: {
-          amount,
-          memberId
-        }
-      })
+  const calculatePoints = useCallback(
+    async (amount: number, memberId?: string) => {
+      try {
+        const data = await window.api.request(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
+          method: 'POST',
+          data: {
+            amount,
+            memberId
+          }
+        })
 
-      if (data.points !== undefined) {
-        setPointsToEarn(data.points)
+        if (data.points !== undefined) {
+          setPointsToEarn(data.points)
+        }
+      } catch (error) {
+        console.error('Error calculating points:', error)
+        setPointsToEarn(0)
+        toast.error(t('cashier.errors.calculatePoints'), {
+          description: t('cashier.errors.calculatePointsDescription')
+        })
       }
-    } catch (error) {
-      console.error('Error calculating points:', error)
-      setPointsToEarn(0)
-      toast.error(t('cashier.errors.calculatePoints'), {
-        description: t('cashier.errors.calculatePointsDescription')
-      })
-    }
-  }
+    },
+    [t]
+  )
 
   const handleOpenPaymentDialog = () => {
     setPaymentDialogOpen(true)
@@ -519,7 +522,7 @@ export default function Cashier() {
     } else {
       setPointsToEarn(0)
     }
-  }, [subtotal, member])
+  }, [subtotal, member, calculatePoints])
 
   // Add global keyboard shortcut for payment (Ctrl+P)
   useEffect(() => {

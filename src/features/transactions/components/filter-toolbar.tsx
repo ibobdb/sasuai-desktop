@@ -2,11 +2,11 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRange } from 'react-day-picker'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
-import { AmountRangeFilter } from '@/components/common/amount-range-filter'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
 import { paymentMethods } from '@/lib/payment-methods'
 import { useTransactions } from '../context/transactions-context'
 import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker-with-presets'
+import { AmountRangePicker } from '@/components/ui/amount-range-picker'
 
 function FilterToolbarComponent() {
   const { t } = useTranslation(['transactions'])
@@ -15,8 +15,7 @@ function FilterToolbarComponent() {
     setFilterUIState,
     updateFilters,
     resetFilters: contextResetFilters,
-    debouncedSearch,
-    executeSearch
+    debouncedSearch
   } = useTransactions()
 
   const {
@@ -113,7 +112,6 @@ function FilterToolbarComponent() {
       onResetFilters={handleResetFilters}
       searchValue={search}
       searchPlaceholder={t('transaction.filters.searchPlaceholder')}
-      onSearchSubmit={() => executeSearch(search)}
       hasFilters={hasFilters}
       filterComponents={
         <div className="flex flex-wrap gap-2">
@@ -134,7 +132,7 @@ function FilterToolbarComponent() {
             isCompact={true}
           />
 
-          <AmountRangeFilter
+          <AmountRangePicker
             minAmount={minAmount}
             maxAmount={maxAmount}
             onMinAmountChange={handleMinAmountChange}

@@ -37,7 +37,8 @@ const defaultFilterUIState: RewardClaimFilterUIState = {
   dateRange: {
     from: null,
     to: null
-  }
+  },
+  status: []
 }
 
 export function RewardClaimsProvider({ children }: Props) {
@@ -60,6 +61,8 @@ export function RewardClaimsProvider({ children }: Props) {
     }
 
     searchTimeoutRef.current = setTimeout(() => {
+      // Update search without clearing other filter UI state
+      setFilterUIState((prev) => ({ ...prev, search: searchTerm }))
       setFilters((prev) => ({ ...prev, search: searchTerm, page: 1 }))
     }, 500)
   }, [])
@@ -105,25 +108,49 @@ export function RewardClaimsProvider({ children }: Props) {
       })
 
       if (response.success && response.data) {
-        setRewardClaims(response.data.claims || [])
-        setTotalCount(response.data.totalCount || 0)
-        setTotalPages(response.data.totalPages || 1)
+        let claims = response.data.claims || []
+
+        // Client-side date filtering if backend doesn't filter properly
+        if (filterUIState.dateRange?.from || filterUIState.dateRange?.to) {
+          claims = claims.filter((claim) => {
+            const claimDate = new Date(claim.claimDate)
+
+            if (filterUIState.dateRange?.from && claimDate < filterUIState.dateRange.from) {
+              return false
+            }
+
+            if (filterUIState.dateRange?.to && claimDate > filterUIState.dateRange.to) {
+              return false
+            }
+
+            return true
+          })
+        }
+
+        setRewardClaims(claims)
+        // Update total count based on filtered results
+        setTotalCount(claims.length)
+        setTotalPages(Math.ceil(claims.length / filters.pageSize))
         setCurrentPage(response.data.currentPage || 1)
         setPageSize(filters.pageSize)
       } else {
-        console.error('Failed to fetch reward claims:', response)
+        setRewardClaims([])
+        setTotalCount(0)
+        setTotalPages(0)
       }
-    } catch (error) {
-      console.error('Error fetching reward claims:', error)
+    } catch {
+      setRewardClaims([])
+      setTotalCount(0)
+      setTotalPages(0)
     } finally {
       setIsLoading(false)
     }
   }, [filters, filterUIState])
 
-  // Fetch claims when filters change
+  // Fetch claims when filters or filterUIState change
   React.useEffect(() => {
     fetchClaims()
-  }, [filters, fetchClaims])
+  }, [filters, filterUIState, fetchClaims])
 
   const contextValue = React.useMemo(
     () => ({

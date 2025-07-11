@@ -12,8 +12,7 @@ function FilterToolbarComponent() {
     setFilterUIState,
     updateFilters,
     resetFilters: contextResetFilters,
-    debouncedSearch,
-    executeSearch
+    debouncedSearch
   } = useRewards()
 
   // Status options for filtering with appropriate icons
@@ -73,7 +72,6 @@ function FilterToolbarComponent() {
       onResetFilters={handleResetFilters}
       searchValue={search}
       searchPlaceholder={t('filters.searchRewards')}
-      onSearchSubmit={() => executeSearch(search)}
       hasFilters={hasFilters}
       filterComponents={
         <div className="flex flex-wrap gap-2">

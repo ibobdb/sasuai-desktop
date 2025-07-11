@@ -1,21 +1,16 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DateRange } from 'react-day-picker'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
 import { useRewardClaims } from '../context/reward-claims-context'
 import { CheckCircle, XCircle, Clock } from 'lucide-react'
-import { DateRangeFilter } from '@/components/common/date-range-filter'
+import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker-with-presets'
 
 function ClaimFilterToolbarComponent() {
   const { t } = useTranslation(['rewards'])
-  const {
-    filterUIState,
-    setFilterUIState,
-    updateFilters,
-    resetFilters,
-    debouncedSearch,
-    executeSearch
-  } = useRewardClaims()
+  const { filterUIState, setFilterUIState, updateFilters, resetFilters, debouncedSearch } =
+    useRewardClaims()
 
   // Status options for filtering with appropriate icons
   const statusOptions = [
@@ -39,9 +34,7 @@ function ClaimFilterToolbarComponent() {
     }
   ]
 
-  const { search, dateRange } = filterUIState
-  const [startDate, setStartDate] = useState<Date | undefined>(dateRange?.from || undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(dateRange?.to || undefined)
+  const { search, dateRange, status: selectedStatus } = filterUIState
 
   // Handle search input change
   const handleSearchChange = (value: string) => {
@@ -49,30 +42,17 @@ function ClaimFilterToolbarComponent() {
     debouncedSearch(value)
   }
 
-  // Handle date changes
-  const handleStartDateChange = (date: Date | undefined) => {
-    setStartDate(date)
-  }
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setEndDate(date)
-  }
-
-  // Apply date filters
-  const handleApplyDateFilter = () => {
-    const newDateRange = {
-      from: startDate || null,
-      to: endDate || null
-    }
-
+  // Handle date range change
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
     setFilterUIState((prev) => ({
       ...prev,
-      dateRange: newDateRange
+      dateRange: dateRange ? { from: dateRange.from || null, to: dateRange.to || null } : undefined
     }))
 
-    if (startDate) {
-      updateFilters({ page: 1 })
-    }
+    // Reset to page 1 when date range changes
+    updateFilters({
+      page: 1
+    })
   }
 
   // Handle status filter change
@@ -90,13 +70,16 @@ function ClaimFilterToolbarComponent() {
 
   const handleResetFilters = () => {
     resetFilters()
-    handleSearchChange('')
-    setStartDate(undefined)
-    setEndDate(undefined)
   }
 
+  // Create date range object for the picker
+  const dateRangeValue: DateRange | undefined =
+    dateRange?.from || dateRange?.to
+      ? { from: dateRange.from || undefined, to: dateRange.to || undefined }
+      : undefined
+
   // Determine if any filters are applied
-  const hasFilters = !!(search || startDate || endDate)
+  const hasFilters = !!(search || dateRange?.from || dateRange?.to || selectedStatus.length > 0)
 
   return (
     <BaseFilterToolbar
@@ -104,16 +87,13 @@ function ClaimFilterToolbarComponent() {
       onResetFilters={handleResetFilters}
       searchValue={search}
       searchPlaceholder={t('filters.searchClaims')}
-      onSearchSubmit={() => executeSearch(search)}
       hasFilters={hasFilters}
       filterComponents={
-        <div className="flex flex-wrap gap-4 items-center">
-          <DateRangeFilter
-            startDate={startDate}
-            endDate={endDate}
-            onStartDateChange={handleStartDateChange}
-            onEndDateChange={handleEndDateChange}
-            onApply={handleApplyDateFilter}
+        <div className="flex flex-wrap gap-2">
+          <DateRangePickerWithPresets
+            value={dateRangeValue}
+            onChange={handleDateRangeChange}
+            isCompact={true}
           />
 
           <DataTableFacetedFilter
@@ -125,7 +105,7 @@ function ClaimFilterToolbarComponent() {
                 : undefined
             }))}
             onValueChange={handleStatusChange}
-            selectedValues={[]}
+            selectedValues={selectedStatus}
           />
         </div>
       }
