@@ -16,9 +16,6 @@ interface DeviceInfo {
 let cachedDeviceInfo: DeviceInfo | null = null
 let cachedMachineId: string | null = null
 
-/**
- * Get a unique machine identifier (cached for performance)
- */
 async function getMachineId(): Promise<string> {
   if (cachedMachineId) {
     return cachedMachineId
@@ -29,15 +26,11 @@ async function getMachineId(): Promise<string> {
     return cachedMachineId
   } catch (error) {
     console.error('Failed to get machine ID:', error)
-    // Fallback to a combination of hostname and platform
     cachedMachineId = `${hostname()}-${platform()}-${arch()}`.replace(/[^a-zA-Z0-9-]/g, '')
     return cachedMachineId
   }
 }
 
-/**
- * Generate comprehensive device information for session tracking
- */
 export async function getDeviceInfo(): Promise<DeviceInfo> {
   if (cachedDeviceInfo) {
     return cachedDeviceInfo
@@ -51,7 +44,6 @@ export async function getDeviceInfo(): Promise<DeviceInfo> {
   const deviceName = hostname()
   const deviceId = await getMachineId()
 
-  // Create a more informative user agent
   const userAgent = `${appName}/${appVersion} (${osType} ${osRelease}; ${osArch}) Desktop/${deviceName}`
 
   cachedDeviceInfo = {
@@ -68,9 +60,6 @@ export async function getDeviceInfo(): Promise<DeviceInfo> {
   return cachedDeviceInfo
 }
 
-/**
- * Get session metadata for API requests
- */
 export async function getSessionMetadata() {
   const deviceInfo = await getDeviceInfo()
 

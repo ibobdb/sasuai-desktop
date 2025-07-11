@@ -2,9 +2,8 @@ import { create } from 'zustand'
 import { API_ENDPOINTS } from '@/config/api'
 import { AuthResponse, AuthUser, LoginMethod } from '@/types/auth'
 
-// Cookie names - should match the ones from Better Auth backend
-const SESSION_TOKEN = 'better-auth.session_token'
-const SESSION_DATA = 'better-auth.session_data'
+const AUTH_COOKIE_NAME = 'better-auth.session_token'
+const USER_DATA_COOKIE_NAME = 'better-auth.session_data'
 
 interface AuthState {
   user: AuthUser | null
@@ -34,7 +33,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const data =
         method === 'email' ? { email: identifier, password } : { username: identifier, password }
 
-      // Choose correct endpoint based on method
       const endpoint =
         method === 'email' ? API_ENDPOINTS.AUTH.SIGN_IN_EMAIL : API_ENDPOINTS.AUTH.SIGN_IN_USERNAME
 
@@ -43,17 +41,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         data
       })) as AuthResponse
 
-      // Set state from response
       set({
         user: response.user,
         token: response.token,
         isLoading: false
       })
 
-      // Store session data in persistent cookies
       try {
-        await window.api.cookies.set(SESSION_TOKEN, response.token)
-        await window.api.cookies.set(SESSION_DATA, JSON.stringify(response.user))
+        await Promise.all([
+          window.api.cookies.set({ name: AUTH_COOKIE_NAME, value: response.token }),
+          window.api.cookies.set({
+            name: USER_DATA_COOKIE_NAME,
+            value: JSON.stringify(response.user)
+          })
+        ])
       } catch (error) {
         console.error('Error storing session data locally:', error)
       }
@@ -92,7 +93,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       })
       return true
     } catch (error: any) {
-      // Only clear auth if it's an explicit auth error
       if (error?.status === 401 || error?.status === 403) {
         await window.api.cookies.clearAuth()
         set({
@@ -109,15 +109,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true })
 
     try {
-      // Get token and user data in one batch to reduce redundant lookups
       const [token, userDataStr] = await Promise.all([
-        window.api.cookies.get(SESSION_TOKEN),
-        window.api.cookies.get(SESSION_DATA)
+        window.api.cookies.get(AUTH_COOKIE_NAME),
+        window.api.cookies.get(USER_DATA_COOKIE_NAME)
       ])
 
       if (token && userDataStr) {
         try {
-          // Set user state to prevent flashing login screen
           const userData = JSON.parse(userDataStr)
           set({
             token,
@@ -125,7 +123,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isLoading: false
           })
 
-          // Validate session with server and return result
           return await get().validateSession()
         } catch (error) {
           console.error('Error parsing user data:', error)
@@ -133,7 +130,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
 
-      // No valid session found
       set({ isLoading: false })
       return false
     } catch (error) {
@@ -144,5 +140,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   }
 }))
 
-// Helper hook
 export const useAuth = () => useAuthStore()

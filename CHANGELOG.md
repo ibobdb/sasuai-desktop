@@ -2,20 +2,18 @@
 
 ## [1.6.4](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.3...v1.6.4) (2025-05-29)
 
-
 ### Bug Fixes
 
-* **device-info:** add device information retrieval for enhanced session tracking ([be4b71e](https://github.com/ibobdb/sasuai-desktop/commit/be4b71e533020d91c3dd4f0e8301ec9d7b28c83c))
-* **profile-dropdown, update-dialog, i18n:** implement internationalization for update messages and actions ([f1bad83](https://github.com/ibobdb/sasuai-desktop/commit/f1bad838cf392b8c3e1521622baa982b12832940))
-* **updater:** enhance auto-update functionality and user preferences ([c7844e1](https://github.com/ibobdb/sasuai-desktop/commit/c7844e1ee6530f3f2f1fea038bced608331a649b))
+- **device-info:** add device information retrieval for enhanced session tracking ([be4b71e](https://github.com/ibobdb/sasuai-desktop/commit/be4b71e533020d91c3dd4f0e8301ec9d7b28c83c))
+- **profile-dropdown, update-dialog, i18n:** implement internationalization for update messages and actions ([f1bad83](https://github.com/ibobdb/sasuai-desktop/commit/f1bad838cf392b8c3e1521622baa982b12832940))
+- **updater:** enhance auto-update functionality and user preferences ([c7844e1](https://github.com/ibobdb/sasuai-desktop/commit/c7844e1ee6530f3f2f1fea038bced608331a649b))
 
 ## [1.6.3](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.2...v1.6.3) (2025-05-29)
 
-
 ### Bug Fixes
 
-* **payment:** enhance payment dialog for non-cash methods ([ee5ca44](https://github.com/ibobdb/sasuai-desktop/commit/ee5ca44d6433a6efdc57bfae4fe15647e12ca6a8))
-* **payment:** update payment dialog behavior for method changes ([0ce5d03](https://github.com/ibobdb/sasuai-desktop/commit/0ce5d03d4d7c7c7d32b403129d5f427222364e1b))
+- **payment:** enhance payment dialog for non-cash methods ([ee5ca44](https://github.com/ibobdb/sasuai-desktop/commit/ee5ca44d6433a6efdc57bfae4fe15647e12ca6a8))
+- **payment:** update payment dialog behavior for method changes ([0ce5d03](https://github.com/ibobdb/sasuai-desktop/commit/0ce5d03d4d7c7c7d32b403129d5f427222364e1b))
 
 ## [1.6.2](https://github.com/ibobdb/sasuai-dekstop/compare/v1.6.1...v1.6.2) (2025-05-19)
 

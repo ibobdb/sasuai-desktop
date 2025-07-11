@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow, shell, ipcMain } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -8,10 +8,8 @@ import { getDeviceInfo } from './device-info'
 let mainWindow: BrowserWindow | null = null
 
 export async function createWindow(): Promise<BrowserWindow> {
-  // Get device info for user agent
   const deviceInfo = await getDeviceInfo()
 
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 960,
@@ -27,10 +25,8 @@ export async function createWindow(): Promise<BrowserWindow> {
     }
   })
 
-  // Set custom user agent for the webContents
   mainWindow.webContents.setUserAgent(deviceInfo.userAgent)
 
-  // Add navigation event handlers to flush cookies
   mainWindow.webContents.on('did-start-navigation', () => {
     persistentSession.cookies.flushStore().catch(() => {})
   })
@@ -50,7 +46,6 @@ export async function createWindow(): Promise<BrowserWindow> {
     return { action: 'deny' }
   })
 
-  // Window state event handlers
   mainWindow.on('maximize', () => {
     if (mainWindow?.webContents) {
       mainWindow.webContents.send('window:state-changed', true)
@@ -74,4 +69,36 @@ export async function createWindow(): Promise<BrowserWindow> {
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
+}
+
+export function setupWindowHandlers() {
+  ipcMain.handle('window:minimize', () => {
+    const mainWindow = getMainWindow()
+    if (mainWindow) mainWindow.minimize()
+    return null
+  })
+
+  ipcMain.handle('window:maximize', () => {
+    const mainWindow = getMainWindow()
+    if (!mainWindow) return false
+
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize()
+      return false
+    } else {
+      mainWindow.maximize()
+      return true
+    }
+  })
+
+  ipcMain.handle('window:close', () => {
+    const mainWindow = getMainWindow()
+    if (mainWindow) mainWindow.close()
+    return null
+  })
+
+  ipcMain.handle('window:isMaximized', () => {
+    const mainWindow = getMainWindow()
+    return mainWindow ? mainWindow.isMaximized() : false
+  })
 }

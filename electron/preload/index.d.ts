@@ -1,6 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
-// Cookie interfaces to match Electron's API
 interface CookieDetails {
   url?: string
   name: string
@@ -23,7 +22,6 @@ interface CookieFilter {
   httpOnly?: boolean
 }
 
-// Update info interface
 interface UpdateInfo {
   version: string
   files: Array<{ url: string; sha512: string; size: number }>
