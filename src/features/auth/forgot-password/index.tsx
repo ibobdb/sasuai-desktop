@@ -2,12 +2,14 @@ import { Card } from '@/components/ui/card'
 import AuthLayout from '../auth-layout'
 import { ForgotForm } from './components/forgot-password-form'
 import { AlertCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import lightIllustration from '../../../../resources/public/auth-forgot-password-illustration-light.png?asset'
 import darkIllustration from '../../../../resources/public/auth-forgot-password-illustration-dark.png?asset'
 import { Link } from '@tanstack/react-router'
 import { useTheme } from '@/context/theme-context'
 
 export default function ForgotPassword() {
+  const { t } = useTranslation(['auth'])
   const { theme } = useTheme()
   const isDarkTheme =
     theme === 'dark' ||
@@ -19,19 +21,18 @@ export default function ForgotPassword() {
   return (
     <AuthLayout
       illustration={illustration}
-      title="Password Recovery"
-      tagline="We'll help you recover your account"
+      titleKey="auth.forgotPassword.title"
+      subtitleKey="auth.forgotPassword.subtitle"
     >
       <Card className="p-7 shadow-lg border-primary/10">
         <div className="flex items-center mb-2">
           <AlertCircle className="mr-3 h-6 w-6 text-primary" />
-          <h2 className="text-xl font-semibold">Forgot Password</h2>
+          <h2 className="text-xl font-semibold">{t('auth.forgotPassword.form.title')}</h2>
         </div>
 
         <div className="mb-5">
           <p className="text-base text-muted-foreground leading-relaxed">
-            Enter your registered email address and we&apos;ll send you a link to reset your
-            password.
+            {t('auth.forgotPassword.form.description')}
           </p>
         </div>
 
@@ -56,7 +57,7 @@ export default function ForgotPassword() {
             >
               <path d="m15 18-6-6 6-6" />
             </svg>
-            Back to Login
+            {t('auth.forgotPassword.form.backToLogin')}
           </Link>
         </div>
       </Card>

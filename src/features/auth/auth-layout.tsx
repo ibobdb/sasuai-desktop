@@ -1,12 +1,13 @@
 import { WindowControls } from '@/components/window-controls'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import logo from '../../../resources/public/logo.png?asset'
 
 interface Props {
   children?: React.ReactNode
   illustration?: string
-  title: string
-  subtitle?: string
+  titleKey?: string // Translation key for title
+  subtitleKey?: string // Translation key for subtitle
   tagline?: string
 }
 
@@ -14,10 +15,16 @@ interface Props {
 export default function AuthLayout({
   children,
   illustration,
-  title,
-  subtitle,
-  tagline = 'Modern solutions for modern business'
+  titleKey,
+  subtitleKey,
+  tagline
 }: Props) {
+  const { t } = useTranslation(['auth'])
+
+  // Use translation fallback if no tagline provided
+  const displayTagline = tagline || t('auth.layout.tagline')
+  const displayTitle = titleKey ? t(titleKey) : ''
+  const displaySubtitle = subtitleKey ? t(subtitleKey) : ''
   useEffect(() => {
     document.body.classList.add('auth-page-loaded')
     return () => {
@@ -44,7 +51,7 @@ export default function AuthLayout({
                 <div className="flex-1 flex items-center justify-center w-full">
                   <img
                     src={illustration}
-                    alt={`${title} Illustration`}
+                    alt={`${displayTitle} Illustration`}
                     className="max-h-[calc(100vh-180px)] w-auto object-contain drop-shadow-xl"
                     style={{ maxWidth: '90%' }}
                   />
@@ -52,9 +59,11 @@ export default function AuthLayout({
 
                 {/* Brand tagline */}
                 <div className="mt-4 text-center z-10">
-                  <h2 className="text-2xl font-medium text-primary">Sasuai Store</h2>
+                  <h2 className="text-2xl font-medium text-primary">
+                    {t('auth.layout.brandName')}
+                  </h2>
                   <p className="text-muted-foreground mt-1.5 text-base leading-relaxed">
-                    {tagline}
+                    {displayTagline}
                   </p>
                 </div>
               </div>
@@ -69,9 +78,11 @@ export default function AuthLayout({
                   <img src={logo} alt="Sasuai Store" className="h-20 w-20 object-contain" />
                 </div>
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl font-medium text-primary">{title}</h1>
-                  {subtitle && (
-                    <p className="text-muted-foreground text-lg leading-relaxed">{subtitle}</p>
+                  <h1 className="text-2xl font-medium text-primary">{displayTitle}</h1>
+                  {displaySubtitle && (
+                    <p className="text-muted-foreground text-lg leading-relaxed">
+                      {displaySubtitle}
+                    </p>
                   )}
                 </div>
               </div>
@@ -81,14 +92,14 @@ export default function AuthLayout({
 
               {/* Support link */}
               <div className="text-center text-base text-muted-foreground">
-                Need help?{' '}
+                {t('auth.layout.support.text')}{' '}
                 <a
                   href="https://nestorzamili.works/#contact"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary font-medium hover:underline transition-colors"
                 >
-                  Contact support
+                  {t('auth.layout.support.link')}
                 </a>
               </div>
             </div>
