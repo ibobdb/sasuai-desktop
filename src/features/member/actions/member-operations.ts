@@ -24,7 +24,7 @@ export const memberOperations: CrudOperations<
       const params = new URLSearchParams()
 
       if (filters.page) params.append('page', filters.page.toString())
-      if (filters.pageSize) params.append('pageSize', filters.pageSize.toString())
+      if (filters.pageSize) params.append('limit', filters.pageSize.toString()) // Use 'limit' instead of 'pageSize'
       if (filters.search) params.append('search', filters.search)
       if (filters.sortField) params.append('sortField', filters.sortField)
       if (filters.sortDirection) params.append('sortDirection', filters.sortDirection)
@@ -32,9 +32,8 @@ export const memberOperations: CrudOperations<
         params.append('tier', filters.tier.join(','))
       }
 
-      const response = await window.api.request(
-        `${API_ENDPOINTS.MEMBERS.BASE}?${params.toString()}`
-      )
+      const url = `${API_ENDPOINTS.MEMBERS.BASE}?${params.toString()}`
+      const response = await window.api.request(url)
 
       // Directly use the API response structure
       const responseData = response?.data?.data || response?.data

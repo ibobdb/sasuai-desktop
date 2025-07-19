@@ -10,16 +10,21 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { useTransactions } from '../context/transactions-context'
 import { Transaction } from '@/types/transactions'
 
 interface DataTableRowActionsProps {
   row: Row<Transaction>
+  onView?: (transaction: Transaction) => void
 }
 
-export function DataTableRowActions({ row }: DataTableRowActionsProps) {
+export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
   const { t } = useTranslation(['transactions'])
-  const { setOpen, setCurrentTransaction } = useTransactions()
+
+  const handleView = () => {
+    if (onView) {
+      onView(row.original)
+    }
+  }
 
   return (
     <>
@@ -31,12 +36,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[160px]">
-          <DropdownMenuItem
-            onClick={() => {
-              setCurrentTransaction(row.original)
-              setOpen('view')
-            }}
-          >
+          <DropdownMenuItem onClick={handleView}>
             {t('transaction.actions.viewDetails')}
             <DropdownMenuShortcut>
               <IconEye size={16} />
@@ -44,8 +44,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              // Print functionality
-              console.log('Print invoice')
+              // TODO: Implement print functionality
             }}
           >
             {t('transaction.actions.printInvoice')}

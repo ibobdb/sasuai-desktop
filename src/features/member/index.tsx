@@ -67,7 +67,10 @@ export default function Members() {
 
   // Update filters function
   const updateFilters = useCallback((newFilters: Partial<MemberFilterParams>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }))
+    setFilters((prev) => {
+      const updated = { ...prev, ...newFilters }
+      return updated
+    })
   }, [])
 
   const resetFilters = useCallback(() => {
@@ -111,7 +114,10 @@ export default function Members() {
         onResetFilters={resetFilters}
       />
 
-      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
+      <div
+        className="-mx-4 flex-1 px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12"
+        style={{ overflowX: 'auto', overflowY: 'visible' }}
+      >
         {isLoading ? (
           <div className="space-y-4">
             <Skeleton className="h-[300px] w-full" />
@@ -127,7 +133,7 @@ export default function Members() {
               pageSize: pagination.pageSize || 10
             }}
             onPaginationChange={{
-              onPageChange: (page) => updateFilters({ page: page + 1 }),
+              onPageChange: (page) => updateFilters({ page }),
               onPageSizeChange: (size) => updateFilters({ pageSize: size, page: 1 })
             }}
             totalCount={pagination.totalCount || 0}

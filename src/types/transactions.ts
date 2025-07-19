@@ -114,10 +114,13 @@ export interface TransactionDetail {
     finalAmount: number
     discounts: {
       total: number
-      product?: number
+      products?: number // Changed from 'product' to 'products'
       member?: {
-        id: string
+        id?: string
+        type?: string
         name: string
+        valueType?: string
+        value?: number
         amount: number
       }
       tier?: {
@@ -143,8 +146,8 @@ export interface TransactionDetail {
 export interface TransactionFilterParams {
   page: number
   pageSize: number
-  sortField?: string
-  sortDirection?: 'asc' | 'desc'
+  sortField: string
+  sortDirection: 'asc' | 'desc'
   search?: string
   cashierId?: string
   memberId?: string

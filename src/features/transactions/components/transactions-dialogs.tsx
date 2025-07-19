@@ -1,17 +1,24 @@
-import { useTransactions } from '../context/transactions-context'
 import { TransactionViewDialog } from './transaction-view-dialog'
+import type { Transaction, TransactionDetail, TransactionsDialogType } from '@/types/transactions'
 
-export function TransactionsDialogs() {
-  const { open, setOpen, currentTransaction, setCurrentTransaction } = useTransactions()
+interface TransactionsDialogsProps {
+  open: TransactionsDialogType | null
+  currentTransaction: Transaction | null
+  transactionDetail: TransactionDetail | null
+  isLoadingDetail: boolean
+  onOpenChange: (open: TransactionsDialogType | null) => void
+  onRefetch: () => void
+}
 
+export function TransactionsDialogs({
+  open,
+  currentTransaction,
+  transactionDetail,
+  isLoadingDetail,
+  onOpenChange
+}: TransactionsDialogsProps) {
   const handleDialogClose = () => {
-    // Close dialog without triggering a fetch
-    setOpen(null)
-
-    // Clear current transaction after dialog animation completes
-    setTimeout(() => {
-      setCurrentTransaction(null)
-    }, 500)
+    onOpenChange(null)
   }
 
   return (
@@ -24,7 +31,8 @@ export function TransactionsDialogs() {
             onOpenChange={(isOpen) => {
               if (!isOpen) handleDialogClose()
             }}
-            currentTransaction={currentTransaction}
+            transactionDetail={transactionDetail}
+            isLoadingDetail={isLoadingDetail}
           />
         </>
       )}
