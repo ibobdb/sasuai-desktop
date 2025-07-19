@@ -28,7 +28,10 @@ export const getTierBadgeVariant = (tier: string | undefined) => {
 }
 
 // Create a custom hook for getting translated columns
-export function useMemberColumns(): ColumnDef<Member>[] {
+export function useMemberColumns(actions?: {
+  onEdit?: (member: Member) => void
+  onView?: (member: Member) => void
+}): ColumnDef<Member>[] {
   const { t } = useTranslation(['member'])
 
   // Use useMemo to prevent unnecessary recreations of the columns array
@@ -165,9 +168,15 @@ export function useMemberColumns(): ColumnDef<Member>[] {
       },
       {
         id: 'actions',
-        cell: DataTableRowActions
+        cell: ({ row }) => (
+          <DataTableRowActions
+            member={row.original}
+            onEdit={actions?.onEdit}
+            onView={actions?.onView}
+          />
+        )
       }
     ],
-    [t]
+    [t, actions]
   )
 }

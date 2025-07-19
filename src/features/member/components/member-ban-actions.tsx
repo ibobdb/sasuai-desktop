@@ -1,9 +1,21 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, ShieldCheck } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/config/api'
-import { Member } from '@/types/members'
+import { ShieldAlert, ShieldCheck } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import {
+  Member,
+  MemberDetail,
+  CreateMemberData,
+  UpdateMemberData,
+  MemberFilterParams,
+  BanMemberData
+} from '@/types/members'
+import { memberOperations, banMember, unbanMember } from '../actions/member-operations'
+import { createDataHooks } from '@/hooks/use-data-provider'
 import { DropdownMenuItem, DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
@@ -18,9 +30,15 @@ import {
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import * as z from 'zod'
+
+// Get query keys from existing data hooks for consistency
+const { queryKeys } = createDataHooks<
+  Member,
+  MemberDetail,
+  CreateMemberData,
+  UpdateMemberData,
+  MemberFilterParams
+>('members', memberOperations, 'member')
 
 // Form schema for ban reason
 const banFormSchema = z.object({
@@ -38,14 +56,62 @@ type BanFormValues = z.infer<typeof banFormSchema>
 
 interface MemberBanActionsProps {
   member: Member
-  onSuccess: () => void // Callback for refreshing data after action
 }
 
-export function MemberBanActions({ member, onSuccess }: MemberBanActionsProps) {
+export function MemberBanActions({ member }: MemberBanActionsProps) {
   const { t } = useTranslation(['member', 'common'])
   const [showBanDialog, setShowBanDialog] = useState(false)
-  const [isBanning, setIsBanning] = useState(false)
-  const [isUnbanning, setIsUnbanning] = useState(false)
+  const queryClient = useQueryClient()
+
+  // Ban member mutation with member name in closure
+  const banMemberMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: BanMemberData }) => banMember(id, data),
+    onSuccess: (response, variables) => {
+      if (response.success) {
+        toast.success(t('member.messages.banSuccess'), {
+          description: t('member.messages.banSuccessDescription').replace('{name}', member.name)
+        })
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: queryKeys.detail(variables.id) })
+      } else {
+        toast.error(t('member.messages.banError'), {
+          description: response.message || t('member.messages.banErrorDescription')
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Error banning member:', error)
+      toast.error(t('member.messages.banError'), {
+        description: t('member.messages.banErrorDescription')
+      })
+    }
+  })
+
+  // Unban member mutation with member name in closure
+  const unbanMemberMutation = useMutation({
+    mutationFn: unbanMember,
+    onSuccess: (response, memberId) => {
+      if (response.success) {
+        toast.success(t('member.messages.unbanSuccess'), {
+          description: t('member.messages.unbanSuccessDescription').replace('{name}', member.name)
+        })
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: queryKeys.detail(memberId) })
+      } else {
+        toast.error(t('member.messages.unbanError'), {
+          description: response.message || t('member.messages.unbanErrorDescription')
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Error unbanning member:', error)
+      toast.error(t('member.messages.unbanError'), {
+        description: t('member.messages.unbanErrorDescription')
+      })
+    }
+  })
 
   const isMemberBanned = Boolean(member.isBanned)
 
@@ -67,66 +133,20 @@ export function MemberBanActions({ member, onSuccess }: MemberBanActionsProps) {
     handleBan(values)
   }
 
-  const handleBan = async (values: BanFormValues) => {
-    setIsBanning(true)
-    try {
-      const apiUrl = `${API_ENDPOINTS.MEMBERS.BASE}/${member.id}/ban`
-      const payload = { reason: values.reason }
-
-      const response = await window.api.request(apiUrl, {
-        method: 'POST',
-        data: payload
-      })
-
-      if (response && response.success) {
-        toast.success(t('member.messages.banSuccess'), {
-          description: t('member.messages.banSuccessDescription').replace('{name}', member.name)
-        })
-        setTimeout(() => onSuccess(), 500)
-      } else {
-        toast.error(t('member.messages.banError'), {
-          description: response?.message || t('member.messages.banErrorDescription')
-        })
+  const handleBan = (values: BanFormValues) => {
+    banMemberMutation.mutate(
+      { id: member.id, data: { reason: values.reason } },
+      {
+        onSuccess: () => {
+          setShowBanDialog(false)
+          form.reset()
+        }
       }
-    } catch (error) {
-      console.error('Failed to ban member:', error)
-      toast.error(t('member.messages.banError'), {
-        description: t('member.messages.banErrorDescription')
-      })
-    } finally {
-      setIsBanning(false)
-      setShowBanDialog(false)
-      form.reset()
-    }
+    )
   }
 
-  const handleUnban = async () => {
-    setIsUnbanning(true)
-    try {
-      const apiUrl = `${API_ENDPOINTS.MEMBERS.BASE}/${member.id}/unban`
-
-      const response = await window.api.request(apiUrl, {
-        method: 'POST'
-      })
-
-      if (response && response.success) {
-        toast.success(t('member.messages.unbanSuccess'), {
-          description: t('member.messages.unbanSuccessDescription').replace('{name}', member.name)
-        })
-        setTimeout(() => onSuccess(), 500)
-      } else {
-        toast.error(t('member.messages.unbanError'), {
-          description: response?.message || t('member.messages.unbanErrorDescription')
-        })
-      }
-    } catch (error) {
-      console.error('Failed to unban member:', error)
-      toast.error(t('member.messages.unbanError'), {
-        description: t('member.messages.unbanErrorDescription')
-      })
-    } finally {
-      setIsUnbanning(false)
-    }
+  const handleUnban = () => {
+    unbanMemberMutation.mutate(member.id)
   }
 
   return (
@@ -136,9 +156,11 @@ export function MemberBanActions({ member, onSuccess }: MemberBanActionsProps) {
         <DropdownMenuItem
           className="text-green-500 focus:text-green-500 hover:text-green-500"
           onClick={handleUnban}
-          disabled={isUnbanning}
+          disabled={unbanMemberMutation.isPending}
         >
-          {isUnbanning ? t('member.actions.unbanning') : t('member.actions.unban')}
+          {unbanMemberMutation.isPending
+            ? t('member.actions.unbanning')
+            : t('member.actions.unban')}
           <DropdownMenuShortcut>
             <ShieldCheck size={16} />
           </DropdownMenuShortcut>
@@ -188,7 +210,6 @@ export function MemberBanActions({ member, onSuccess }: MemberBanActionsProps) {
                       <Textarea
                         id="reason"
                         placeholder={t('member.ban.reasonPlaceholder')}
-                        className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
@@ -196,24 +217,24 @@ export function MemberBanActions({ member, onSuccess }: MemberBanActionsProps) {
                   </FormItem>
                 )}
               />
-
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isBanning} type="button">
-                  {t('actions.cancel', { ns: 'common' })}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={(e) => {
-                    e.preventDefault()
-                    submitBan()
-                  }}
-                  disabled={isBanning}
-                  className="bg-orange-500 hover:bg-orange-600 focus:ring-orange-500"
-                >
-                  {isBanning ? t('member.ban.banning') : t('member.actions.ban')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
             </div>
           </Form>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={banMemberMutation.isPending}>
+              {t('actions.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                submitBan()
+              }}
+              disabled={banMemberMutation.isPending}
+              className="bg-orange-500 hover:bg-orange-600 focus:ring-orange-500"
+            >
+              {banMemberMutation.isPending ? t('member.ban.banning') : t('member.actions.ban')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>

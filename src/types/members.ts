@@ -1,4 +1,5 @@
-import { BaseFilterParams, BaseFilterUIState } from './common'
+import { BaseFilterParams } from './common'
+import { BaseFilterUIState } from './data-provider'
 import { Discount } from './cashier'
 
 // Available dialog types
@@ -22,6 +23,7 @@ export interface Member {
   phone: string
   cardId: string
   address: string | null
+  notes?: string | null
   tierId: string
   totalPoints: number
   totalPointsEarned: number
@@ -122,4 +124,38 @@ export interface MemberFilterParams extends BaseFilterParams {
 // UI state for filters
 export interface MemberFilterUIState extends BaseFilterUIState {
   tier: string[]
+}
+
+// API request/response types
+export interface MemberApiResponse {
+  success: boolean
+  data: {
+    members: Member[]
+    totalCount: number
+    totalPages: number
+    currentPage: number
+  }
+  message?: string
+}
+
+export interface MemberDetailApiResponse {
+  success: boolean
+  data: MemberDetail
+  message?: string
+}
+
+export interface CreateMemberData {
+  name: string
+  cardId: string
+  phone: string
+  email?: string | null
+  address?: string | null
+}
+
+export interface UpdateMemberData extends CreateMemberData {
+  id: string
+}
+
+export interface BanMemberData {
+  reason: string
 }
