@@ -29,7 +29,7 @@ export const memberOperations: CrudOperations<
       if (filters.sortField) params.append('sortField', filters.sortField)
       if (filters.sortDirection) params.append('sortDirection', filters.sortDirection)
       if (filters.tier && Array.isArray(filters.tier)) {
-        filters.tier.forEach((t) => params.append('tier', t))
+        params.append('tier', filters.tier.join(','))
       }
 
       const response = await window.api.request(

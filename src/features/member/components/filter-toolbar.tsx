@@ -39,7 +39,6 @@ function FilterToolbarComponent({
     delay: 300,
     minLength: 2,
     callback: (searchValue) => {
-      // Trigger search when debounced
       onFiltersChange({ search: searchValue, page: 1 })
     }
   })
@@ -65,18 +64,21 @@ function FilterToolbarComponent({
 
   const handleResetFilters = () => {
     onResetFilters()
-    onFilterUIStateChange((prev) => ({ ...prev, search: '' }))
-    setDebouncedSearchValue('') // Reset debounced search value
+    onFilterUIStateChange((prev) => ({
+      ...prev,
+      search: '',
+      tier: []
+    }))
+    setDebouncedSearchValue('')
   }
 
-  // Determine if any filters are applied
   const hasFilters = !!(search || selectedTiers.length > 0)
 
   return (
     <BaseFilterToolbar
       onSearch={handleSearchChange}
       onResetFilters={handleResetFilters}
-      searchValue={search} // Use the UI state value for immediate display
+      searchValue={search}
       searchPlaceholder={t('member.filters.searchPlaceholder')}
       hasFilters={hasFilters}
       filterComponents={
@@ -98,5 +100,4 @@ function FilterToolbarComponent({
   )
 }
 
-// Memoize the toolbar to prevent unnecessary re-renders
 export const FilterToolbar = memo(FilterToolbarComponent)

@@ -20,7 +20,6 @@ import { MemberDialogs } from './components/member-dialogs'
 import { MemberTable } from './components/member-table'
 import { FilterToolbar } from './components/filter-toolbar'
 
-// Default filters untuk member
 const defaultMemberFilters: MemberFilterParams = {
   page: 1,
   pageSize: 10,
@@ -28,7 +27,6 @@ const defaultMemberFilters: MemberFilterParams = {
   sortDirection: 'desc'
 }
 
-// Default filter UI state untuk member
 const defaultMemberFilterUIState: MemberFilterUIState = {
   search: '',
   tier: []
@@ -43,7 +41,6 @@ export default function Members() {
   )
   const [filters, setFilters] = useState<MemberFilterParams>(defaultMemberFilters)
 
-  // Create hooks for data fetching
   const { useItems: useMembers, useItemDetail: useMemberDetail } = createDataHooks<
     Member,
     MemberDetail,
@@ -52,7 +49,6 @@ export default function Members() {
     MemberFilterParams
   >('members', memberOperations, 'member')
 
-  // Use direct hooks with current filters
   const { data: membersResponse, isLoading, refetch } = useMembers(filters)
 
   const { data: memberDetailResponse, isLoading: isLoadingDetail } = useMemberDetail(
@@ -60,7 +56,6 @@ export default function Members() {
     !!currentMember?.id
   )
 
-  // Extract data from API responses
   const members = membersResponse?.data?.items || []
   const memberDetail = memberDetailResponse?.data || null
   const pagination = {
@@ -75,13 +70,11 @@ export default function Members() {
     setFilters((prev) => ({ ...prev, ...newFilters }))
   }, [])
 
-  // Reset filters function
   const resetFilters = useCallback(() => {
     setFilters(defaultMemberFilters)
     setFilterUIState(defaultMemberFilterUIState)
   }, [])
 
-  // Create columns
   const columns = useMemberColumns({
     onEdit: (member) => {
       setCurrentMember(member)
@@ -110,7 +103,6 @@ export default function Members() {
         </div>
       </div>
 
-      {/* Filter toolbar */}
       <FilterToolbar
         filters={filters}
         filterUIState={filterUIState}
