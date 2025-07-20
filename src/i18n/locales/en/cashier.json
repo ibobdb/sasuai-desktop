@@ -55,6 +55,7 @@
       "removeDiscount": "Remove Discount",
       "minPurchase": "Min. purchase: Rp {{amount}}",
       "discounts": "Available Discounts",
+      "availableDiscounts": "Available Discounts",
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },
@@ -176,7 +177,9 @@
       "discountAdded": "Discount {{name}} has been added",
       "discountRemoved": "Discount has been removed",
       "alreadyHasDiscount": "You already have a member discount applied. Remove it first to apply a voucher code.",
+      "memberDiscountActive": "Member discount is already active. Remove it to use a voucher code.",
       "memberDiscountAlreadyApplied": "Member discount is already applied. Remove it to use a voucher code.",
+      "tierDiscountActive": "Member tier discount is already active. Remove it to use a voucher code.",
       "minimumPurchaseNotMet": "Minimum purchase requirement not met",
       "minimumPurchaseRequired": "This voucher requires a minimum purchase of Rp {{amount}}"
     }

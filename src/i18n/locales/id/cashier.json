@@ -55,6 +55,7 @@
       "removeDiscount": "Hapus Diskon",
       "minPurchase": "Min. pembelian: Rp {{amount}}",
       "discounts": "Diskon Tersedia",
+      "availableDiscounts": "Diskon Tersedia",
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },
@@ -176,7 +177,9 @@
       "discountAdded": "Diskon {{name}} telah ditambahkan",
       "discountRemoved": "Diskon telah dihapus",
       "alreadyHasDiscount": "Anda sudah menggunakan diskon anggota. Hapus terlebih dahulu untuk menggunakan kode voucher.",
+      "memberDiscountActive": "Diskon anggota sudah aktif. Hapus untuk menggunakan kode voucher.",
       "memberDiscountAlreadyApplied": "Diskon anggota sudah diterapkan. Hapus untuk menggunakan kode voucher.",
+      "tierDiscountActive": "Diskon tier anggota sudah aktif. Hapus untuk menggunakan kode voucher.",
       "minimumPurchaseNotMet": "Syarat pembelian minimum tidak terpenuhi",
       "minimumPurchaseRequired": "Voucher ini membutuhkan pembelian minimum Rp {{amount}}"
     }
