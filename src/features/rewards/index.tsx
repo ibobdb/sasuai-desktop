@@ -1,30 +1,46 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Main } from '@/components/layout/main'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { GiftIcon } from 'lucide-react'
-import { useRewardColumns } from './components/reward-columns'
-import { useRewardClaimColumns } from './components/reward-claim-columns'
+import { ClaimRewardDialog } from './components/claim-reward-dialog'
 import { RewardTable } from './components/reward-table'
 import { RewardClaimsTable } from './components/reward-claims-table'
-import RewardProvider, { useRewards } from './context/reward-context'
-import { RewardClaimsProvider, useRewardClaims } from './context/reward-claims-context'
-import { FilterToolbar } from './components/filter-toolbar'
-import { ClaimFilterToolbar } from './components/claim-filter-toolbar'
-import { ClaimRewardDialog } from './components/claim-reward-dialog'
-import { Reward } from '@/types/rewards'
+import { Reward, RewardFilterParams } from '@/types/rewards'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fetchRewards } from './actions/reward-operations'
 
 function RewardContent() {
   const { t } = useTranslation(['rewards'])
+  const queryClient = useQueryClient()
   const [tab, setTab] = useState<string>('rewards')
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null)
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)
+  const [rewardFilters] = useState<RewardFilterParams>({
+    page: 1,
+    pageSize: 100,
+    sortBy: 'pointsCost',
+    sortDirection: 'asc',
+    includeInactive: false
+  })
 
-  // Handle claim button click
+  const { data: rewardDialogData } = useQuery({
+    queryKey: ['rewards-for-dialog', rewardFilters],
+    queryFn: () => fetchRewards(rewardFilters),
+    select: (response) => response.data
+  })
+
+  const availableRewards = rewardDialogData?.rewards || []
+
   const handleClaimClick = () => {
     setIsClaimDialogOpen(true)
+  }
+
+  const handleClaimSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['rewards'] })
+    queryClient.invalidateQueries({ queryKey: ['reward-claims'] })
+    queryClient.invalidateQueries({ queryKey: ['rewards-for-dialog'] })
   }
 
   return (
@@ -49,12 +65,10 @@ function RewardContent() {
             <TabsTrigger value="claims">{t('tabs.claims')}</TabsTrigger>
           </TabsList>
           <TabsContent value="rewards">
-            <RewardsTab />
+            <RewardTable />
           </TabsContent>
           <TabsContent value="claims">
-            <RewardClaimsProvider>
-              <ClaimsTab />
-            </RewardClaimsProvider>
+            <RewardClaimsTable />
           </TabsContent>
         </Tabs>
       </Main>
@@ -62,6 +76,8 @@ function RewardContent() {
       <ClaimRewardDialog
         reward={selectedReward}
         isOpen={isClaimDialogOpen}
+        rewards={availableRewards}
+        onClaimSuccess={handleClaimSuccess}
         onClose={() => {
           setIsClaimDialogOpen(false)
           setSelectedReward(null)
@@ -71,145 +87,6 @@ function RewardContent() {
   )
 }
 
-function RewardsTab() {
-  const columns = useRewardColumns()
-  const {
-    isLoading,
-    rewards,
-    filters,
-    updateFilters,
-    totalCount,
-    totalPages,
-    currentPage,
-    pageSize,
-    applyFilters
-  } = useRewards()
-
-  // Fetch rewards on component mount
-  useEffect(() => {
-    applyFilters()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Handle page change
-  const handlePageChange = useCallback(
-    (page: number) => {
-      updateFilters({ page })
-    },
-    [updateFilters]
-  )
-
-  // Handle page size change
-  const handlePageSizeChange = useCallback(
-    (pageSize: number) => {
-      updateFilters({ pageSize, page: 1 })
-    },
-    [updateFilters]
-  )
-
-  // Ensure we're working with an array
-  const rewardData = Array.isArray(rewards) ? rewards : []
-
-  return (
-    <>
-      {/* Filter toolbar */}
-      <FilterToolbar />
-
-      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-[300px] w-full" />
-            <Skeleton className="h-8 w-full" />
-          </div>
-        ) : (
-          <RewardTable
-            data={rewardData}
-            columns={columns}
-            pageCount={totalPages || 0}
-            pagination={{
-              pageIndex: (currentPage || filters.page || 1) - 1,
-              pageSize: pageSize || filters.pageSize || 10
-            }}
-            onPaginationChange={{
-              onPageChange: handlePageChange,
-              onPageSizeChange: handlePageSizeChange
-            }}
-            totalCount={totalCount || 0}
-          />
-        )}
-      </div>
-    </>
-  )
-}
-
-function ClaimsTab() {
-  const columns = useRewardClaimColumns()
-  const {
-    isLoading,
-    rewardClaims,
-    filters,
-    updateFilters,
-    totalCount,
-    totalPages,
-    currentPage,
-    pageSize
-  } = useRewardClaims()
-
-  // Handle page change
-  const handlePageChange = useCallback(
-    (page: number) => {
-      updateFilters({ page })
-    },
-    [updateFilters]
-  )
-
-  // Handle page size change
-  const handlePageSizeChange = useCallback(
-    (pageSize: number) => {
-      updateFilters({ pageSize, page: 1 })
-    },
-    [updateFilters]
-  )
-
-  // Ensure we're working with an array
-  const claimsData = Array.isArray(rewardClaims) ? rewardClaims : []
-
-  return (
-    <>
-      {/* Filter toolbar */}
-      <ClaimFilterToolbar />
-
-      <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12">
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-[300px] w-full" />
-            <Skeleton className="h-8 w-full" />
-          </div>
-        ) : (
-          <RewardClaimsTable
-            data={claimsData}
-            columns={columns}
-            pageCount={totalPages || 0}
-            pagination={{
-              pageIndex: (currentPage || filters.page || 1) - 1,
-              pageSize: pageSize || filters.pageSize || 10
-            }}
-            onPaginationChange={{
-              onPageChange: handlePageChange,
-              onPageSizeChange: handlePageSizeChange
-            }}
-            totalCount={totalCount || 0}
-          />
-        )}
-      </div>
-    </>
-  )
-}
-
 export default function Rewards() {
-  return (
-    <RewardProvider>
-      <RewardContent />
-    </RewardProvider>
-  )
+  return <RewardContent />
 }

@@ -1,21 +1,38 @@
-import { memo } from 'react'
+import { memo, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
-import { useRewards } from '../context/reward-context'
+import { RewardFilterParams } from '@/types/rewards'
 import { CheckCircle, XCircle, ClockIcon } from 'lucide-react'
+import { useDebounce } from '@/hooks/use-debounce'
 
-function FilterToolbarComponent() {
+interface FilterToolbarProps {
+  filters: RewardFilterParams
+  onFiltersChange: (filters: RewardFilterParams) => void
+}
+
+function FilterToolbarComponent({ filters, onFiltersChange }: FilterToolbarProps) {
   const { t } = useTranslation(['rewards'])
-  const {
-    filterUIState,
-    setFilterUIState,
-    updateFilters,
-    resetFilters: contextResetFilters,
-    debouncedSearch
-  } = useRewards()
+  const [search, setSearch] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  const filtersRef = useRef(filters)
 
-  // Status options for filtering with appropriate icons
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
+
+  const { debouncedValue } = useDebounce(search, { delay: 300 })
+
+  useEffect(() => {
+    if (debouncedValue !== filtersRef.current.query) {
+      onFiltersChange({
+        ...filtersRef.current,
+        query: debouncedValue,
+        page: 1
+      })
+    }
+  }, [debouncedValue, onFiltersChange])
+
   const statusOptions = [
     {
       label: t('statusOptions.active'),
@@ -37,33 +54,30 @@ function FilterToolbarComponent() {
     }
   ]
 
-  const { search, status: selectedStatus } = filterUIState
-
-  // Handle search input change
   const handleSearchChange = (value: string) => {
-    setFilterUIState((prev) => ({ ...prev, search: value }))
-    debouncedSearch(value)
+    setSearch(value)
   }
 
-  // Handle status filter change
   const handleStatusChange = (values: string[]) => {
-    setFilterUIState((prev) => ({
-      ...prev,
-      status: values
-    }))
-
-    updateFilters({
+    setSelectedStatus(values)
+    onFiltersChange({
+      ...filtersRef.current,
       includeInactive: values.includes('inactive') || values.includes('expired'),
       page: 1
     })
   }
 
   const handleResetFilters = () => {
-    contextResetFilters()
-    handleSearchChange('')
+    setSearch('')
+    setSelectedStatus([])
+    onFiltersChange({
+      ...filtersRef.current,
+      query: '',
+      includeInactive: false,
+      page: 1
+    })
   }
 
-  // Determine if any filters are applied
   const hasFilters = !!(search || selectedStatus.length > 0)
 
   return (
@@ -92,5 +106,4 @@ function FilterToolbarComponent() {
   )
 }
 
-// Memoize the toolbar to prevent unnecessary re-renders
 export const FilterToolbar = memo(FilterToolbarComponent)

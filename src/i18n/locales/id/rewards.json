@@ -38,6 +38,12 @@
     "submit": "Klaim Hadiah",
     "available": "tersedia"
   },
+  "messages": {
+    "claimSuccess": "Hadiah berhasil diklaim",
+    "claimSuccessDesc": "Hadiah telah diklaim untuk pelanggan",
+    "claimError": "Gagal mengklaim hadiah",
+    "claimErrorDesc": "Terjadi kesalahan yang tidak diketahui"
+  },
   "table": {
     "name": "Nama",
     "description": "Deskripsi",
@@ -56,6 +62,7 @@
     "dateClaimed": "Tanggal Diklaim",
     "reward": "Hadiah",
     "member": "Pelanggan",
-    "currentPoints": "Poin Saat Ini"
+    "currentPoints": "Poin Saat Ini",
+    "points": "poin"
   }
 }

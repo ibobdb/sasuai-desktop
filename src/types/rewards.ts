@@ -15,10 +15,6 @@ export interface Reward {
   }
 }
 
-export interface RewardDetail extends Reward {
-  rewardClaims?: RewardClaim[]
-}
-
 export interface RewardClaim {
   id: string
   memberId: string
@@ -62,27 +58,32 @@ export interface RewardFilterParams {
   includeInactive?: boolean
 }
 
-export interface RewardFilterUIState {
-  search: string
-  status: string[]
-}
-
-export type RewardDialogType = 'view' | 'create' | 'edit'
-
 export interface RewardClaimFilterParams {
   page: number
   pageSize: number
   sortBy: string
   sortDirection: 'asc' | 'desc'
   search?: string
-  statusFilter?: string // Added this property for status filtering
+  statusFilter?: string
 }
 
-export interface RewardClaimFilterUIState {
-  search: string
-  dateRange?: {
-    from: Date | null
-    to: Date | null
-  }
-  status: string[]
+// API Response interfaces
+export interface ApiResponse<T> {
+  success: boolean
+  data: T
+  error?: string
+}
+
+export interface RewardListResponse {
+  rewards: Reward[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
+
+export interface RewardClaimListResponse {
+  claims: RewardClaim[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
 }
