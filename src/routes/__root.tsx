@@ -18,7 +18,7 @@ export const Route = createRootRouteWithContext<{
           <UpdaterProvider>
             <NavigationProgress />
             <Outlet />
-            <Toaster duration={3000} />
+            <Toaster duration={3000} richColors position="bottom-right" />
             <AutoUpdateCheck />
           </UpdaterProvider>
         </AuthProvider>

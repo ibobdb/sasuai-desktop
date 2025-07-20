@@ -12,7 +12,14 @@
     "delete": "Delete",
     "edit": "Edit",
     "add": "Add",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "print": "Print",
+    "search": "Search",
+    "reset": "Reset",
+    "apply": "Apply",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore"
   },
   "status": {
     "loading": "Loading...",
@@ -49,7 +56,14 @@
     "tooltip": "Switch theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "systemMode": "System Mode",
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "switchToSystem": "Switch to system theme",
+    "clickTo": "Click to"
   },
   "datePicker": {
     "placeholder": "Pick a date range",

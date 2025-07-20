@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           className="gap-2"
           title={i18n.t('common:languageSwitcher.tooltip')}
