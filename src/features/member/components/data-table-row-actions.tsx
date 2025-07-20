@@ -23,25 +23,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import {
-  Member,
-  MemberDetail,
-  MemberFilterParams,
-  CreateMemberData,
-  UpdateMemberData
-} from '@/types/members'
+import { Member, MemberDeleteResponse } from '@/types/members'
 import { memberOperations } from '../actions/member-operations'
-import { createDataHooks } from '@/hooks/use-data-provider'
 import { MemberBanActions } from './member-ban-actions'
-
-// Get query keys from existing data hooks for consistency
-const { queryKeys } = createDataHooks<
-  Member,
-  MemberDetail,
-  CreateMemberData,
-  UpdateMemberData,
-  MemberFilterParams
->('members', memberOperations, 'member')
 
 interface DataTableRowActionsProps {
   member: Member
@@ -55,7 +39,7 @@ export function DataTableRowActions({ member, onEdit, onView }: DataTableRowActi
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   // Custom delete member mutation with proper name interpolation
-  const deleteMemberMutation = useMutation({
+  const deleteMemberMutation = useMutation<MemberDeleteResponse, Error, string>({
     mutationFn: memberOperations.deleteItem,
     onSuccess: (response) => {
       if (response.success) {
@@ -63,7 +47,7 @@ export function DataTableRowActions({ member, onEdit, onView }: DataTableRowActi
           description: t('member.messages.deleteSuccessDescription').replace('{name}', member.name)
         })
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: ['members'] })
       } else {
         toast.error(t('member.messages.deleteError'), {
           description: response.message || t('member.messages.deleteErrorDescription')

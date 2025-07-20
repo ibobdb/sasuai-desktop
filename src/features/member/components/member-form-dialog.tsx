@@ -17,22 +17,12 @@ import {
 import { Label } from '@/components/ui/label'
 import {
   Member,
-  MemberDetail,
   CreateMemberData,
   UpdateMemberData,
-  MemberFilterParams
+  MemberCreateResponse,
+  MemberUpdateResponse
 } from '@/types/members'
 import { memberOperations } from '../actions/member-operations'
-import { createDataHooks } from '@/hooks/use-data-provider'
-
-// Get query keys from existing data hooks for consistency
-const { queryKeys } = createDataHooks<
-  Member,
-  MemberDetail,
-  CreateMemberData,
-  UpdateMemberData,
-  MemberFilterParams
->('members', memberOperations, 'member')
 
 interface MemberFormDialogProps {
   open: boolean
@@ -63,7 +53,7 @@ export function MemberFormDialog({
   })
 
   // Custom create member mutation with proper name interpolation
-  const createMemberMutation = useMutation({
+  const createMemberMutation = useMutation<MemberCreateResponse, Error, CreateMemberData>({
     mutationFn: memberOperations.createItem,
     onSuccess: (response) => {
       if (response.success) {
@@ -71,7 +61,7 @@ export function MemberFormDialog({
           description: t('member.form.createSuccessDescription').replace('{name}', formData.name)
         })
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: ['members'] })
       } else {
         toast.error(t('member.form.createError'), {
           description: response.message || t('member.form.errorDefault')
@@ -87,7 +77,7 @@ export function MemberFormDialog({
   })
 
   // Custom update member mutation with proper name interpolation
-  const updateMemberMutation = useMutation({
+  const updateMemberMutation = useMutation<MemberUpdateResponse, Error, UpdateMemberData>({
     mutationFn: memberOperations.updateItem,
     onSuccess: (response, variables) => {
       if (response.success) {
@@ -95,8 +85,8 @@ export function MemberFormDialog({
           description: t('member.form.updateSuccessDescription').replace('{name}', formData.name)
         })
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
-        queryClient.invalidateQueries({ queryKey: queryKeys.detail(variables.id) })
+        queryClient.invalidateQueries({ queryKey: ['members'] })
+        queryClient.invalidateQueries({ queryKey: ['member-detail', variables.id] })
       } else {
         toast.error(t('member.form.updateError'), {
           description: response.message || t('member.form.errorDefault')

@@ -6,16 +6,8 @@ import { ShieldAlert, ShieldCheck } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import {
-  Member,
-  MemberDetail,
-  CreateMemberData,
-  UpdateMemberData,
-  MemberFilterParams,
-  BanMemberData
-} from '@/types/members'
-import { memberOperations, banMember, unbanMember } from '../actions/member-operations'
-import { createDataHooks } from '@/hooks/use-data-provider'
+import { Member, BanMemberData, MemberBanResponse } from '@/types/members'
+import { banMember, unbanMember } from '../actions/member-operations'
 import { DropdownMenuItem, DropdownMenuShortcut } from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
@@ -30,15 +22,6 @@ import {
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-
-// Get query keys from existing data hooks for consistency
-const { queryKeys } = createDataHooks<
-  Member,
-  MemberDetail,
-  CreateMemberData,
-  UpdateMemberData,
-  MemberFilterParams
->('members', memberOperations, 'member')
 
 // Form schema for ban reason
 const banFormSchema = z.object({
@@ -64,7 +47,11 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
   const queryClient = useQueryClient()
 
   // Ban member mutation with member name in closure
-  const banMemberMutation = useMutation({
+  const banMemberMutation = useMutation<
+    MemberBanResponse,
+    Error,
+    { id: string; data: BanMemberData }
+  >({
     mutationFn: ({ id, data }: { id: string; data: BanMemberData }) => banMember(id, data),
     onSuccess: (response, variables) => {
       if (response.success) {
@@ -72,8 +59,8 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
           description: t('member.messages.banSuccessDescription').replace('{name}', member.name)
         })
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
-        queryClient.invalidateQueries({ queryKey: queryKeys.detail(variables.id) })
+        queryClient.invalidateQueries({ queryKey: ['members'] })
+        queryClient.invalidateQueries({ queryKey: ['member-detail', variables.id] })
       } else {
         toast.error(t('member.messages.banError'), {
           description: response.message || t('member.messages.banErrorDescription')
@@ -89,7 +76,7 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
   })
 
   // Unban member mutation with member name in closure
-  const unbanMemberMutation = useMutation({
+  const unbanMemberMutation = useMutation<MemberBanResponse, Error, string>({
     mutationFn: unbanMember,
     onSuccess: (response, memberId) => {
       if (response.success) {
@@ -97,8 +84,8 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
           description: t('member.messages.unbanSuccessDescription').replace('{name}', member.name)
         })
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: queryKeys.lists() })
-        queryClient.invalidateQueries({ queryKey: queryKeys.detail(memberId) })
+        queryClient.invalidateQueries({ queryKey: ['members'] })
+        queryClient.invalidateQueries({ queryKey: ['member-detail', memberId] })
       } else {
         toast.error(t('member.messages.unbanError'), {
           description: response.message || t('member.messages.unbanErrorDescription')

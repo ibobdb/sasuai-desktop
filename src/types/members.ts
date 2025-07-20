@@ -1,6 +1,12 @@
 import { BaseFilterParams } from './common'
-import { BaseFilterUIState } from './data-provider'
 import { Discount } from './cashier'
+
+// Base filter UI state interface
+interface BaseFilterUIState {
+  search: string
+  startDate?: Date
+  endDate?: Date
+}
 
 // Available dialog types
 export type MemberDialogType = 'view' | 'create' | 'edit'
@@ -166,4 +172,28 @@ export interface UpdateMemberData extends CreateMemberData {
 
 export interface BanMemberData {
   reason: string
+}
+
+// Member-specific API response interfaces
+export interface MemberCreateResponse {
+  success: boolean
+  data: Member
+  message?: string
+}
+
+export interface MemberUpdateResponse {
+  success: boolean
+  data: Member
+  message?: string
+}
+
+export interface MemberDeleteResponse {
+  success: boolean
+  message?: string
+}
+
+export interface MemberBanResponse {
+  success: boolean
+  data: Member
+  message?: string
 }

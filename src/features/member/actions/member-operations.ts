@@ -1,13 +1,15 @@
 import { API_ENDPOINTS } from '@/config/api'
-import { ApiResponse } from '@/types/data-provider'
 import {
-  Member,
-  MemberDetail,
   MemberFilterParams,
   CreateMemberData,
   UpdateMemberData,
   BanMemberData,
-  MemberListResponse
+  MemberListResponse,
+  MemberDetailResponse,
+  MemberCreateResponse,
+  MemberUpdateResponse,
+  MemberDeleteResponse,
+  MemberBanResponse
 } from '@/types/members'
 
 // Member-specific API operations
@@ -29,13 +31,13 @@ export const memberOperations = {
     return response
   },
 
-  fetchItemDetail: async (id: string): Promise<ApiResponse<MemberDetail>> => {
+  fetchItemDetail: async (id: string): Promise<MemberDetailResponse> => {
     const response = await window.api.request(`${API_ENDPOINTS.MEMBERS.BASE}/${id}`)
     return response
   },
 
   // Write operations
-  createItem: async (data: CreateMemberData): Promise<ApiResponse<Member>> => {
+  createItem: async (data: CreateMemberData): Promise<MemberCreateResponse> => {
     const response = await window.api.request(API_ENDPOINTS.MEMBERS.BASE, {
       method: 'POST',
       data: data
@@ -43,7 +45,7 @@ export const memberOperations = {
     return response
   },
 
-  updateItem: async (data: UpdateMemberData & { id: string }): Promise<ApiResponse<Member>> => {
+  updateItem: async (data: UpdateMemberData & { id: string }): Promise<MemberUpdateResponse> => {
     const { id, ...updateData } = data
     const response = await window.api.request(`${API_ENDPOINTS.MEMBERS.BASE}/${id}`, {
       method: 'PUT',
@@ -52,7 +54,7 @@ export const memberOperations = {
     return response
   },
 
-  deleteItem: async (id: string): Promise<ApiResponse<void>> => {
+  deleteItem: async (id: string): Promise<MemberDeleteResponse> => {
     const response = await window.api.request(`${API_ENDPOINTS.MEMBERS.BASE}/${id}`, {
       method: 'DELETE'
     })
@@ -61,7 +63,7 @@ export const memberOperations = {
 }
 
 // Additional member-specific operations (not part of generic CRUD)
-export const banMember = async (id: string, data: BanMemberData): Promise<ApiResponse<Member>> => {
+export const banMember = async (id: string, data: BanMemberData): Promise<MemberBanResponse> => {
   const response = await window.api.request(`${API_ENDPOINTS.MEMBERS.BASE}/${id}/ban`, {
     method: 'POST',
     data: data
@@ -69,7 +71,7 @@ export const banMember = async (id: string, data: BanMemberData): Promise<ApiRes
   return response
 }
 
-export const unbanMember = async (id: string): Promise<ApiResponse<Member>> => {
+export const unbanMember = async (id: string): Promise<MemberBanResponse> => {
   const response = await window.api.request(`${API_ENDPOINTS.MEMBERS.BASE}/${id}/unban`, {
     method: 'POST'
   })
