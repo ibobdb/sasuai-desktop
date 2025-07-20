@@ -17,20 +17,22 @@ interface MemberViewDialogProps {
   memberDetail: MemberDetail | null
   isLoadingDetail: boolean
   onOpenChange: (open: boolean) => void
+  onEditClick?: () => void
 }
 
 export function MemberViewDialog({
   open,
   memberDetail,
   isLoadingDetail,
-  onOpenChange
+  onOpenChange,
+  onEditClick
 }: MemberViewDialogProps) {
   const { t } = useTranslation(['member', 'common'])
   const [activeTab, setActiveTab] = useState('info')
 
   const handleEditClick = () => {
     onOpenChange(false)
-    // Note: Edit functionality would need to be handled by parent component
+    onEditClick?.()
   }
 
   return (

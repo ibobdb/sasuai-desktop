@@ -168,3 +168,25 @@ export interface TransactionFilterUIState {
 }
 
 export type TransactionsDialogType = 'view'
+
+// Backend transaction response structure
+export interface TransactionListResponse {
+  success: boolean
+  data: {
+    transactions: Transaction[]
+    pagination: {
+      totalCount: number
+      totalPages: number
+      currentPage: number
+      pageSize: number
+    }
+  }
+}
+
+// API response structure for single transaction
+export interface TransactionDetailResponse {
+  success: boolean
+  data: {
+    transactionDetails: TransactionDetail
+  }
+}

@@ -5,6 +5,14 @@ import { Discount } from './cashier'
 // Available dialog types
 export type MemberDialogType = 'view' | 'create' | 'edit'
 
+// Backend member response structure (what actually comes from API)
+export interface BackendMemberResponse {
+  members: Member[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
+
 // Member tier information
 export interface MemberTier {
   id: string

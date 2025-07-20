@@ -35,6 +35,9 @@ export function MemberDialogs({
             onOpenChange={(isOpen) => {
               if (!isOpen) handleDialogClose()
             }}
+            onEditClick={() => {
+              onOpenChange('edit')
+            }}
           />
         </>
       )}

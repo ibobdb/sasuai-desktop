@@ -1,19 +1,17 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Main } from '@/components/layout/main'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { UserPlus } from 'lucide-react'
-import { createDataHooks } from '@/hooks/use-data-provider'
 import { memberOperations } from './actions/member-operations'
 import {
   Member,
-  MemberDetail,
   MemberFilterParams,
   MemberFilterUIState,
   MemberDialogType,
-  CreateMemberData,
-  UpdateMemberData
+  MemberListResponse
 } from '@/types/members'
 import { useMemberColumns } from './components/member-columns'
 import { MemberDialogs } from './components/member-dialogs'
@@ -41,36 +39,37 @@ export default function Members() {
   )
   const [filters, setFilters] = useState<MemberFilterParams>(defaultMemberFilters)
 
-  const { useItems: useMembers, useItemDetail: useMemberDetail } = createDataHooks<
-    Member,
-    MemberDetail,
-    CreateMemberData,
-    UpdateMemberData,
-    MemberFilterParams
-  >('members', memberOperations, 'member')
+  const {
+    data: membersResponse,
+    isLoading,
+    refetch
+  } = useQuery<MemberListResponse>({
+    queryKey: ['members', filters],
+    queryFn: () => memberOperations.fetchItems(filters)
+  })
 
-  const { data: membersResponse, isLoading, refetch } = useMembers(filters)
+  const { data: memberDetailResponse, isLoading: isLoadingDetail } = useQuery({
+    queryKey: ['member-detail', currentMember?.id],
+    queryFn: () => memberOperations.fetchItemDetail(currentMember!.id),
+    enabled: !!currentMember?.id,
+    select: (response) => response.data
+  })
 
-  const { data: memberDetailResponse, isLoading: isLoadingDetail } = useMemberDetail(
-    currentMember?.id || '',
-    !!currentMember?.id
-  )
+  // Access data with proper types
+  const members = membersResponse?.data?.members ?? []
+  const memberDetail = memberDetailResponse ?? null
+  const { totalPages = 0, currentPage = 1, totalCount = 0 } = membersResponse?.data ?? {}
 
-  const members = membersResponse?.data?.items || []
-  const memberDetail = memberDetailResponse?.data || null
   const pagination = {
-    totalPages: membersResponse?.data?.totalPages || 0,
-    currentPage: membersResponse?.data?.currentPage || 1,
-    pageSize: membersResponse?.data?.pageSize || 10,
-    totalCount: membersResponse?.data?.totalCount || 0
+    totalPages,
+    currentPage,
+    pageSize: filters.pageSize ?? 10,
+    totalCount
   }
 
   // Update filters function
   const updateFilters = useCallback((newFilters: Partial<MemberFilterParams>) => {
-    setFilters((prev) => {
-      const updated = { ...prev, ...newFilters }
-      return updated
-    })
+    setFilters((prev) => ({ ...prev, ...newFilters }))
   }, [])
 
   const resetFilters = useCallback(() => {
@@ -88,8 +87,6 @@ export default function Members() {
       setOpen('view')
     }
   })
-
-  const memberData = Array.isArray(members) ? members : []
 
   return (
     <Main>
@@ -125,7 +122,7 @@ export default function Members() {
           </div>
         ) : (
           <MemberTable
-            data={memberData}
+            data={members}
             columns={columns}
             pageCount={pagination.totalPages || 0}
             pagination={{

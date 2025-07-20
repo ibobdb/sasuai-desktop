@@ -52,16 +52,22 @@ export default function Transactions() {
   const { data: transactionDetailResponse, isLoading: isLoadingDetail } = useQuery({
     queryKey: ['transaction', currentTransaction?.id],
     queryFn: () => transactionOperations.fetchItemDetail(currentTransaction?.id || ''),
-    enabled: !!currentTransaction?.id
+    enabled: !!currentTransaction?.id,
+    select: (response) => response.data?.transactionDetails
   })
 
-  const transactions = transactionsResponse?.data?.items || []
-  const transactionDetail = transactionDetailResponse?.data || null
+  const transactions = transactionsResponse?.data?.transactions ?? []
+  const transactionDetail = transactionDetailResponse || null
+  const paginationResponse = transactionsResponse?.data?.pagination
+  const totalPages = paginationResponse?.totalPages ?? 0
+  const currentPage = paginationResponse?.currentPage ?? 1
+  const totalCount = paginationResponse?.totalCount ?? 0
+
   const pagination = {
-    totalPages: transactionsResponse?.data?.totalPages || 0,
-    currentPage: transactionsResponse?.data?.currentPage || 1,
-    pageSize: transactionsResponse?.data?.pageSize || 10,
-    totalCount: transactionsResponse?.data?.totalCount || 0
+    totalPages,
+    currentPage,
+    pageSize: filters.pageSize ?? 10,
+    totalCount
   }
 
   const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
