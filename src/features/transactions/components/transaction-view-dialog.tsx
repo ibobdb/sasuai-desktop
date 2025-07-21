@@ -11,7 +11,8 @@ import { Card } from '@/components/ui/card'
 import { DetailDialog } from '@/components/common/detail-dialog'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 import { toast } from 'sonner'
-import { generateReceiptData, generateReceiptHTML } from '@/utils/receipt-generator'
+import { generateReceiptData } from '@/utils/receipt-data'
+import { generateReceiptHTML } from '@/utils/receipt-html'
 
 interface Props {
   open: boolean

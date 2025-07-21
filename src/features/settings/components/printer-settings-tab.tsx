@@ -85,11 +85,14 @@ export function PrinterSettingsTab() {
 
   const updateSetting = useCallback(
     <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
-      const newSettings = { ...settings, [key]: value }
-      saveSettings(newSettings)
+      setSettings((prevSettings) => ({ ...prevSettings, [key]: value }))
     },
-    [settings, saveSettings]
+    []
   )
+
+  const handleSaveSettings = useCallback(async () => {
+    await saveSettings(settings)
+  }, [saveSettings, settings])
 
   return (
     <div className="space-y-6">
@@ -98,6 +101,7 @@ export function PrinterSettingsTab() {
         availablePrinters={availablePrinters}
         isSaving={isSaving}
         onUpdateSetting={updateSetting}
+        onSaveSettings={handleSaveSettings}
       />
 
       <TypographySettingsCard settings={settings} onUpdateSetting={updateSetting} />

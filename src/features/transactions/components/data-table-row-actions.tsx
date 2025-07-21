@@ -14,7 +14,8 @@ import {
 import { Transaction } from '@/types/transactions'
 import { PrinterSettings } from '@/types/settings'
 import { toast } from 'sonner'
-import { generateReceiptData, generateReceiptHTML } from '@/utils/receipt-generator'
+import { generateReceiptData } from '@/utils/receipt-data'
+import { generateReceiptHTML } from '@/utils/receipt-html'
 import { transactionOperations } from '@/features/transactions/actions/transaction-operations'
 
 interface DataTableRowActionsProps {

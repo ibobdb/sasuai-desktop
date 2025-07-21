@@ -21,13 +21,15 @@ interface BasicPrintSettingsCardProps {
   availablePrinters: string[]
   isSaving: boolean
   onUpdateSetting: <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => void
+  onSaveSettings: () => void
 }
 
 export function BasicPrintSettingsCard({
   settings,
   availablePrinters,
   isSaving,
-  onUpdateSetting
+  onUpdateSetting,
+  onSaveSettings
 }: BasicPrintSettingsCardProps) {
   const { t } = useTranslation(['settings'])
   const [isTestingPrint, setIsTestingPrint] = useState(false)
@@ -163,12 +165,19 @@ export function BasicPrintSettingsCard({
           </div>
         </div>
 
-        {isSaving && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {t('printer.saving')}
-          </div>
-        )}
+        {/* Save Button */}
+        <div className="flex justify-end pt-4 border-t">
+          <Button onClick={onSaveSettings} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                {t('printer.saving')}
+              </>
+            ) : (
+              t('actions.save', { ns: 'common' })
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )

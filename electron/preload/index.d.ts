@@ -45,6 +45,13 @@ interface PrinterSettings {
   margin: string
   copies: number
   timeOutPerLine: number
+  fontSize: number
+  fontFamily: string
+  lineHeight: number
+  enableBold: boolean
+  autocut: boolean
+  cashdrawer: boolean
+  encoding: string
 }
 
 // Remove PrintReceipt interface since we only use HTML now
