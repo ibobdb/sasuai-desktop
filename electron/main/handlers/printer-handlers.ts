@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
-import { PrinterService, PrinterSettings, PrintReceipt } from '../services/printer-service'
+import { PrinterService, PrintReceipt } from '../services/printer-service'
+import { PrinterSettings } from '../types/printer'
 
 let printerService: PrinterService | null = null
 
