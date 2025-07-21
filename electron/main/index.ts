@@ -4,6 +4,7 @@ import Store from 'electron-store'
 import { createWindow, getMainWindow, setupWindowHandlers } from './window'
 import { setupApiHandlers } from './handlers/api-handlers'
 import { setupCookieHandlers } from './handlers/cookie-handlers'
+import { setupPrinterHandlers } from './handlers/printer-handlers'
 import { setupAutoUpdater } from './updater'
 import { AUTH_STORE_TOKEN_KEY, AUTH_STORE_USER_KEY } from './constants'
 
@@ -67,6 +68,7 @@ const initializeApp = async () => {
 
   setupApiHandlers()
   setupCookieHandlers()
+  setupPrinterHandlers()
   setupWindowHandlers()
   setupStoreHandlers()
   setupLanguageHandlers()

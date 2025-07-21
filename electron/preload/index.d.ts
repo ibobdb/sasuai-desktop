@@ -39,6 +39,37 @@ interface UpdateProgress {
   total: number
 }
 
+interface PrinterSettings {
+  printerName: string
+  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
+  margin: string
+  copies: number
+  timeOutPerLine: number
+}
+
+interface PrintReceipt {
+  id: string
+  storeName: string
+  address: string
+  phone: string
+  items: Array<{
+    name: string
+    quantity: number
+    price: number
+    total: number
+  }>
+  subtotal: number
+  tax: number
+  total: number
+  payment: {
+    method: string
+    amount: number
+    change: number
+  }
+  transactionDate: Date
+  cashier: string
+}
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -73,6 +104,25 @@ declare global {
       app: {
         getVersion: () => Promise<string>
         getName: () => Promise<string>
+      }
+      printer: {
+        getPrinters: () => Promise<{
+          success: boolean
+          data?: string[]
+          error?: { message: string }
+        }>
+        getSettings: () => Promise<{
+          success: boolean
+          data?: PrinterSettings
+          error?: { message: string }
+        }>
+        saveSettings: (
+          settings: Partial<PrinterSettings>
+        ) => Promise<{ success: boolean; error?: { message: string } }>
+        testPrint: () => Promise<{ success: boolean; error?: { message: string } }>
+        printReceipt: (
+          receipt: PrintReceipt
+        ) => Promise<{ success: boolean; error?: { message: string } }>
       }
     }
   }

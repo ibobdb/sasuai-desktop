@@ -10,26 +10,35 @@ export interface KeyboardShortcut {
   isCustom?: boolean
 }
 
-export interface PrinterConfig {
+export interface PrinterSettings {
+  printerName: string
+  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
+  margin: string
+  copies: number
+  timeOutPerLine: number
+}
+
+export interface PrintReceipt {
   id: string
-  name: string
-  type: 'thermal' | 'inkjet' | 'laser'
-  connection: 'usb' | 'network' | 'bluetooth'
-  settings: {
-    paperWidth: number // in mm
-    paperHeight?: number // in mm, optional for continuous paper
-    dpi: number
-    characterSet: string
-    autocut: boolean
-    buzzer: boolean
-    drawer: boolean
+  storeName: string
+  address: string
+  phone: string
+  items: Array<{
+    name: string
+    quantity: number
+    price: number
+    total: number
+  }>
+  subtotal: number
+  tax: number
+  total: number
+  payment: {
+    method: string
+    amount: number
+    change: number
   }
-  networkConfig?: {
-    ipAddress: string
-    port: number
-  }
-  isDefault: boolean
-  isActive: boolean
+  transactionDate: Date
+  cashier: string
 }
 
 export interface GeneralConfig {
@@ -43,7 +52,7 @@ export interface GeneralConfig {
 export interface SettingsConfig {
   general: GeneralConfig
   keyboard: KeyboardShortcut[]
-  printer: PrinterConfig
+  printer: PrinterSettings
 }
 
 // Component Props
@@ -58,25 +67,9 @@ export interface KeyboardShortcutItemProps {
   onReset: (shortcutId: string) => void
 }
 
-export interface PrinterItemProps {
-  printer: PrinterConfig
-  onEdit: (printer: PrinterConfig) => void
-  onDelete: (printerId: string) => void
-  onSetDefault: (printerId: string) => void
-  onToggleActive: (printerId: string) => void
-  onTest: (printerId: string) => void
-}
-
-export interface EditShortcutDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  shortcut: KeyboardShortcut | null
-  onSave: (shortcut: KeyboardShortcut) => void
-}
-
-export interface EditPrinterDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  printer: PrinterConfig | null
-  onSave: (printer: PrinterConfig) => void
+export interface PrinterSettingsProps {
+  settings: PrinterSettings
+  printers: string[]
+  onSettingsChange: (settings: PrinterSettings) => void
+  onTestPrint: () => void
 }
