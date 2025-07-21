@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Product, Discount } from '@/types/cashier'
 import { QuantityInputDialog } from './quantity-input-dialog'
-import { useProductSearchHook } from '../hooks'
+import { useProductSearch as useProductSearchHook } from '../hooks/use-product-search'
 import {
   getExpiryInfo,
   getBestDiscount,
@@ -20,9 +20,14 @@ import {
 interface ProductSearchProps {
   onProductSelect: (product: Product, quantity?: number) => void
   autoFocus?: boolean
+  inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
-export default function ProductSearch({ onProductSelect, autoFocus = true }: ProductSearchProps) {
+export default function ProductSearch({
+  onProductSelect,
+  autoFocus = true,
+  inputRef: externalInputRef
+}: ProductSearchProps) {
   const { t } = useTranslation(['cashier'])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [quantityDialogOpen, setQuantityDialogOpen] = useState(false)
@@ -59,13 +64,16 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
     resultsRef
   } = productSearch
 
+  // Use external ref if provided, otherwise use internal ref
+  const activeInputRef = externalInputRef || inputRef
+
   // Handle adding product with quantity
   const handleAddWithQuantity = (product: Product, quantity: number) => {
     onProductSelect(product, quantity)
     setQuantityDialogOpen(false)
     setSelectedProduct(null)
     clearSearch()
-    inputRef.current?.focus()
+    activeInputRef.current?.focus()
   }
 
   // Custom handleSelect to ensure cleanup
@@ -75,18 +83,18 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       // Clear search after selection to hide results
       setTimeout(() => {
         clearSearch()
-        inputRef.current?.focus()
+        activeInputRef.current?.focus()
       }, 100)
     },
-    [handleSelect, clearSearch, inputRef]
+    [handleSelect, clearSearch, activeInputRef]
   )
 
   // Auto-focus input when component mounts
   useEffect(() => {
-    if (autoFocus && inputRef.current) {
-      inputRef.current.focus()
+    if (autoFocus && activeInputRef.current) {
+      activeInputRef.current.focus()
     }
-  }, [autoFocus, inputRef])
+  }, [autoFocus, activeInputRef])
 
   // Auto-select if there's an exact match when manually searching
   useEffect(() => {
@@ -129,7 +137,7 @@ export default function ProductSearch({ onProductSelect, autoFocus = true }: Pro
       <div className="relative">
         <div className="relative">
           <Input
-            ref={inputRef}
+            ref={activeInputRef}
             placeholder={t('cashier.productSearch.placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}

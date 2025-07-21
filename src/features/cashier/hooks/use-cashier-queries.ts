@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { cashierOperations } from '../actions/cashier-operations'
 import {
-  cashierOperations,
+  TransactionData,
   ProductSearchParams,
   MemberSearchParams,
   PointsCalculationParams,
   DiscountValidationParams,
   TransactionResponse
-} from '../actions/cashier-operations'
-import { TransactionData } from '@/types/cashier'
+} from '@/types/cashier'
 
 // Query keys
 export const CASHIER_QUERY_KEYS = {

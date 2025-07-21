@@ -1,17 +1,6 @@
 import { useState, useCallback } from 'react'
-import { Member, Discount } from '@/types/cashier'
+import { Member, Discount, UseMemberDiscountsReturn } from '@/types/cashier'
 import { isDiscountValid } from '../utils/cashier-utils'
-
-export interface UseMemberDiscountsReturn {
-  selectedMember: Member | null
-  selectedMemberDiscount: Discount | null
-  selectedTierDiscount: Discount | null
-  handleMemberSelect: (member: Member | null) => void
-  handleMemberDiscountSelect: (discount: Discount | null) => void
-  clearMemberData: () => void
-  getAvailableMemberDiscounts: () => Discount[]
-  getAvailableTierDiscounts: () => Discount[]
-}
 
 export function useMemberDiscounts(): UseMemberDiscountsReturn {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)

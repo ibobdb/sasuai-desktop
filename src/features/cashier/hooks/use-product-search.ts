@@ -3,30 +3,7 @@ import { useProductSearch as useProductSearchQuery } from './use-cashier-queries
 import { useDebounce } from '@/hooks/use-debounce'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 import { useClickOutside } from '@/hooks/use-click-outside'
-import { Product } from '@/types/cashier'
-
-export interface UseProductSearchReturn {
-  query: string
-  setQuery: (query: string) => void
-  results: Product[]
-  showResults: boolean
-  setShowResults: (show: boolean) => void
-  isLoading: boolean
-  handleSelect: (product: Product) => void
-  handleManualSearch: () => void
-  clearSearch: () => void
-  focusedIndex: number
-  listItemsRef: React.MutableRefObject<(HTMLElement | null)[]>
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
-  handleItemMouseEnter: (index: number) => void
-  inputRef: React.RefObject<HTMLInputElement | null>
-  resultsRef: React.RefObject<HTMLDivElement | null>
-}
-
-interface UseProductSearchProps {
-  onProductSelect: (product: Product, quantity?: number) => void
-  quickAddMode?: boolean
-}
+import { Product, UseProductSearchReturn, UseProductSearchProps } from '@/types/cashier'
 
 export function useProductSearch({
   onProductSelect,

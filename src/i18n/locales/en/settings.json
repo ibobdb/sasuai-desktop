@@ -1,0 +1,106 @@
+{
+  "title": "Settings",
+  "description": "Manage your application settings",
+  "loading": "Loading settings...",
+  "tabs": {
+    "general": "General",
+    "keyboard": "Keyboard",
+    "printer": "Printer"
+  },
+  "general": {
+    "title": "General Settings",
+    "description": "Basic application configuration",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": "Theme",
+    "lightTheme": "Light",
+    "darkTheme": "Dark",
+    "systemTheme": "System",
+    "applicationBehavior": "Application Behavior",
+    "autoStart": "Auto Start",
+    "autoStartDescription": "Start application when computer boots up",
+    "minimizeToTray": "Minimize to System Tray",
+    "minimizeToTrayDescription": "Hide application to system tray when minimized",
+    "autoUpdate": "Auto Update",
+    "autoUpdateDescription": "Automatically download and install app updates",
+    "resetToDefault": "Reset to Default",
+    "saveSuccess": "Settings saved successfully",
+    "saveSuccessDescription": "Your settings changes have been applied",
+    "resetSuccess": "Settings reset successfully",
+    "resetSuccessDescription": "All settings have been restored to default values"
+  },
+  "keyboard": {
+    "title": "Keyboard Shortcuts",
+    "description": "Manage keyboard shortcuts for quick access",
+    "action": "Action",
+    "tableDescription": "Description",
+    "shortcut": "Shortcut",
+    "actions": "Actions",
+    "resetAll": "Reset All",
+    "clickToRecord": "Click to record shortcut",
+    "clear": "Clear",
+    "edit": "Edit",
+    "reset": "Reset",
+    "shortcutActions": {
+      "searchProduct": {
+        "name": "Search Product",
+        "description": "Focus on product search input"
+      },
+      "payment": {
+        "name": "Payment",
+        "description": "Open payment dialog"
+      },
+      "clearCart": {
+        "name": "Clear Cart",
+        "description": "Remove all items from cart"
+      },
+      "addDiscount": {
+        "name": "Add Discount",
+        "description": "Focus on discount code input"
+      },
+      "searchMember": {
+        "name": "Search Member",
+        "description": "Focus on member search"
+      },
+      "quickPayment": {
+        "name": "Quick Payment",
+        "description": "Process payment instantly with exact amount"
+      },
+      "voidTransaction": {
+        "name": "Void Transaction",
+        "description": "Cancel transaction and clear cart"
+      }
+    }
+  },
+  "printer": {
+    "title": "Printer Settings",
+    "description": "Configure printer for receipt printing",
+    "selection": "Printer Selection",
+    "enabled": "Enable Printer",
+    "refresh": "Refresh",
+    "selectPrinter": "Select Printer",
+    "selectPrinterPlaceholder": "Choose available printer",
+    "connected": "Connected",
+    "testPrint": "Test Print",
+    "printersRefreshed": "Printer list refreshed",
+    "printersFound": "{{count}} printers found",
+    "refreshError": "Failed to refresh printers",
+    "refreshErrorDescription": "Cannot update printer list",
+    "testPrintSuccess": "Test print successful",
+    "testPrintSuccessDescription": "Printer is working properly",
+    "testPrintError": "Test print failed",
+    "testPrintErrorDescription": "Failed to print to printer",
+    "printSettings": "Print Settings",
+    "type": "Printer Type",
+    "connection": "Connection",
+    "settings": "Settings",
+    "paperWidth": "Paper Width",
+    "dpi": "DPI",
+    "autocut": "Auto Cut",
+    "buzzer": "Buzzer",
+    "drawer": "Cash Drawer",
+    "networkConfig": "Network Configuration",
+    "ipAddress": "IP Address",
+    "port": "Port"
+  }
+}

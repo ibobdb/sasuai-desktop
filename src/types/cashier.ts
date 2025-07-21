@@ -20,6 +20,146 @@ export type Discount = {
   updatedAt?: string
 }
 
+// API Parameter Types
+export interface ProductSearchParams {
+  query: string
+  limit?: number
+}
+
+export interface MemberSearchParams {
+  query: string
+  limit?: number
+}
+
+export interface PointsCalculationParams {
+  amount: number
+  memberId?: string
+}
+
+export interface DiscountValidationParams {
+  code: string
+}
+
+// API Response Types
+export interface TransactionResponse {
+  success: boolean
+  data: {
+    tranId: string
+    [key: string]: any
+  }
+  change?: number
+  message?: string
+}
+
+export interface PointsResponse {
+  success: boolean
+  points: number
+  message?: string
+}
+
+export interface DiscountResponse {
+  success: boolean
+  discount: Discount
+  message?: string
+}
+
+// Hook Return Types
+export interface UseCartReturn {
+  cart: CartItem[]
+  subtotal: number
+  productDiscountsTotal: number
+  totalItems: number
+  addToCart: (product: Product, quantity?: number) => void
+  removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
+  updateItemDiscount: (id: string, discount: Discount | null) => void
+  clearCart: () => void
+}
+
+export interface CashierCalculations {
+  subtotal: number
+  productDiscountsTotal: number
+  memberDiscountAmount: number
+  tierDiscountAmount: number
+  globalDiscountAmount: number
+  totalGeneralDiscount: number
+  totalDiscount: number
+  tax: number
+  total: number
+}
+
+export interface UseGlobalDiscountReturn {
+  globalDiscount: Discount | null
+  setGlobalDiscount: (discount: Discount | null) => void
+  clearGlobalDiscount: () => void
+}
+
+export interface UseMemberDiscountsReturn {
+  selectedMember: Member | null
+  selectedMemberDiscount: Discount | null
+  selectedTierDiscount: Discount | null
+  handleMemberSelect: (member: Member | null) => void
+  handleMemberDiscountSelect: (discount: Discount | null) => void
+  clearMemberData: () => void
+  getAvailableMemberDiscounts: () => Discount[]
+  getAvailableTierDiscounts: () => Discount[]
+}
+
+export interface UseProductSearchReturn {
+  query: string
+  setQuery: (query: string) => void
+  results: Product[]
+  showResults: boolean
+  setShowResults: (show: boolean) => void
+  isLoading: boolean
+  handleSelect: (product: Product) => void
+  handleManualSearch: () => void
+  clearSearch: () => void
+  focusedIndex: number
+  listItemsRef: React.MutableRefObject<(HTMLElement | null)[]>
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  handleItemMouseEnter: (index: number) => void
+  inputRef: React.RefObject<HTMLInputElement | null>
+  resultsRef: React.RefObject<HTMLDivElement | null>
+}
+
+export interface UseProductSearchProps {
+  onProductSelect: (product: Product, quantity?: number) => void
+  quickAddMode?: boolean
+}
+
+export interface PaymentStatus {
+  success: boolean
+  transactionId?: string
+  change?: number
+  errorMessage?: string
+}
+
+export interface UseTransactionReturn {
+  paymentMethod: PaymentMethod
+  paymentAmount: number
+  paymentDialogOpen: boolean
+  paymentStatusDialogOpen: boolean
+  paymentStatus: PaymentStatus
+  isProcessingTransaction: boolean
+  setPaymentMethod: (method: PaymentMethod) => void
+  setPaymentAmount: (amount: number) => void
+  setPaymentDialogOpen: (open: boolean) => void
+  handlePayment: () => Promise<void>
+  handleStatusDialogClose: () => void
+}
+
+// Enhanced Types for UI Components
+export interface EnhancedDiscount extends Discount {
+  source: 'member' | 'tier'
+}
+
+export interface MemberSearchProps {
+  onMemberSelect: (member: Member | null) => void
+  placeholder?: string
+  autoFocus?: boolean
+}
+
 // Product related types
 
 export type Product = {

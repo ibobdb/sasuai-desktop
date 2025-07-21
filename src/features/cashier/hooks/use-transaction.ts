@@ -6,34 +6,13 @@ import {
   CartItem,
   Discount,
   TransactionItem,
-  TransactionData
+  TransactionData,
+  PaymentStatus,
+  UseTransactionReturn
 } from '@/types/cashier'
 import { useAuthStore } from '@/stores/authStore'
 import { useProcessTransaction } from './use-cashier-queries'
 import { isDiscountValid } from '../utils/cashier-utils'
-
-export interface PaymentStatus {
-  success: boolean
-  transactionId?: string
-  change?: number
-  errorMessage?: string
-}
-
-export interface UseTransactionReturn {
-  paymentMethod: PaymentMethod
-  paymentAmount: number
-  isProcessingTransaction: boolean
-  paymentDialogOpen: boolean
-  paymentStatusDialogOpen: boolean
-  paymentStatus: PaymentStatus
-  setPaymentMethod: (method: PaymentMethod) => void
-  setPaymentAmount: (amount: number) => void
-  setPaymentDialogOpen: (open: boolean) => void
-  setPaymentStatusDialogOpen: (open: boolean) => void
-  handlePayment: () => Promise<void>
-  handleStatusDialogClose: () => void
-  validateTransaction: () => boolean
-}
 
 export function useTransaction(
   cart: CartItem[],
@@ -143,24 +122,24 @@ export function useTransaction(
         const batch = item.batches?.find((b) => b.id === item.batchId)
 
         if (!batch) {
-          throw new Error(`No valid batch found for product ${item.name}`)
+          throw new Error(`Batch not found for product ${item.name}`)
         }
 
         return {
           productId: item.id,
           quantity: item.quantity,
-          unitId: item.unitId || '',
-          cost: batch.buyPrice,
+          unitId: item.unitId,
+          cost: batch.buyPrice * item.quantity,
           pricePerUnit: item.price,
-          subtotal: item.finalPrice,
-          batchId: batch.id,
+          subtotal: item.subtotal,
+          batchId: item.batchId || '',
           discountId: item.selectedDiscount?.id || null
         }
       })
 
       const transactionData: TransactionData = {
         cashierId: user?.id || '',
-        memberId: memberId,
+        memberId: memberId || null,
         selectedMemberDiscountId: selectedMemberDiscount?.id || null,
         selectedTierDiscountId: selectedTierDiscount?.id || null,
         globalDiscountCode: globalDiscount?.code || null,
@@ -171,28 +150,31 @@ export function useTransaction(
         items: transactionItems
       }
 
-      const response = await processTransactionMutation.mutateAsync(transactionData)
+      const result = await processTransactionMutation.mutateAsync(transactionData)
 
-      if (response.success) {
+      if (result.success) {
+        const change = paymentMethod === 'cash' ? paymentAmount - finalAmount : 0
+
         setPaymentStatus({
           success: true,
-          transactionId: response.data.tranId,
-          change: response.change
+          transactionId: result.data.tranId,
+          change: change > 0 ? change : undefined
         })
       } else {
         setPaymentStatus({
           success: false,
-          errorMessage: response.message || t('cashier.errors.transactionFailed')
+          errorMessage: result.message || t('cashier.paymentStatus.errorDefault')
         })
       }
 
       setPaymentDialogOpen(false)
       setPaymentStatusDialogOpen(true)
     } catch (error) {
-      console.error('Payment error:', error)
+      console.error('Transaction error:', error)
       setPaymentStatus({
         success: false,
-        errorMessage: t('cashier.errors.unexpectedError')
+        errorMessage:
+          error instanceof Error ? error.message : t('cashier.paymentStatus.errorDefault')
       })
       setPaymentDialogOpen(false)
       setPaymentStatusDialogOpen(true)
@@ -215,23 +197,23 @@ export function useTransaction(
 
   const handleStatusDialogClose = useCallback(() => {
     setPaymentStatusDialogOpen(false)
-    // Reset payment status for next transaction
-    setPaymentStatus({ success: false })
+    // Reset payment status after closing
+    setTimeout(() => {
+      setPaymentStatus({ success: false })
+    }, 500)
   }, [])
 
   return {
     paymentMethod,
     paymentAmount,
-    isProcessingTransaction,
     paymentDialogOpen,
     paymentStatusDialogOpen,
     paymentStatus,
+    isProcessingTransaction,
     setPaymentMethod,
     setPaymentAmount,
     setPaymentDialogOpen,
-    setPaymentStatusDialogOpen,
     handlePayment,
-    handleStatusDialogClose,
-    validateTransaction
+    handleStatusDialogClose
   }
 }

@@ -1,0 +1,95 @@
+{
+  "title": "Pengaturan",
+  "description": "Kelola pengaturan aplikasi Anda",
+  "loading": "Memuat pengaturan...",
+  "tabs": {
+    "general": "Umum",
+    "keyboard": "Keyboard",
+    "printer": "Printer"
+  },
+  "general": {
+    "title": "Pengaturan Umum",
+    "description": "Konfigurasi dasar aplikasi",
+    "applicationBehavior": "Perilaku Aplikasi",
+    "autoStart": "Mulai Otomatis",
+    "autoStartDescription": "Jalankan aplikasi saat komputer dinyalakan",
+    "minimizeToTray": "Minimize ke System Tray",
+    "minimizeToTrayDescription": "Sembunyikan aplikasi ke system tray saat diminimize",
+    "autoUpdate": "Update Otomatis",
+    "autoUpdateDescription": "Otomatis unduh dan instal pembaruan aplikasi"
+  },
+  "keyboard": {
+    "title": "Shortcut Keyboard",
+    "description": "Kelola shortcut keyboard untuk akses cepat",
+    "action": "Aksi",
+    "tableDescription": "Deskripsi",
+    "shortcut": "Shortcut",
+    "actions": "Tindakan",
+    "resetAll": "Reset Semua",
+    "clickToRecord": "Klik untuk merekam shortcut",
+    "clear": "Hapus",
+    "edit": "Edit",
+    "reset": "Reset",
+    "shortcutActions": {
+      "searchProduct": {
+        "name": "Cari Produk",
+        "description": "Fokus ke kotak pencarian produk"
+      },
+      "payment": {
+        "name": "Pembayaran",
+        "description": "Buka dialog pembayaran"
+      },
+      "clearCart": {
+        "name": "Kosongkan Keranjang",
+        "description": "Hapus semua item dari keranjang"
+      },
+      "addDiscount": {
+        "name": "Tambah Diskon",
+        "description": "Fokus ke input kode diskon"
+      },
+      "searchMember": {
+        "name": "Cari Member",
+        "description": "Fokus ke pencarian member"
+      },
+      "quickPayment": {
+        "name": "Pembayaran Cepat",
+        "description": "Proses pembayaran langsung dengan uang pas"
+      },
+      "voidTransaction": {
+        "name": "Batalkan Transaksi",
+        "description": "Batalkan transaksi dan kosongkan keranjang"
+      }
+    }
+  },
+  "printer": {
+    "title": "Pengaturan Printer",
+    "description": "Konfigurasi printer untuk mencetak struk",
+    "selection": "Pemilihan Printer",
+    "enabled": "Aktifkan Printer",
+    "refresh": "Refresh",
+    "selectPrinter": "Pilih Printer",
+    "selectPrinterPlaceholder": "Pilih printer yang tersedia",
+    "connected": "Terhubung",
+    "testPrint": "Test Print",
+    "printersRefreshed": "Daftar printer diperbarui",
+    "printersFound": "{{count}} printer ditemukan",
+    "refreshError": "Gagal memperbarui printer",
+    "refreshErrorDescription": "Tidak dapat memperbarui daftar printer",
+    "testPrintSuccess": "Test print berhasil",
+    "testPrintSuccessDescription": "Printer berfungsi dengan baik",
+    "testPrintError": "Test print gagal",
+    "testPrintErrorDescription": "Gagal mencetak ke printer",
+    "printSettings": "Pengaturan Cetak",
+    "type": "Jenis Printer",
+    "connection": "Koneksi",
+    "settings": "Pengaturan",
+    "paperWidth": "Lebar Kertas",
+    "dpi": "DPI",
+    "autocut": "Potong Otomatis",
+    "buzzer": "Buzzer",
+    "drawer": "Cash Drawer",
+    "networkConfig": "Konfigurasi Jaringan",
+    "ipAddress": "Alamat IP",
+    "port": "Port"
+  }
+}

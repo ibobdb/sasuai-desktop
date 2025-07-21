@@ -1,46 +1,17 @@
 import { API_ENDPOINTS } from '@/config/api'
-import { ProductResponse, Member, MemberResponse, TransactionData, Discount } from '@/types/cashier'
-
-export interface ProductSearchParams {
-  query: string
-  limit?: number
-}
-
-export interface MemberSearchParams {
-  query: string
-  limit?: number
-}
-
-export interface PointsCalculationParams {
-  amount: number
-  memberId?: string
-}
-
-export interface DiscountValidationParams {
-  code: string
-}
-
-export interface TransactionResponse {
-  success: boolean
-  data: {
-    tranId: string
-    [key: string]: any
-  }
-  change?: number
-  message?: string
-}
-
-export interface PointsResponse {
-  success: boolean
-  points: number
-  message?: string
-}
-
-export interface DiscountResponse {
-  success: boolean
-  discount: Discount
-  message?: string
-}
+import {
+  ProductResponse,
+  Member,
+  MemberResponse,
+  TransactionData,
+  ProductSearchParams,
+  MemberSearchParams,
+  PointsCalculationParams,
+  DiscountValidationParams,
+  TransactionResponse,
+  PointsResponse,
+  DiscountResponse
+} from '@/types/cashier'
 
 export const cashierOperations = {
   // Product operations

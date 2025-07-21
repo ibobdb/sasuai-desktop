@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
@@ -16,10 +16,14 @@ import { useGlobalDiscount } from './hooks/use-global-discount'
 import { useTransaction } from './hooks/use-transaction'
 import { useCashierCalculations } from './hooks/use-cashier-calculations'
 import { usePointsCalculation } from './hooks/use-cashier-queries'
+import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts'
+import { useShortcutFeedback } from '@/hooks/use-shortcut-feedback'
 import { Member, Discount } from '@/types/cashier'
 
 export default function Cashier() {
   const { t } = useTranslation(['cashier'])
+  const productSearchRef = useRef<HTMLInputElement>(null)
+  const { showShortcutFeedback, showShortcutError } = useShortcutFeedback()
 
   // Core hooks
   const cart = useCart()
@@ -54,6 +58,75 @@ export default function Cashier() {
     globalDiscount.globalDiscount,
     memberDiscounts.selectedMember?.id
   )
+
+  // Keyboard shortcuts handlers
+  const shortcutHandlers = {
+    'focus-product-search': () => {
+      productSearchRef.current?.focus()
+      showShortcutFeedback('focus-product-search', 'Fokus ke pencarian produk')
+    },
+    'open-payment-dialog': () => {
+      if (cart.cart.length === 0) {
+        showShortcutError(
+          'open-payment-dialog',
+          'Keranjang kosong, tidak bisa membuka dialog pembayaran'
+        )
+        return
+      }
+      handleOpenPaymentDialog()
+      showShortcutFeedback('open-payment-dialog', 'Dialog pembayaran dibuka')
+    },
+    'clear-cart': () => {
+      if (cart.cart.length === 0) {
+        showShortcutError('clear-cart', 'Keranjang sudah kosong')
+        return
+      }
+      clearAll()
+      showShortcutFeedback('clear-cart', 'Keranjang berhasil dikosongkan')
+    },
+    'search-member': () => {
+      // Focus to member search input
+      const memberSearchInput = document.querySelector(
+        '[data-member-search-input]'
+      ) as HTMLInputElement
+      if (memberSearchInput) {
+        memberSearchInput.focus()
+        showShortcutFeedback('search-member', 'Fokus ke pencarian member')
+      }
+    },
+    'add-discount': () => {
+      // Focus to discount/redeem code section
+      const redeemInput = document.querySelector('[data-redeem-input]') as HTMLInputElement
+      if (redeemInput) {
+        redeemInput.focus()
+        showShortcutFeedback('add-discount', 'Fokus ke input kode diskon')
+      }
+    },
+    'quick-payment': () => {
+      if (cart.cart.length === 0) {
+        showShortcutError(
+          'quick-payment',
+          'Keranjang kosong, tidak bisa melakukan pembayaran cepat'
+        )
+        return
+      }
+      // Auto set payment amount to total and open dialog
+      transaction.setPaymentAmount(calculations.total)
+      handleOpenPaymentDialog()
+      showShortcutFeedback('quick-payment', 'Pembayaran cepat dengan uang pas')
+    },
+    'void-transaction': () => {
+      if (cart.cart.length === 0) {
+        showShortcutError('void-transaction', 'Tidak ada transaksi untuk dibatalkan')
+        return
+      }
+      clearAll()
+      showShortcutFeedback('void-transaction', 'Transaksi berhasil dibatalkan')
+    }
+  }
+
+  // Initialize global shortcuts
+  useGlobalShortcuts(shortcutHandlers)
 
   // Clear cart and reset transaction state
   const clearAll = () => {
@@ -114,7 +187,7 @@ export default function Cashier() {
         <div className="flex-1 space-y-6">
           <div className="space-y-2">
             <h3 className="text-lg font-medium">{t('cashier.productSearch.title')}</h3>
-            <ProductSearch onProductSelect={cart.addToCart} />
+            <ProductSearch onProductSelect={cart.addToCart} inputRef={productSearchRef} />
           </div>
 
           <CartList

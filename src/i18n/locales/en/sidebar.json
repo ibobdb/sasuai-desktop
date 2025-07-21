@@ -8,7 +8,8 @@
       "cashier": "Cashier",
       "transactions": "Transactions",
       "members": "Member",
-      "rewards": "Rewards"
+      "rewards": "Rewards",
+      "settings": "Settings"
     }
   }
 }

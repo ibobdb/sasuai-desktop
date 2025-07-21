@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Loader2, UserPlus, X, Ticket } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -6,22 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/config/api'
 import { CreateMemberDialog } from './create-member-dialog'
-import { Member, MemberResponse } from '@/types/cashier'
+import { Member, MemberSearchProps } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useClickOutside } from '@/hooks/use-click-outside'
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
-
-interface MemberSearchProps {
-  onMemberSelect: (member: Member | null) => void
-}
+import { useMemberSearch as useMemberSearchQuery } from '../hooks/use-cashier-queries'
 
 export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
   const { t } = useTranslation(['cashier'])
-  const [isLoading, setIsLoading] = useState(false)
-  const [searchResults, setSearchResults] = useState<Member[]>([])
   const [showResults, setShowResults] = useState(false)
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
   const [lastSearchedQuery, setLastSearchedQuery] = useState('')
@@ -31,8 +25,8 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
   const searchCallback = useCallback(
     (value: string) => {
       if (value.trim() && value !== lastSearchedQuery) {
-        searchMembers(value)
         setLastSearchedQuery(value)
+        setShowResults(true)
       }
     },
     [lastSearchedQuery]
@@ -49,6 +43,12 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
     callback: searchCallback
   })
 
+  // Use React Query for member search
+  const { data: searchResults = [], isLoading } = useMemberSearchQuery(
+    { query: lastSearchedQuery },
+    lastSearchedQuery.length >= 3
+  )
+
   const handleMemberSelect = useCallback(
     (member: Member) => {
       if (member.isBanned) {
@@ -61,64 +61,35 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
       setShowResults(false)
       setQuery('')
       setLastSearchedQuery('')
-      setSearchResults([])
       onMemberSelect(member)
     },
-    [onMemberSelect, setQuery, setLastSearchedQuery, t]
+    [onMemberSelect, setQuery, t]
   )
 
   const handleManualSearch = useCallback(() => {
     if (query.trim().length >= 3 && query !== lastSearchedQuery) {
-      searchMembers(query)
       setLastSearchedQuery(query)
+      setShowResults(true)
     }
   }, [query, lastSearchedQuery])
 
-  const searchMembers = useCallback(
-    async (searchQuery: string) => {
-      if (!searchQuery.trim()) return
-
-      setIsLoading(true)
-
-      try {
-        const response = (await window.api.request(
-          `${API_ENDPOINTS.MEMBERS.BASE}?search=${encodeURIComponent(searchQuery)}`,
-          {
-            method: 'GET'
-          }
-        )) as MemberResponse
-
-        if (response.success && response.data?.members?.length > 0) {
-          setSearchResults(response.data.members)
-          setShowResults(true)
-
-          // Auto-select if there's an exact match
-          const exactMatch = response.data.members.find(
-            (m) =>
-              m.phone === searchQuery ||
-              m.cardId === searchQuery ||
-              m.name.toLowerCase() === searchQuery.toLowerCase()
-          )
-          if (exactMatch) {
-            handleMemberSelect(exactMatch)
-          }
-        } else {
-          setSearchResults([])
-          setShowResults(false)
-        }
-      } catch (error) {
-        console.error('Failed to search for member:', error)
-        toast.error('Failed to search for member', {
-          description: 'Please try again later'
-        })
-        setSearchResults([])
-        setShowResults(false)
-      } finally {
-        setIsLoading(false)
+  // Auto-select exact matches
+  const handleAutoSelect = useCallback(() => {
+    if (searchResults.length > 0 && query.trim().length >= 3) {
+      const exactMatch = searchResults.find(
+        (m) =>
+          m.phone === query || m.cardId === query || m.name.toLowerCase() === query.toLowerCase()
+      )
+      if (exactMatch) {
+        handleMemberSelect(exactMatch)
       }
-    },
-    [handleMemberSelect]
-  )
+    }
+  }, [searchResults, query, handleMemberSelect])
+
+  // Call auto-select when search results change
+  useEffect(() => {
+    handleAutoSelect()
+  }, [handleAutoSelect])
 
   const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
     {
@@ -145,7 +116,6 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
 
   const clearSearch = () => {
     setQuery('')
-    setSearchResults([])
     setShowResults(false)
     setLastSearchedQuery('')
     inputRef.current?.focus()
@@ -163,6 +133,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
           onFocus={handleInputFocus}
           className="pr-16 h-9"
           tabIndex={2}
+          data-member-search-input
         />
 
         {query && !isLoading && !isDebouncing && (

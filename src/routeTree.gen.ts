@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
 import { Route as AuthenticatedMemberRouteImport } from './routes/_authenticated/member'
 import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
@@ -88,6 +89,11 @@ const AuthenticatedTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/terms': typeof legalTermsRoute
   '/member': typeof AuthenticatedMemberRoute
   '/rewards': typeof AuthenticatedRewardsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
   '/forgot-password': typeof authForgotPasswordLazyRoute
   '/401': typeof errors401LazyRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/(legal)/terms': typeof legalTermsRoute
   '/_authenticated/member': typeof AuthenticatedMemberRoute
   '/_authenticated/rewards': typeof AuthenticatedRewardsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
   '/(auth)/forgot-password': typeof authForgotPasswordLazyRoute
   '/(errors)/401': typeof errors401LazyRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/member'
     | '/rewards'
+    | '/settings'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/member'
     | '/rewards'
+    | '/settings'
     | '/transactions'
     | '/forgot-password'
     | '/401'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/(legal)/terms'
     | '/_authenticated/member'
     | '/_authenticated/rewards'
+    | '/_authenticated/settings'
     | '/_authenticated/transactions'
     | '/(auth)/forgot-password'
     | '/(errors)/401'
@@ -288,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTransactionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/rewards': {
       id: '/_authenticated/rewards'
       path: '/rewards'
@@ -329,6 +348,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMemberRoute: typeof AuthenticatedMemberRoute
   AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -336,6 +356,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMemberRoute: AuthenticatedMemberRoute,
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

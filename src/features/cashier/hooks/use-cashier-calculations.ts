@@ -1,16 +1,4 @@
-import { Discount } from '@/types/cashier'
-
-export interface CashierCalculations {
-  subtotal: number
-  productDiscountsTotal: number
-  memberDiscountAmount: number
-  tierDiscountAmount: number
-  globalDiscountAmount: number
-  totalGeneralDiscount: number
-  totalDiscount: number
-  tax: number
-  total: number
-}
+import { Discount, CashierCalculations } from '@/types/cashier'
 
 export function useCashierCalculations(
   cartSubtotal: number,

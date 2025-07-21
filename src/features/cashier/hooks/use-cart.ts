@@ -1,17 +1,5 @@
 import { useState, useCallback } from 'react'
-import { CartItem, Product, Discount } from '@/types/cashier'
-
-export interface UseCartReturn {
-  cart: CartItem[]
-  addToCart: (product: Product, quantity?: number) => void
-  updateQuantity: (id: string, quantity: number) => void
-  updateItemDiscount: (id: string, discount: Discount | null) => void
-  removeItem: (id: string) => void
-  clearCart: () => void
-  subtotal: number
-  productDiscountsTotal: number
-  totalItems: number
-}
+import { Product, CartItem, Discount, UseCartReturn } from '@/types/cashier'
 
 export function useCart(): UseCartReturn {
   const [cart, setCart] = useState<CartItem[]>([])

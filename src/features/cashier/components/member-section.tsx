@@ -10,16 +10,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Member, MemberSectionProps, Discount } from '@/types/cashier'
+import { Member, MemberSectionProps, Discount, EnhancedDiscount } from '@/types/cashier'
 import { MemberSearch } from './member-search'
 import { Card } from '@/components/ui/card'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
 import { isDiscountValid } from '../utils/cashier-utils'
-
-// Enhanced discount interface that includes source information for UI
-interface EnhancedDiscount extends Discount {
-  source: 'member' | 'tier'
-}
 
 export function MemberSection({
   onMemberSelect,

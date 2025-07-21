@@ -8,7 +8,8 @@
       "cashier": "Kasir",
       "transactions": "Transaksi",
       "members": "Pelanggan",
-      "rewards": "Hadiah"
+      "rewards": "Hadiah",
+      "settings": "Pengaturan"
     }
   }
 }
