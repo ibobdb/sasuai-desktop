@@ -5,7 +5,11 @@
     "receipt": {
       "title": "Transaction Receipt",
       "loading": "Loading Transaction",
-      "loadingDescription": "Fetching detailed transaction information"
+      "loadingDescription": "Fetching detailed transaction information",
+      "printSuccess": "Receipt printed successfully",
+      "printError": "Failed to print receipt",
+      "printing": "Printing...",
+      "preview": "Print Preview"
     },
     "table": {
       "id": "Transaction ID",

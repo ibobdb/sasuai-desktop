@@ -1,13 +1,17 @@
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TransactionDetail } from '@/types/transactions'
+import { PrinterSettings } from '@/types/settings'
 import { formatCurrency } from '@/utils/format'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { DetailDialog } from '@/components/common/detail-dialog'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
+import { toast } from 'sonner'
+import { generateReceiptData, generateReceiptHTML } from '@/utils/receipt-generator'
 
 interface Props {
   open: boolean
@@ -23,6 +27,35 @@ export function TransactionViewDialog({
   isLoadingDetail
 }: Props) {
   const { t } = useTranslation(['transactions', 'common'])
+  const [isPrinting, setIsPrinting] = useState(false)
+
+  const handlePrintReceipt = async () => {
+    if (!transactionDetail) return
+
+    setIsPrinting(true)
+    try {
+      // Get printer settings first
+      const printerSettingsResponse = await window.api.printer.getSettings()
+      const printerSettings = printerSettingsResponse.success
+        ? (printerSettingsResponse.data as PrinterSettings)
+        : undefined
+
+      const receiptData = generateReceiptData(transactionDetail)
+      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
+      const response = await window.api.printer.printHTML(receiptHTML)
+
+      if (response.success) {
+        toast.success(t('transaction.receipt.printSuccess'))
+      } else {
+        throw new Error(response.error?.message || t('transaction.receipt.printError'))
+      }
+    } catch (error) {
+      console.error('Print failed:', error)
+      toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
+    } finally {
+      setIsPrinting(false)
+    }
+  }
 
   // Generate receipt content if we have details
   const generateReceiptContent = () => {
@@ -259,26 +292,28 @@ export function TransactionViewDialog({
       <Button variant="outline" onClick={() => onOpenChange(false)}>
         {t('actions.close', { ns: 'common' })}
       </Button>
-      <Button>
+      <Button onClick={handlePrintReceipt} disabled={isPrinting}>
         <IconPrinter className="h-4 w-4 mr-2" />
-        {t('actions.print', { ns: 'common' })}
+        {isPrinting ? t('transaction.receipt.printing') : t('actions.print', { ns: 'common' })}
       </Button>
     </>
   )
 
   return (
-    <DetailDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      loading={isLoadingDetail}
-      loadingTitle={t('transaction.receipt.loading')}
-      loadingDescription={t('transaction.receipt.loadingDescription')}
-      title={t('transaction.receipt.title')}
-      description={transactionDetail ? `Transaction ID: ${transactionDetail.tranId}` : ''}
-      icon={<IconReceipt className="h-5 w-5" />}
-      footerContent={footerContent}
-    >
-      {generateReceiptContent()}
-    </DetailDialog>
+    <>
+      <DetailDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        loading={isLoadingDetail}
+        loadingTitle={t('transaction.receipt.loading')}
+        loadingDescription={t('transaction.receipt.loadingDescription')}
+        title={t('transaction.receipt.title')}
+        description={transactionDetail ? `Transaction ID: ${transactionDetail.tranId}` : ''}
+        icon={<IconReceipt className="h-5 w-5" />}
+        footerContent={footerContent}
+      >
+        {generateReceiptContent()}
+      </DetailDialog>
+    </>
   )
 }

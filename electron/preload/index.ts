@@ -65,7 +65,7 @@ const api = {
     getSettings: () => ipcRenderer.invoke('printer:get-settings'),
     saveSettings: (settings) => ipcRenderer.invoke('printer:save-settings', settings),
     testPrint: () => ipcRenderer.invoke('printer:test-print'),
-    printReceipt: (receipt) => ipcRenderer.invoke('printer:print-receipt', receipt)
+    printHTML: (htmlContent) => ipcRenderer.invoke('printer:print-html', htmlContent)
   },
 
   // Updater API

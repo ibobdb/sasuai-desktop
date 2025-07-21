@@ -47,28 +47,7 @@ interface PrinterSettings {
   timeOutPerLine: number
 }
 
-interface PrintReceipt {
-  id: string
-  storeName: string
-  address: string
-  phone: string
-  items: Array<{
-    name: string
-    quantity: number
-    price: number
-    total: number
-  }>
-  subtotal: number
-  tax: number
-  total: number
-  payment: {
-    method: string
-    amount: number
-    change: number
-  }
-  transactionDate: Date
-  cashier: string
-}
+// Remove PrintReceipt interface since we only use HTML now
 
 declare global {
   interface Window {
@@ -120,8 +99,8 @@ declare global {
           settings: Partial<PrinterSettings>
         ) => Promise<{ success: boolean; error?: { message: string } }>
         testPrint: () => Promise<{ success: boolean; error?: { message: string } }>
-        printReceipt: (
-          receipt: PrintReceipt
+        printHTML: (
+          htmlContent: string
         ) => Promise<{ success: boolean; error?: { message: string } }>
       }
     }

@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { PrinterService, PrintReceipt } from '../services/printer-service'
+import { PrinterService } from '../services/printer-service'
 import { PrinterSettings } from '../types/printer'
 
 let printerService: PrinterService | null = null
@@ -80,18 +80,18 @@ export function setupPrinterHandlers() {
     }
   })
 
-  // Print receipt
-  ipcMain.handle('printer:print-receipt', async (_event, receipt: PrintReceipt) => {
+  // Print HTML content
+  ipcMain.handle('printer:print-html', async (_event, htmlContent: string) => {
     try {
       const service = getPrinterService()
-      await service.printReceipt(receipt)
+      await service.printHTML(htmlContent)
       return { success: true }
     } catch (error) {
-      console.error('Print receipt failed:', error)
+      console.error('Print HTML failed:', error)
       return {
         success: false,
         error: {
-          message: error instanceof Error ? error.message : 'Print receipt failed'
+          message: error instanceof Error ? error.message : 'Print HTML failed'
         }
       }
     }

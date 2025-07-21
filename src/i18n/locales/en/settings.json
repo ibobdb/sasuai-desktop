@@ -79,6 +79,7 @@
     "enabled": "Enable Printer",
     "refresh": "Refresh",
     "selectPrinter": "Select Printer",
+    "selectedPrinter": "Selected Printer",
     "selectPrinterPlaceholder": "Choose your printer...",
     "systemDefault": "System Default",
     "connected": "Connected",

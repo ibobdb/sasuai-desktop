@@ -2,6 +2,7 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
 import { IconEye, IconReceipt } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,6 +12,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Transaction } from '@/types/transactions'
+import { PrinterSettings } from '@/types/settings'
+import { toast } from 'sonner'
+import { generateReceiptData, generateReceiptHTML } from '@/utils/receipt-generator'
+import { transactionOperations } from '@/features/transactions/actions/transaction-operations'
 
 interface DataTableRowActionsProps {
   row: Row<Transaction>
@@ -19,10 +24,46 @@ interface DataTableRowActionsProps {
 
 export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
   const { t } = useTranslation(['transactions'])
+  const [isPrinting, setIsPrinting] = useState(false)
 
   const handleView = () => {
     if (onView) {
       onView(row.original)
+    }
+  }
+
+  const handlePrint = async () => {
+    setIsPrinting(true)
+    try {
+      // Get transaction detail first
+      const detailResponse = await transactionOperations.fetchItemDetail(row.original.id)
+      if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
+        throw new Error(t('transaction.receipt.failedToLoadDetails'))
+      }
+
+      const transactionDetail = detailResponse.data.transactionDetails
+
+      // Get printer settings
+      const printerSettingsResponse = await window.api.printer.getSettings()
+      const printerSettings = printerSettingsResponse.success
+        ? (printerSettingsResponse.data as PrinterSettings)
+        : undefined
+
+      // Generate and print receipt
+      const receiptData = generateReceiptData(transactionDetail)
+      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
+      const response = await window.api.printer.printHTML(receiptHTML)
+
+      if (response.success) {
+        toast.success(t('transaction.receipt.printSuccess'))
+      } else {
+        throw new Error(response.error?.message || t('transaction.receipt.printError'))
+      }
+    } catch (error) {
+      console.error('Print failed:', error)
+      toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
+    } finally {
+      setIsPrinting(false)
     }
   }
 
@@ -42,12 +83,8 @@ export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
               <IconEye size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              // TODO: Implement print functionality
-            }}
-          >
-            {t('transaction.actions.printInvoice')}
+          <DropdownMenuItem onClick={handlePrint} disabled={isPrinting}>
+            {isPrinting ? t('transaction.receipt.printing') : t('transaction.actions.printInvoice')}
             <DropdownMenuShortcut>
               <IconReceipt size={16} />
             </DropdownMenuShortcut>

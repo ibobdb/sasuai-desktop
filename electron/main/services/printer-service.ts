@@ -1,14 +1,15 @@
 import { PrinterConfig } from './printer/printer-config'
 import { PrintEngine } from './printer/print-engine'
-import { ReceiptBuilder, PrintReceipt } from './printer/receipt-builder'
 import { PrinterSettings } from '../types/printer'
 
-export type { PrintReceipt } from './printer/receipt-builder'
+// Remove ReceiptBuilder import since we'll use HTML directly
+// export type { PrintReceipt } from './printer/receipt-builder'
 
 export class PrinterService {
   private config = new PrinterConfig()
   private printEngine = new PrintEngine()
-  private receiptBuilder = new ReceiptBuilder()
+  // Remove receiptBuilder since we'll use HTML directly
+  // private receiptBuilder = new ReceiptBuilder()
 
   getSettings(): PrinterSettings {
     return this.config.getSettings()
@@ -26,8 +27,13 @@ export class PrinterService {
     return this.printEngine.testPrint()
   }
 
-  async printReceipt(receipt: PrintReceipt): Promise<boolean> {
-    const receiptContent = this.receiptBuilder.buildReceiptContent(receipt)
-    return this.printEngine.print(receiptContent)
+  // Remove the old printReceipt method that used ReceiptBuilder
+  // async printReceipt(receipt: PrintReceipt): Promise<boolean> {
+  //   const receiptContent = this.receiptBuilder.buildReceiptContent(receipt)
+  //   return this.printEngine.print(receiptContent)
+  // }
+
+  async printHTML(htmlContent: string): Promise<boolean> {
+    return this.printEngine.print(htmlContent)
   }
 }

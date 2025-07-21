@@ -68,6 +68,7 @@
     "enabled": "Aktifkan Printer",
     "refresh": "Refresh",
     "selectPrinter": "Pilih Printer",
+    "selectedPrinter": "Printer Terpilih",
     "selectPrinterPlaceholder": "Pilih printer Anda...",
     "systemDefault": "Default Sistem",
     "connected": "Terhubung",

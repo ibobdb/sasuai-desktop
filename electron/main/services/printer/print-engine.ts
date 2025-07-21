@@ -1,10 +1,8 @@
 import { BrowserWindow, webContents } from 'electron'
 import { PrinterConfig } from './printer-config'
-import { PrintHtmlGenerator } from './print-html-generator'
 
 export class PrintEngine {
   private config = new PrinterConfig()
-  private htmlGenerator = new PrintHtmlGenerator()
 
   async getAvailablePrinters(): Promise<string[]> {
     try {
@@ -33,8 +31,8 @@ export class PrintEngine {
         }
       })
 
-      const fullHtml = this.htmlGenerator.generateHtml(htmlContent, settings)
-      printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(fullHtml))
+      // Use the HTML content directly - it should already be a complete HTML document
+      printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent))
 
       printWindow.webContents.once('did-finish-load', () => {
         const printOptions = {
@@ -65,7 +63,37 @@ export class PrintEngine {
   }
 
   async testPrint(): Promise<boolean> {
-    const testContent = this.htmlGenerator.generateTestContent()
+    const testContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Test Print</title>
+        <style>
+          body {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.3;
+            margin: 0;
+            padding: 8px;
+            text-align: center;
+          }
+          .header { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+          .separator { border-top: 1px dashed #000; margin: 8px 0; }
+          .footer { font-size: 10px; margin-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">TEST PRINT</div>
+        <div class="separator"></div>
+        <div>Hello World!</div>
+        <div>Printer Test</div>
+        <div style="font-size: 10px;">${new Date().toLocaleString('id-ID')}</div>
+        <div class="separator"></div>
+        <div class="footer">Success!</div>
+      </body>
+      </html>
+    `
     return this.print(testContent)
   }
 }
