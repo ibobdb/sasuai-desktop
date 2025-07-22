@@ -37,6 +37,7 @@
     "footerInfoSaved": "Informasi footer berhasil disimpan",
     "saveStoreInfo": "Simpan Info Toko",
     "saveFooterInfo": "Simpan Info Footer",
+    "unsavedChanges": "Perubahan belum disimpan",
     "allChangesSaved": "Semua perubahan telah disimpan"
   },
   "keyboard": {
@@ -131,7 +132,6 @@
     "encoding": "Encoding Teks",
     "basicSettings": "Pengaturan Dasar",
     "printOptions": "Opsi Cetak",
-    "unsavedChanges": "Anda memiliki perubahan yang belum disimpan",
     "changesDiscarded": "Perubahan berhasil dibatalkan",
     "saving": "Menyimpan pengaturan...",
     "saveSuccess": "Pengaturan printer berhasil disimpan",

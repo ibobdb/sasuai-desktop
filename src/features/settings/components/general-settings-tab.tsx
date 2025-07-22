@@ -17,15 +17,36 @@ export function GeneralSettingsTab() {
   const { settings, updateGeneralSettings } = useSettings()
   const [localSettings, setLocalSettings] = useState<GeneralConfig>(settings.general)
   const [isSaving, setIsSaving] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  // Update local settings when settings change
+  // Only update local settings when settings change from external source (not user input)
   useEffect(() => {
-    setLocalSettings(settings.general)
-  }, [settings.general])
+    if (!isInitialized) {
+      setLocalSettings(settings.general)
+      setIsInitialized(true)
+    }
+  }, [settings.general, isInitialized])
 
   const updateLocalConfig = useCallback((updates: Partial<GeneralConfig>) => {
     setLocalSettings((prev) => ({ ...prev, ...updates }))
   }, [])
+
+  // Auto-save for application behavior changes
+  const handleAppBehaviorChange = useCallback(
+    async (updates: Partial<GeneralConfig>) => {
+      setLocalSettings((prev) => ({ ...prev, ...updates }))
+      try {
+        const success = await updateGeneralSettings(updates)
+        if (success) {
+          setIsInitialized(false) // Sync with saved data
+        }
+      } catch (error) {
+        console.error('Failed to auto-save app behavior:', error)
+        toast.error(t('general.saveError'))
+      }
+    },
+    [updateGeneralSettings, t]
+  )
 
   // Check if there are changes for each section
   const hasStoreInfoChanges =
@@ -39,6 +60,8 @@ export function GeneralSettingsTab() {
     try {
       const success = await updateGeneralSettings({ storeInfo: localSettings.storeInfo })
       if (success) {
+        // Update the initialized state to sync with saved data
+        setIsInitialized(false)
         toast.success(t('general.storeInfoSaved'))
       } else {
         toast.error(t('general.saveError'))
@@ -56,6 +79,8 @@ export function GeneralSettingsTab() {
     try {
       const success = await updateGeneralSettings({ footerInfo: localSettings.footerInfo })
       if (success) {
+        // Update the initialized state to sync with saved data
+        setIsInitialized(false)
         toast.success(t('general.footerInfoSaved'))
       } else {
         toast.error(t('general.saveError'))
@@ -83,7 +108,7 @@ export function GeneralSettingsTab() {
             </div>
             <Switch
               checked={localSettings.autoStart}
-              onCheckedChange={(autoStart) => updateLocalConfig({ autoStart })}
+              onCheckedChange={(autoStart) => handleAppBehaviorChange({ autoStart })}
             />
           </div>
 
@@ -96,7 +121,7 @@ export function GeneralSettingsTab() {
             </div>
             <Switch
               checked={localSettings.autoUpdate}
-              onCheckedChange={(autoUpdate) => updateLocalConfig({ autoUpdate })}
+              onCheckedChange={(autoUpdate) => handleAppBehaviorChange({ autoUpdate })}
             />
           </div>
         </CardContent>

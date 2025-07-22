@@ -53,6 +53,7 @@ export default function Settings() {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">{t('keyboard.title')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{t('keyboard.description')}</p>
                 </div>
               </div>
             </div>
@@ -102,7 +103,7 @@ export default function Settings() {
               </div>
               <div className="text-left">
                 <div className="font-medium text-sm">{t('tabs.general')}</div>
-                <div className="text-xs opacity-70">Bahasa & Tema</div>
+                <div className="text-xs opacity-70">{t('general.description')}</div>
               </div>
             </button>
             <button
@@ -116,7 +117,7 @@ export default function Settings() {
               </div>
               <div className="text-left">
                 <div className="font-medium text-sm">{t('tabs.keyboard')}</div>
-                <div className="text-xs opacity-70">Pintasan Keyboard</div>
+                <div className="text-xs opacity-70">{t('keyboard.description')}</div>
               </div>
             </button>
             <button
@@ -130,7 +131,7 @@ export default function Settings() {
               </div>
               <div className="text-left">
                 <div className="font-medium text-sm">{t('tabs.printer')}</div>
-                <div className="text-xs opacity-70">Konfigurasi Printer</div>
+                <div className="text-xs opacity-70">{t('printer.description')}</div>
               </div>
             </button>
           </div>
