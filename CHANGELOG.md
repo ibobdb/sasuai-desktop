@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.8.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.7.0...v1.8.0) (2025-07-22)
+
+
+### Features
+
+* **cashier:** add execute transaction shortcut and enhance payment input ([a9cdb0c](https://github.com/ibobdb/sasuai-desktop/commit/a9cdb0c2b8cfdf6ce3b6b5f4261fa6649591fe37))
+* implement member management features with CRUD operations ([e6c17a7](https://github.com/ibobdb/sasuai-desktop/commit/e6c17a778d548bcc60a925e02de3256801546065))
+* **member:** update member operations with specific response types ([c8f6fa9](https://github.com/ibobdb/sasuai-desktop/commit/c8f6fa917a0b7701149b074fdea569d0db00f587))
+* **payment:** enhance accessibility and auto-print functionality ([fa7d5e2](https://github.com/ibobdb/sasuai-desktop/commit/fa7d5e2ace62a60b34692c355999d868b9c08108))
+* **printer-settings:** consolidate printer settings UI and enhance functionality ([8ee7dee](https://github.com/ibobdb/sasuai-desktop/commit/8ee7deee0b09f3fc8ce5534006b5896eeb604ecd))
+* **printer-settings:** enhance printer settings with typography options and improved UI ([e1b1830](https://github.com/ibobdb/sasuai-desktop/commit/e1b18309dbfa5f591f04025256597b20ec121120))
+* **printer-settings:** enhance PrinterSettings interface and update related components ([6b469ec](https://github.com/ibobdb/sasuai-desktop/commit/6b469ec75ff9fa5f44259d03d252bbc73460cb71))
+* **printer:** implement printer settings management and receipt printing ([31e2561](https://github.com/ibobdb/sasuai-desktop/commit/31e25613d4488c16d2869d112db113a4de35df8b))
+* **printer:** refactor printing system to use HTML directly and remove receipt builder ([30db0a1](https://github.com/ibobdb/sasuai-desktop/commit/30db0a105780acba3244e7554532eacba56d7e82))
+* **settings:** add shortcut row actions for editing and resetting keyboard shortcuts ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **settings:** build settings page with tabs for general, keyboard, and printer settings ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **settings:** create custom hook for keyboard recording functionality ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **settings:** enhance general settings tab with store and footer information management ([8cd66fe](https://github.com/ibobdb/sasuai-desktop/commit/8cd66fec7f3bf95b091cbcbecad2ab0184100d46))
+* **settings:** enhance GeneralSettingsTab with auto-save functionality and improved state management ([b48bb44](https://github.com/ibobdb/sasuai-desktop/commit/b48bb44d479e084db4fe829493acf5bb7394013d))
+* **settings:** enhance useSettings hook for managing application settings with Electron Store ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **settings:** implement printer settings tab with printer selection and configuration options ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **shortcut-feedback:** add feedback mechanism for keyboard shortcuts execution ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **shortcuts:** implement global keyboard shortcuts handling ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+
+
+### Chores
+
+* **package:** remove unnecessary 'dev' flags and update form-data version ([3b27adb](https://github.com/ibobdb/sasuai-desktop/commit/3b27adb97628936b4df99c30ed568d3946fa39a3))
+* remove unused hooks and utility functions ([93ec0f3](https://github.com/ibobdb/sasuai-desktop/commit/93ec0f34e6e3a15fe2a0cdc2a10983c6860f44f8))
+* update dependencies and improve code structure ([35677e4](https://github.com/ibobdb/sasuai-desktop/commit/35677e4979c062a5b51c1c074614aa8ef4938450))
+
+
+### Code Refactoring
+
+* **member:** optimize filter handling in member operations and toolbar ([207a652](https://github.com/ibobdb/sasuai-desktop/commit/207a652afb71572b70e8ec613fdd56a062d27b33))
+* **member:** remove unused data provider and context files ([c8f6fa9](https://github.com/ibobdb/sasuai-desktop/commit/c8f6fa917a0b7701149b074fdea569d0db00f587))
+* **member:** simplify member form and ban actions components ([c8f6fa9](https://github.com/ibobdb/sasuai-desktop/commit/c8f6fa917a0b7701149b074fdea569d0db00f587))
+* **member:** streamline member operations and enhance API response handling ([f1b1b03](https://github.com/ibobdb/sasuai-desktop/commit/f1b1b03ff59c6d7b6b1950820099ca65d063fac1))
+* remove unused discount validation utility and implement cashier operations ([accb988](https://github.com/ibobdb/sasuai-desktop/commit/accb9884f51f2ce1d090604646cf413d1ce7cee8))
+* **routes:** create authenticated settings route ([9e02c55](https://github.com/ibobdb/sasuai-desktop/commit/9e02c553fb8bde4772afe24f0bbc2832f51d244d))
+* **theme:** replace ThemeSwitch with ThemeToggle and enhance theme handling ([feb273e](https://github.com/ibobdb/sasuai-desktop/commit/feb273ef173a4b69feab9635309df20681770680))
+
 ## [1.7.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.4...v1.7.0) (2025-07-11)
 
 ### Features
