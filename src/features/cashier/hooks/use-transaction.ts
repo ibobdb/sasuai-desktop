@@ -10,9 +10,13 @@ import {
   PaymentStatus,
   UseTransactionReturn
 } from '@/types/cashier'
+import { PrinterSettings } from '@/types/settings'
 import { useAuthStore } from '@/stores/authStore'
 import { useProcessTransaction } from './use-cashier-queries'
 import { isDiscountValid } from '../utils/cashier-utils'
+import { generateReceiptData } from '@/utils/receipt-data'
+import { generateReceiptHTML } from '@/utils/receipt-html'
+import { transactionOperations } from '@/features/transactions/actions/transaction-operations'
 
 export function useTransaction(
   cart: CartItem[],
@@ -109,6 +113,40 @@ export function useTransaction(
   }, [cart, paymentAmount, total, selectedMemberDiscount, selectedTierDiscount, t])
 
   // Handle payment processing
+  // Helper function untuk auto-print receipt
+  const printReceiptAfterTransaction = useCallback(async (transactionId: string) => {
+    try {
+      // Get transaction detail first menggunakan API yang sama seperti di data-table-row-actions
+      const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
+
+      if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
+        console.error('Failed to load transaction details for printing')
+        return
+      }
+
+      const transactionDetail = detailResponse.data.transactionDetails
+
+      // Get printer settings
+      const printerSettingsResponse = await window.api.printer.getSettings()
+      const printerSettings = printerSettingsResponse.success
+        ? (printerSettingsResponse.data as PrinterSettings)
+        : undefined
+
+      // Generate and print receipt menggunakan fungsi yang sudah ada
+      const receiptData = generateReceiptData(transactionDetail)
+      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
+      const response = await window.api.printer.printHTML(receiptHTML)
+
+      if (response.success) {
+        toast.success('Receipt dicetak otomatis')
+      } else {
+        console.error('Print failed:', response.error?.message)
+      }
+    } catch (error) {
+      console.error('Failed to print receipt:', error)
+    }
+  }, [])
+
   const handlePayment = useCallback(async (): Promise<void> => {
     if (isProcessingTransaction) return
 
@@ -160,6 +198,11 @@ export function useTransaction(
           transactionId: result.data.tranId,
           change: change > 0 ? change : undefined
         })
+
+        // Auto-print receipt setelah transaksi berhasil
+        if (result.data.id) {
+          printReceiptAfterTransaction(result.data.id)
+        }
       } else {
         setPaymentStatus({
           success: false,
@@ -192,6 +235,7 @@ export function useTransaction(
     paymentMethod,
     paymentAmount,
     processTransactionMutation,
+    printReceiptAfterTransaction,
     t
   ])
 

@@ -56,6 +56,7 @@
       "minPurchase": "Min. pembelian: Rp {{amount}}",
       "discounts": "Diskon Tersedia",
       "availableDiscounts": "Diskon Tersedia",
+      "noDiscountsAvailable": "Tidak ada diskon tersedia",
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },

@@ -168,10 +168,13 @@ export default function PaymentDialog({
           'p-0 overflow-hidden',
           paymentMethod === 'cash' ? 'sm:max-w-[850px]' : 'sm:max-w-[500px]'
         )}
+        aria-describedby="payment-dialog-description"
       >
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>{t('cashier.payment.title')}</DialogTitle>
-          <DialogDescription>{t('cashier.payment.description')}</DialogDescription>
+          <DialogDescription id="payment-dialog-description">
+            {t('cashier.payment.description')}
+          </DialogDescription>
         </DialogHeader>
 
         <div

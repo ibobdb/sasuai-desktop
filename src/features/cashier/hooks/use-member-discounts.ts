@@ -14,23 +14,6 @@ export function useMemberDiscounts(): UseMemberDiscountsReturn {
     // Reset discounts when changing members
     setSelectedMemberDiscount(null)
     setSelectedTierDiscount(null)
-
-    if (member) {
-      // Check if member has personal discounts
-      const memberDiscounts = member.discounts || []
-
-      // Check if tier has discounts
-      const tierDiscounts = member.tier?.discounts || []
-
-      // Auto-select member personal discount if only one is available
-      if (memberDiscounts.length === 1) {
-        setSelectedMemberDiscount(memberDiscounts[0])
-      }
-      // Otherwise, auto-select tier discount if only one is available
-      else if (tierDiscounts.length === 1) {
-        setSelectedTierDiscount(tierDiscounts[0])
-      }
-    }
   }, [])
 
   // Handle member discount selection

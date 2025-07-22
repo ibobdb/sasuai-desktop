@@ -56,6 +56,7 @@
       "minPurchase": "Min. purchase: Rp {{amount}}",
       "discounts": "Available Discounts",
       "availableDiscounts": "Available Discounts",
+      "noDiscountsAvailable": "No discounts available",
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },
