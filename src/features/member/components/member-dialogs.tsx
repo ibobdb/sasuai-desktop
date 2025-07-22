@@ -1,19 +1,26 @@
-import { useMembers } from '../context/member-context'
 import { MemberViewDialog } from './member-view-dialog'
 import { MemberFormDialog } from './member-form-dialog'
+import type { Member, MemberDetail, MemberDialogType } from '@/types/members'
 
-export function MemberDialogs() {
-  const { open, setOpen, currentMember, setCurrentMember } = useMembers()
+interface MemberDialogsProps {
+  open: MemberDialogType | null
+  currentMember: Member | null
+  memberDetail: MemberDetail | null
+  isLoadingDetail: boolean
+  onOpenChange: (open: MemberDialogType | null) => void
+  onRefetch: () => void
+}
 
+export function MemberDialogs({
+  open,
+  currentMember,
+  memberDetail,
+  isLoadingDetail,
+  onOpenChange,
+  onRefetch
+}: MemberDialogsProps) {
   const handleDialogClose = () => {
-    setOpen(null)
-    const isTransitioning = open === 'view'
-
-    if (!isTransitioning) {
-      setTimeout(() => {
-        setCurrentMember(null)
-      }, 500)
-    }
+    onOpenChange(null)
   }
 
   return (
@@ -23,10 +30,14 @@ export function MemberDialogs() {
           <MemberViewDialog
             key={`member-view-${currentMember.id}`}
             open={open === 'view'}
+            memberDetail={memberDetail}
+            isLoadingDetail={isLoadingDetail}
             onOpenChange={(isOpen) => {
               if (!isOpen) handleDialogClose()
             }}
-            currentMember={currentMember}
+            onEditClick={() => {
+              onOpenChange('edit')
+            }}
           />
         </>
       )}
@@ -39,6 +50,10 @@ export function MemberDialogs() {
           if (!isOpen) handleDialogClose()
         }}
         currentMember={currentMember}
+        onSuccess={() => {
+          handleDialogClose()
+          onRefetch()
+        }}
       />
     </>
   )

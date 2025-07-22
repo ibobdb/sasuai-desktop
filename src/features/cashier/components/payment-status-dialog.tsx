@@ -4,7 +4,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogFooter,
-  DialogTitle
+  DialogTitle,
+  DialogDescription
 } from '@/components/ui/dialog'
 import { CheckCircle2, XCircle, Receipt, CreditCard, ArrowRight, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -72,8 +73,13 @@ export function PaymentStatusDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] p-6">
+      <DialogContent className="sm:max-w-[425px] p-6" aria-describedby="payment-status-description">
         <DialogHeader className="pb-4">
+          <DialogDescription id="payment-status-description" className="sr-only">
+            {success
+              ? t('cashier.paymentStatus.successDescription')
+              : t('cashier.paymentStatus.failedDescription')}
+          </DialogDescription>
           <div className="flex flex-col items-center text-center">
             {success ? (
               <>

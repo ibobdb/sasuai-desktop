@@ -149,6 +149,7 @@ export function RedeemCodeSection({
               placeholder={t('cashier.redeemCode.placeholder')}
               className="h-9 uppercase"
               disabled={isLoading}
+              data-redeem-input
             />
             <Button
               onClick={validateCode}

@@ -2,31 +2,28 @@
 
 ## [1.7.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.4...v1.7.0) (2025-07-11)
 
-
 ### Features
 
-* **api-client:** refactor API client to use class structure with improved cookie handling and session management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **auth:** implement internationalization for authentication components ([dcfcd59](https://github.com/ibobdb/sasuai-desktop/commit/dcfcd596baad737a37c9c6797419ad4f10bce317))
-* **authStore:** update auth store to use new cookie management methods ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **constants:** add COOKIE_CONFIG for better cookie management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **cookie-service:** create CookieService for centralized cookie operations ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **index:** initialize app with structured setup for handlers and services ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **updater:** enhance auto-updater functionality with better event handling ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-
+- **api-client:** refactor API client to use class structure with improved cookie handling and session management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **auth:** implement internationalization for authentication components ([dcfcd59](https://github.com/ibobdb/sasuai-desktop/commit/dcfcd596baad737a37c9c6797419ad4f10bce317))
+- **authStore:** update auth store to use new cookie management methods ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **constants:** add COOKIE_CONFIG for better cookie management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **cookie-service:** create CookieService for centralized cookie operations ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **index:** initialize app with structured setup for handlers and services ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **updater:** enhance auto-updater functionality with better event handling ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
 
 ### Bug Fixes
 
-* enhance date range picker and filters ([1cff638](https://github.com/ibobdb/sasuai-desktop/commit/1cff638ca4625cf22fbed743d198dfaa82c60848))
-
+- enhance date range picker and filters ([1cff638](https://github.com/ibobdb/sasuai-desktop/commit/1cff638ca4625cf22fbed743d198dfaa82c60848))
 
 ### Code Refactoring
 
-* **api-handlers:** streamline API request handling ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **auth-provider:** optimize authentication flow with useMemo and useCallback ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **cookie-handlers:** implement CookieService for cookie management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **device-info:** simplify device info retrieval and caching ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **store:** remove redundant store handlers and integrate directly into index ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
-* **window-handlers:** consolidate window control handlers ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **api-handlers:** streamline API request handling ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **auth-provider:** optimize authentication flow with useMemo and useCallback ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **cookie-handlers:** implement CookieService for cookie management ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **device-info:** simplify device info retrieval and caching ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **store:** remove redundant store handlers and integrate directly into index ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
+- **window-handlers:** consolidate window control handlers ([8b25238](https://github.com/ibobdb/sasuai-desktop/commit/8b252387be5d01b8b68d637818bc250297fab0e9))
 
 ## [1.6.4](https://github.com/ibobdb/sasuai-desktop/compare/v1.6.3...v1.6.4) (2025-05-29)
 

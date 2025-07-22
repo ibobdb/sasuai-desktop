@@ -68,7 +68,8 @@
         "transactions": "Transactions",
         "points": "Points History",
         "discounts": "Discounts",
-        "rewards": "Rewards"
+        "rewards": "Rewards",
+        "summary": "Summary"
       },
       "loading": "Loading member details",
       "loadingDescription": "Please wait while we fetch the member information",
@@ -88,6 +89,7 @@
       "banReason": "Ban Reason",
       "noTransactions": "No Transactions",
       "noTransactionsDescription": "This member has no transactions yet.",
+      "noDiscounts": "No Discounts Available",
       "noPointsHistory": "No Points History",
       "noPointsHistoryDescription": "This member has not earned any points yet.",
       "transactionCount": "{{count}} transactions",
@@ -97,7 +99,15 @@
       "totalSaved": "Total Saved",
       "totalPaid": "Total Paid",
       "activeDiscounts": "Active Discounts",
-      "totalDiscount": "Total Discount"
+      "totalDiscount": "Total Discount",
+      "discount": "Discount",
+      "final": "Final",
+      "active": "Active",
+      "inactive": "Inactive",
+      "usageLimit": "Usage Limit",
+      "averageTransaction": "Average Transaction",
+      "perTransaction": "per transaction",
+      "withDiscounts": "with discounts"
     },
 
     "tiers": {

@@ -38,6 +38,12 @@
     "submit": "Claim Reward",
     "available": "available"
   },
+  "messages": {
+    "claimSuccess": "Reward claimed successfully",
+    "claimSuccessDesc": "The reward has been claimed for the member",
+    "claimError": "Failed to claim reward",
+    "claimErrorDesc": "An unknown error occurred"
+  },
   "table": {
     "name": "Name",
     "description": "Description",
@@ -49,6 +55,7 @@
     "noDescription": "No description",
     "noExpiry": "No expiry",
     "daysLeft": "{{count}} days left",
-    "dateClaimed": "Date Claimed"
+    "dateClaimed": "Date Claimed",
+    "points": "points"
   }
 }

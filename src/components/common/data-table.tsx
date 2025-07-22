@@ -93,6 +93,7 @@ export function DataTable<TData>({
               })
 
               // Call the appropriate callbacks based on what changed
+              // Convert 0-based pageIndex to 1-based page number for API
               if (newState.pageIndex !== pagination.pageIndex) {
                 onPaginationChange.onPageChange(newState.pageIndex + 1)
               }
@@ -101,6 +102,7 @@ export function DataTable<TData>({
               }
             } else {
               // Direct value update
+              // Convert 0-based pageIndex to 1-based page number for API
               if (updater.pageIndex !== pagination.pageIndex) {
                 onPaginationChange.onPageChange(updater.pageIndex + 1)
               }
@@ -121,7 +123,7 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -170,7 +172,9 @@ export function DataTable<TData>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} totalCount={totalCount} />
+      <div className="relative z-10">
+        <DataTablePagination table={table} totalCount={totalCount} />
+      </div>
     </div>
   )
 }

@@ -74,7 +74,7 @@ export function useRewardColumns(): ColumnDef<Reward>[] {
         ),
         cell: ({ row }) => (
           <div className="font-medium">
-            {(row.getValue('pointsCost') as number).toLocaleString()} pts
+            {(row.getValue('pointsCost') as number).toLocaleString()} {t('table.points')}
           </div>
         ),
         enableSorting: true

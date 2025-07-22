@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { UserPlus, Pencil, Loader2, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/config/api'
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,21 @@ import {
   DialogClose
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Member } from '@/types/members'
-import { useMembers } from '../context/member-context'
+import {
+  Member,
+  CreateMemberData,
+  UpdateMemberData,
+  MemberCreateResponse,
+  MemberUpdateResponse
+} from '@/types/members'
+import { memberOperations } from '../actions/member-operations'
 
 interface MemberFormDialogProps {
   open: boolean
   mode: 'create' | 'edit'
   onOpenChange: (open: boolean) => void
   currentMember: Member | null
+  onSuccess?: () => void
 }
 
 const REQUIRED_FIELDS = ['name', 'cardId', 'phone'] as const
@@ -31,11 +38,11 @@ export function MemberFormDialog({
   open,
   mode,
   onOpenChange,
-  currentMember
+  currentMember,
+  onSuccess
 }: MemberFormDialogProps) {
   const { t } = useTranslation(['member', 'common'])
-  const { applyFilters } = useMembers()
-  const [isLoading, setIsLoading] = useState(false)
+  const queryClient = useQueryClient()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     name: '',
@@ -44,6 +51,58 @@ export function MemberFormDialog({
     cardId: '',
     phone: ''
   })
+
+  // Custom create member mutation with proper name interpolation
+  const createMemberMutation = useMutation<MemberCreateResponse, Error, CreateMemberData>({
+    mutationFn: memberOperations.createItem,
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success(t('member.form.createSuccess'), {
+          description: t('member.form.createSuccessDescription').replace('{name}', formData.name)
+        })
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['members'] })
+      } else {
+        toast.error(t('member.form.createError'), {
+          description: response.message || t('member.form.errorDefault')
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Error creating member:', error)
+      toast.error(t('member.form.createError'), {
+        description: t('member.form.errorDefault')
+      })
+    }
+  })
+
+  // Custom update member mutation with proper name interpolation
+  const updateMemberMutation = useMutation<MemberUpdateResponse, Error, UpdateMemberData>({
+    mutationFn: memberOperations.updateItem,
+    onSuccess: (response, variables) => {
+      if (response.success) {
+        toast.success(t('member.form.updateSuccess'), {
+          description: t('member.form.updateSuccessDescription').replace('{name}', formData.name)
+        })
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['members'] })
+        queryClient.invalidateQueries({ queryKey: ['member-detail', variables.id] })
+      } else {
+        toast.error(t('member.form.updateError'), {
+          description: response.message || t('member.form.errorDefault')
+        })
+      }
+    },
+    onError: (error) => {
+      console.error('Error updating member:', error)
+      toast.error(t('member.form.updateError'), {
+        description: t('member.form.errorDefault')
+      })
+    }
+  })
+
+  // Compute loading state from mutations
+  const isLoading = createMemberMutation.isPending || updateMemberMutation.isPending
 
   // Load current member data when editing
   useEffect(() => {
@@ -97,57 +156,29 @@ export function MemberFormDialog({
       return
     }
 
-    setIsLoading(true)
+    const memberData = {
+      ...formData,
+      email: formData.email.trim() === '' ? null : formData.email,
+      address: formData.address.trim() === '' ? null : formData.address
+    }
 
-    try {
-      const memberData = {
-        ...formData,
-        email: formData.email.trim() === '' ? null : formData.email,
-        address: formData.address.trim() === '' ? null : formData.address
-      }
-
-      const endpoint =
-        mode === 'create'
-          ? API_ENDPOINTS.MEMBERS.BASE
-          : `${API_ENDPOINTS.MEMBERS.BASE}/${currentMember?.id}`
-
-      const method = mode === 'create' ? 'POST' : 'PUT'
-
-      const response = await window.api.request(endpoint, {
-        method,
-        data: memberData
+    if (mode === 'create') {
+      createMemberMutation.mutate(memberData, {
+        onSuccess: () => {
+          handleClose()
+          onSuccess?.()
+        }
       })
-
-      if (response.success) {
-        toast.success(
-          mode === 'create' ? t('member.form.createSuccess') : t('member.form.updateSuccess'),
-          {
-            description: t(
-              mode === 'create'
-                ? 'member.form.createSuccessDescription'
-                : 'member.form.updateSuccessDescription'
-            ).replace('{name}', formData.name)
+    } else if (currentMember) {
+      updateMemberMutation.mutate(
+        { ...memberData, id: currentMember.id },
+        {
+          onSuccess: () => {
+            handleClose()
+            onSuccess?.()
           }
-        )
-
-        // Refresh the members list
-        applyFilters()
-        handleClose()
-      } else {
-        toast.error(
-          mode === 'create' ? t('member.form.createError') : t('member.form.updateError'),
-          {
-            description: response.message || t('member.form.errorDefault')
-          }
-        )
-      }
-    } catch (error) {
-      console.error(`Error ${mode === 'create' ? 'creating' : 'updating'} member:`, error)
-      toast.error(mode === 'create' ? t('member.form.createError') : t('member.form.updateError'), {
-        description: t('member.form.errorDefault')
-      })
-    } finally {
-      setIsLoading(false)
+        }
+      )
     }
   }
 

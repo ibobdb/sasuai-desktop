@@ -10,8 +10,13 @@ import { DataTableColumnHeader } from '@/components/common/data-table-column-hea
 import { DataTableRowActions } from './data-table-row-actions'
 import { Badge } from '@/components/ui/badge'
 
-// Create a custom hook for getting translated columns
-export function useTransactionColumns(): ColumnDef<Transaction>[] {
+interface UseTransactionColumnsProps {
+  onView?: (transaction: Transaction) => void
+}
+
+export function useTransactionColumns({
+  onView
+}: UseTransactionColumnsProps = {}): ColumnDef<Transaction>[] {
   const { t } = useTranslation(['transactions'])
 
   // Use useMemo to prevent unnecessary recreations of the columns array
@@ -200,9 +205,9 @@ export function useTransactionColumns(): ColumnDef<Transaction>[] {
       },
       {
         id: 'actions',
-        cell: DataTableRowActions
+        cell: ({ row }) => <DataTableRowActions row={row} onView={onView} />
       }
     ],
-    [t]
+    [t, onView]
   )
 }

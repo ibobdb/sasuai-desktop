@@ -39,6 +39,23 @@ interface UpdateProgress {
   total: number
 }
 
+interface PrinterSettings {
+  printerName: string
+  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
+  margin: string
+  copies: number
+  timeOutPerLine: number
+  fontSize: number
+  fontFamily: string
+  lineHeight: number
+  enableBold: boolean
+  autocut: boolean
+  cashdrawer: boolean
+  encoding: string
+}
+
+// Remove PrintReceipt interface since we only use HTML now
+
 declare global {
   interface Window {
     electron: ElectronAPI
@@ -73,6 +90,25 @@ declare global {
       app: {
         getVersion: () => Promise<string>
         getName: () => Promise<string>
+      }
+      printer: {
+        getPrinters: () => Promise<{
+          success: boolean
+          data?: string[]
+          error?: { message: string }
+        }>
+        getSettings: () => Promise<{
+          success: boolean
+          data?: PrinterSettings
+          error?: { message: string }
+        }>
+        saveSettings: (
+          settings: Partial<PrinterSettings>
+        ) => Promise<{ success: boolean; error?: { message: string } }>
+        testPrint: () => Promise<{ success: boolean; error?: { message: string } }>
+        printHTML: (
+          htmlContent: string
+        ) => Promise<{ success: boolean; error?: { message: string } }>
       }
     }
   }

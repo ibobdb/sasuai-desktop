@@ -1,0 +1,147 @@
+{
+  "title": "Pengaturan",
+  "description": "Kelola pengaturan aplikasi Anda",
+  "loading": "Memuat pengaturan...",
+  "tabs": {
+    "general": "Umum",
+    "keyboard": "Keyboard",
+    "printer": "Printer"
+  },
+  "general": {
+    "title": "Pengaturan Umum",
+    "description": "Konfigurasi dasar aplikasi",
+    "applicationBehavior": "Perilaku Aplikasi",
+    "autoStart": "Mulai Otomatis",
+    "autoStartDescription": "Jalankan aplikasi saat komputer dinyalakan",
+    "autoUpdate": "Update Otomatis",
+    "autoUpdateDescription": "Otomatis unduh dan instal pembaruan aplikasi",
+    "storeInformation": "Informasi Toko",
+    "storeName": "Nama Toko",
+    "storeNamePlaceholder": "Masukkan nama toko Anda",
+    "storeAddress": "Alamat Toko",
+    "storeAddressPlaceholder": "Masukkan alamat toko Anda",
+    "storePhone": "Nomor Telepon",
+    "storePhonePlaceholder": "Masukkan nomor telepon",
+    "storeEmail": "Alamat Email",
+    "storeEmailPlaceholder": "Masukkan alamat email",
+    "storeWebsite": "Website",
+    "storeWebsitePlaceholder": "Masukkan URL website",
+    "receiptFooter": "Footer Struk",
+    "thankYouMessage": "Pesan Terima Kasih",
+    "thankYouMessagePlaceholder": "Pesan terima kasih untuk pelanggan",
+    "returnMessage": "Pesan Kunjungan Kembali",
+    "returnMessagePlaceholder": "Pesan kunjungan kembali untuk pelanggan",
+    "saveSuccess": "Pengaturan berhasil disimpan",
+    "saveError": "Gagal menyimpan pengaturan",
+    "storeInfoSaved": "Informasi toko berhasil disimpan",
+    "footerInfoSaved": "Informasi footer berhasil disimpan",
+    "saveStoreInfo": "Simpan Info Toko",
+    "saveFooterInfo": "Simpan Info Footer",
+    "unsavedChanges": "Perubahan belum disimpan",
+    "allChangesSaved": "Semua perubahan telah disimpan"
+  },
+  "keyboard": {
+    "title": "Shortcut Keyboard",
+    "description": "Kelola shortcut keyboard untuk akses cepat",
+    "action": "Aksi",
+    "tableDescription": "Deskripsi",
+    "shortcut": "Shortcut",
+    "actions": "Tindakan",
+    "resetAll": "Reset Semua",
+    "clickToRecord": "Klik untuk merekam shortcut",
+    "clear": "Hapus",
+    "edit": "Edit",
+    "reset": "Reset",
+    "shortcutActions": {
+      "searchProduct": {
+        "name": "Cari Produk",
+        "description": "Fokus ke kotak pencarian produk"
+      },
+      "payment": {
+        "name": "Pembayaran",
+        "description": "Buka dialog pembayaran"
+      },
+      "clearCart": {
+        "name": "Kosongkan Keranjang",
+        "description": "Hapus semua item dari keranjang"
+      },
+      "addDiscount": {
+        "name": "Tambah Diskon",
+        "description": "Fokus ke input kode diskon"
+      },
+      "searchMember": {
+        "name": "Cari Member",
+        "description": "Fokus ke pencarian member"
+      },
+      "quickPayment": {
+        "name": "Pembayaran Cepat",
+        "description": "Proses pembayaran langsung dengan uang pas"
+      },
+      "executeTransaction": {
+        "name": "Eksekusi Transaksi",
+        "description": "Eksekusi transaksi dengan metode pembayaran saat ini"
+      },
+      "voidTransaction": {
+        "name": "Batalkan Transaksi",
+        "description": "Batalkan transaksi dan kosongkan keranjang"
+      }
+    }
+  },
+  "printer": {
+    "title": "Pengaturan Printer",
+    "description": "Konfigurasi printer untuk mencetak struk",
+    "selection": "Pemilihan Printer",
+    "enabled": "Aktifkan Printer",
+    "refresh": "Refresh",
+    "selectPrinter": "Pilih Printer",
+    "selectedPrinter": "Printer Terpilih",
+    "selectPrinterPlaceholder": "Pilih printer Anda...",
+    "systemDefault": "Default Sistem",
+    "connected": "Terhubung",
+    "testPrint": "Test Print",
+    "testing": "Testing...",
+    "active": "Aktif",
+    "printersRefreshed": "Daftar printer diperbarui",
+    "printersFound": "{{count}} printer ditemukan",
+    "refreshError": "Gagal memperbarui printer",
+    "refreshErrorDescription": "Tidak dapat memperbarui daftar printer",
+    "testPrintSuccess": "Test print berhasil diselesaikan",
+    "testPrintSuccessDescription": "Printer berfungsi dengan baik",
+    "testPrintError": "Test print gagal",
+    "testPrintErrorDescription": "Gagal mencetak ke printer",
+    "printSettings": "Pengaturan Cetak",
+    "printConfiguration": "Konfigurasi Cetak",
+    "type": "Jenis Printer",
+    "connection": "Koneksi",
+    "settings": "Pengaturan",
+    "paperSize": "Ukuran Kertas",
+    "copies": "Salinan",
+    "margin": "Margin",
+    "marginHelp": "Format CSS: atas kanan bawah kiri",
+    "timeoutPerLine": "Timeout per Baris (ms)",
+    "timeoutHelp": "Disarankan: 400ms",
+    "paperWidth": "Lebar Kertas",
+    "dpi": "DPI",
+    "autocut": "Potong Otomatis",
+    "buzzer": "Buzzer",
+    "drawer": "Cash Drawer",
+    "networkConfig": "Konfigurasi Jaringan",
+    "ipAddress": "Alamat IP",
+    "port": "Port",
+    "typography": "Pengaturan Tipografi",
+    "fontSize": "Ukuran Font",
+    "fontFamily": "Jenis Font",
+    "lineHeight": "Tinggi Baris",
+    "enableBold": "Aktifkan Tebal",
+    "encoding": "Encoding Teks",
+    "basicSettings": "Pengaturan Dasar",
+    "printOptions": "Opsi Cetak",
+    "changesDiscarded": "Perubahan berhasil dibatalkan",
+    "saving": "Menyimpan pengaturan...",
+    "saveSuccess": "Pengaturan printer berhasil disimpan",
+    "saveError": "Gagal menyimpan pengaturan printer",
+    "loadError": "Gagal memuat pengaturan printer",
+    "getPrintersError": "Gagal mendapatkan daftar printer",
+    "unsavedChanges": "Perubahan belum disimpan"
+  }
+}

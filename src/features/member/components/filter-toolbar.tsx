@@ -2,8 +2,9 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
-import { useMembers } from '../context/member-context'
 import { User, Award, GemIcon, Crown } from 'lucide-react'
+import { useDebounce } from '@/hooks/use-debounce'
+import type { MemberFilterParams, MemberFilterUIState } from '@/types/members'
 
 // Member tier options for filtering with appropriate icons
 const tierOptions = [
@@ -15,43 +16,62 @@ const tierOptions = [
   { label: 'Diamond', value: 'diamond', icon: GemIcon, color: '#B9F2FF' }
 ]
 
-function FilterToolbarComponent() {
+interface FilterToolbarProps {
+  filters: MemberFilterParams
+  filterUIState: MemberFilterUIState
+  onFiltersChange: (newFilters: Partial<MemberFilterParams>) => void
+  onFilterUIStateChange: React.Dispatch<React.SetStateAction<MemberFilterUIState>>
+  onResetFilters: () => void
+}
+
+function FilterToolbarComponent({
+  filterUIState,
+  onFiltersChange,
+  onFilterUIStateChange,
+  onResetFilters
+}: FilterToolbarProps) {
   const { t } = useTranslation(['member'])
-  const {
-    filterUIState,
-    setFilterUIState,
-    updateFilters,
-    resetFilters: contextResetFilters,
-    debouncedSearch
-  } = useMembers()
 
   const { search, tier: selectedTiers } = filterUIState
 
+  // Use debounce hook for search
+  const { setValue: setDebouncedSearchValue } = useDebounce(search, {
+    delay: 300,
+    minLength: 2,
+    callback: (searchValue) => {
+      onFiltersChange({ search: searchValue, page: 1 })
+    }
+  })
+
   // Handle search input change
   const handleSearchChange = (value: string) => {
-    setFilterUIState((prev) => ({ ...prev, search: value }))
-    debouncedSearch(value)
+    onFilterUIStateChange((prev) => ({ ...prev, search: value }))
+    setDebouncedSearchValue(value)
   }
 
   // Handle tier filter change
   const handleTierChange = (values: string[]) => {
-    setFilterUIState((prev) => ({
+    onFilterUIStateChange((prev) => ({
       ...prev,
       tier: values
     }))
 
-    updateFilters({
+    onFiltersChange({
       tier: values.length ? values : undefined,
       page: 1
     })
   }
 
   const handleResetFilters = () => {
-    contextResetFilters()
-    handleSearchChange('')
+    onResetFilters()
+    onFilterUIStateChange((prev) => ({
+      ...prev,
+      search: '',
+      tier: []
+    }))
+    setDebouncedSearchValue('')
   }
 
-  // Determine if any filters are applied
   const hasFilters = !!(search || selectedTiers.length > 0)
 
   return (
@@ -80,5 +100,4 @@ function FilterToolbarComponent() {
   )
 }
 
-// Memoize the toolbar to prevent unnecessary re-renders
 export const FilterToolbar = memo(FilterToolbarComponent)

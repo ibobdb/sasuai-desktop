@@ -59,6 +59,15 @@ const api = {
     getName: () => ipcRenderer.invoke('app:getName')
   },
 
+  // Printer API
+  printer: {
+    getPrinters: () => ipcRenderer.invoke('printer:get-printers'),
+    getSettings: () => ipcRenderer.invoke('printer:get-settings'),
+    saveSettings: (settings) => ipcRenderer.invoke('printer:save-settings', settings),
+    testPrint: () => ipcRenderer.invoke('printer:test-print'),
+    printHTML: (htmlContent) => ipcRenderer.invoke('printer:print-html', htmlContent)
+  },
+
   // Updater API
   updater: {
     checkForUpdates: () => ipcRenderer.invoke('update:check'),

@@ -16,7 +16,7 @@
     },
 
     "filters": {
-      "searchPlaceholder": "Cari pelanggan...",
+      "searchPlaceholder": "Cari pelanggan... (min. 2 karakter)",
       "tier": "Tingkatan"
     },
 
@@ -68,7 +68,8 @@
         "transactions": "Transaksi",
         "points": "Riwayat Poin",
         "discounts": "Diskon",
-        "rewards": "Hadiah"
+        "rewards": "Hadiah",
+        "summary": "Ringkasan"
       },
       "loading": "Memuat detail pelanggan",
       "loadingDescription": "Mohon tunggu sementara kami mengambil informasi pelanggan",
@@ -93,10 +94,19 @@
       "noPointsHistoryDescription": "Pelanggan ini belum memperoleh poin",
       "noTransactions": "Tidak ada transaksi ditemukan",
       "noTransactionsDescription": "Pelanggan ini belum melakukan transaksi",
+      "noDiscounts": "Tidak ada diskon tersedia",
       "totalSaved": "Total Disimpan",
       "totalPaid": "Total Dibayar",
       "activeDiscounts": "Diskon Aktif",
-      "totalDiscount": "Total Diskon"
+      "totalDiscount": "Total Diskon",
+      "discount": "Diskon",
+      "final": "Akhir",
+      "active": "Aktif",
+      "inactive": "Tidak Aktif",
+      "usageLimit": "Batas Penggunaan",
+      "averageTransaction": "Transaksi Rata-rata",
+      "perTransaction": "per transaksi",
+      "withDiscounts": "dengan diskon"
     },
 
     "tiers": {

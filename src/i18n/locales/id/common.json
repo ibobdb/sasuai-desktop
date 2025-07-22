@@ -5,21 +5,28 @@
     "error": "Terjadi kesalahan. Silakan coba lagi."
   },
   "actions": {
-    "save": "Simpan",
+    "logout": "Keluar",
+    "close": "Tutup",
     "cancel": "Batal",
+    "save": "Simpan",
     "delete": "Hapus",
     "edit": "Ubah",
-    "close": "Tutup",
+    "add": "Tambah",
+    "confirm": "Konfirmasi",
     "print": "Cetak",
+    "preview": "Pratinjau",
     "search": "Cari",
     "reset": "Reset",
     "apply": "Terapkan",
     "minimize": "Kecilkan",
     "maximize": "Perbesar",
-    "restore": "Pulihkan",
-    "logout": "Keluar",
-    "add": "Tambah",
-    "confirm": "Konfirmasi"
+    "restore": "Pulihkan"
+  },
+  "status": {
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "success": "Berhasil",
+    "processing": "Memproses..."
   },
   "commandMenu": {
     "placeholder": "Ketik perintah atau cari...",
@@ -50,13 +57,14 @@
     "tooltip": "Ganti tema",
     "light": "Terang",
     "dark": "Gelap",
-    "system": "Sistem"
-  },
-  "status": {
-    "loading": "Memuat...",
-    "error": "Terjadi kesalahan",
-    "success": "Berhasil",
-    "processing": "Memproses..."
+    "system": "Sistem",
+    "lightMode": "Mode Terang",
+    "darkMode": "Mode Gelap",
+    "systemMode": "Mode Sistem",
+    "switchToLight": "Ganti ke tema terang",
+    "switchToDark": "Ganti ke tema gelap",
+    "switchToSystem": "Ganti ke tema sistem",
+    "clickTo": "Klik untuk"
   },
   "datePicker": {
     "placeholder": "Pilih rentang tanggal",
@@ -69,5 +77,6 @@
       "thisMonth": "Bulan Ini",
       "thisYear": "Tahun Ini"
     }
-  }
+  },
+  "tip": "Tips"
 }

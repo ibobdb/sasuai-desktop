@@ -11,6 +11,7 @@ import sidebarEN from './locales/en/sidebar.json'
 import updaterEN from './locales/en/updater.json'
 import rewardsEN from './locales/en/rewards.json'
 import authEN from './locales/en/auth.json'
+import settingsEN from './locales/en/settings.json'
 
 import commonID from './locales/id/common.json'
 import transactionsID from './locales/id/transactions.json'
@@ -20,6 +21,7 @@ import sidebarID from './locales/id/sidebar.json'
 import updaterID from './locales/id/updater.json'
 import rewardsID from './locales/id/rewards.json'
 import authID from './locales/id/auth.json'
+import settingsID from './locales/id/settings.json'
 
 // Configure resources
 const resources = {
@@ -31,7 +33,8 @@ const resources = {
     sidebar: sidebarEN,
     updater: updaterEN,
     rewards: rewardsEN,
-    auth: authEN
+    auth: authEN,
+    settings: settingsEN
   },
   id: {
     common: commonID,
@@ -41,7 +44,8 @@ const resources = {
     sidebar: sidebarID,
     updater: updaterID,
     rewards: rewardsID,
-    auth: authID
+    auth: authID,
+    settings: settingsID
   }
 }
 

@@ -1,8 +1,23 @@
-import { BaseFilterParams, BaseFilterUIState } from './common'
+import { BaseFilterParams } from './common'
 import { Discount } from './cashier'
+
+// Base filter UI state interface
+interface BaseFilterUIState {
+  search: string
+  startDate?: Date
+  endDate?: Date
+}
 
 // Available dialog types
 export type MemberDialogType = 'view' | 'create' | 'edit'
+
+// Backend member response structure (what actually comes from API)
+export interface BackendMemberResponse {
+  members: Member[]
+  totalCount: number
+  totalPages: number
+  currentPage: number
+}
 
 // Member tier information
 export interface MemberTier {
@@ -22,6 +37,7 @@ export interface Member {
   phone: string
   cardId: string
   address: string | null
+  notes?: string | null
   tierId: string
   totalPoints: number
   totalPointsEarned: number
@@ -122,4 +138,62 @@ export interface MemberFilterParams extends BaseFilterParams {
 // UI state for filters
 export interface MemberFilterUIState extends BaseFilterUIState {
   tier: string[]
+}
+
+// API request/response types
+export interface MemberApiResponse {
+  success: boolean
+  data: {
+    members: Member[]
+    totalCount: number
+    totalPages: number
+    currentPage: number
+  }
+  message?: string
+}
+
+export interface MemberDetailApiResponse {
+  success: boolean
+  data: MemberDetail
+  message?: string
+}
+
+export interface CreateMemberData {
+  name: string
+  cardId: string
+  phone: string
+  email?: string | null
+  address?: string | null
+}
+
+export interface UpdateMemberData extends CreateMemberData {
+  id: string
+}
+
+export interface BanMemberData {
+  reason: string
+}
+
+// Member-specific API response interfaces
+export interface MemberCreateResponse {
+  success: boolean
+  data: Member
+  message?: string
+}
+
+export interface MemberUpdateResponse {
+  success: boolean
+  data: Member
+  message?: string
+}
+
+export interface MemberDeleteResponse {
+  success: boolean
+  message?: string
+}
+
+export interface MemberBanResponse {
+  success: boolean
+  data: Member
+  message?: string
 }

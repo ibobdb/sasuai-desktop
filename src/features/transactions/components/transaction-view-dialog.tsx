@@ -1,55 +1,76 @@
-import { useEffect, useState } from 'react'
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Transaction, TransactionDetail } from '@/types/transactions'
+import { TransactionDetail } from '@/types/transactions'
+import { PrinterSettings } from '@/types/settings'
 import { formatCurrency } from '@/utils/format'
 import { Separator } from '@/components/ui/separator'
-import { useTransactions } from '../context/transactions-context'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { DetailDialog } from '@/components/common/detail-dialog'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
+import { toast } from 'sonner'
+import { generateReceiptData } from '@/utils/receipt-data'
+import { generateReceiptHTML } from '@/utils/receipt-html'
+import { useSettings } from '@/features/settings/hooks/use-settings'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  currentTransaction: Transaction
+  transactionDetail: TransactionDetail | null
+  isLoadingDetail: boolean
 }
 
-export function TransactionViewDialog({ open, onOpenChange, currentTransaction }: Props) {
+export function TransactionViewDialog({
+  open,
+  onOpenChange,
+  transactionDetail,
+  isLoadingDetail
+}: Props) {
   const { t } = useTranslation(['transactions', 'common'])
-  const { fetchTransactionDetail } = useTransactions()
-  const [detail, setDetail] = useState<TransactionDetail | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
+  const { settings } = useSettings()
+  const [isPrinting, setIsPrinting] = useState(false)
 
-  useEffect(() => {
-    if (open && currentTransaction) {
-      setLoading(true)
-      fetchTransactionDetail(currentTransaction.id)
-        .then((data) => {
-          if (data) {
-            setDetail(data)
-          }
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    } else {
-      setDetail(null)
+  const handlePrintReceipt = async () => {
+    if (!transactionDetail) return
+
+    setIsPrinting(true)
+    try {
+      // Get printer settings first
+      const printerSettingsResponse = await window.api.printer.getSettings()
+      const printerSettings = printerSettingsResponse.success
+        ? (printerSettingsResponse.data as PrinterSettings)
+        : undefined
+
+      const receiptData = generateReceiptData(transactionDetail, settings.general.storeInfo)
+      const receiptHTML = generateReceiptHTML(
+        receiptData,
+        printerSettings,
+        settings.general.footerInfo
+      )
+      const response = await window.api.printer.printHTML(receiptHTML)
+
+      if (response.success) {
+        toast.success(t('transaction.receipt.printSuccess'))
+      } else {
+        throw new Error(response.error?.message || t('transaction.receipt.printError'))
+      }
+    } catch (error) {
+      console.error('Print failed:', error)
+      toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
+    } finally {
+      setIsPrinting(false)
     }
-  }, [open, currentTransaction, fetchTransactionDetail])
-
-  // If no details are available when not loading, close dialog
-  if (!detail && !loading) return null
+  }
 
   // Generate receipt content if we have details
   const generateReceiptContent = () => {
-    if (!detail) return null
+    if (!transactionDetail) return null
 
-    const { pricing, cashier, member, items, payment } = detail
-    const paymentMethod = payment?.method || detail.paymentMethod
-    const date = new Date(detail.createdAt)
+    const { pricing, cashier, member, items = [], payment } = transactionDetail
+    const paymentMethod = payment?.method || transactionDetail.paymentMethod
+    const date = new Date(transactionDetail.createdAt)
     const formattedDate = date.toLocaleDateString('en-US', {
       weekday: 'short',
       year: 'numeric',
@@ -60,11 +81,10 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
     })
 
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-    const totalAmount = pricing.originalAmount
+    const totalAmount = pricing?.originalAmount || 0
 
     return (
       <>
-        {/* Meta Information */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
           <div className="space-y-3">
             <div>
@@ -75,7 +95,7 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t('transaction.details.cashier')}</p>
-              <p className="font-medium">{cashier.name}</p>
+              <p className="font-medium">{cashier?.name || '-'}</p>
             </div>
           </div>
 
@@ -108,7 +128,6 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
 
         <Separator />
 
-        {/* Items List */}
         <div>
           <h3 className="font-semibold mb-3">
             {t('transaction.details.itemsPurchased')} ({totalItems})
@@ -134,30 +153,38 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item) => (
-                    <tr key={item.id} className="border-t hover:bg-muted/50 transition-colors">
-                      <td className="p-3">
-                        <div className="break-words max-w-[200px] sm:max-w-[300px]">
-                          <p className="font-medium">{item.product.name}</p>
-                          {item.discountApplied && (
-                            <div className="mt-1">
-                              <Badge variant="outline" className="text-xs text-rose-600">
-                                {item.discountApplied.name}: -
-                                {formatCurrency(item.discountApplied.amount)}
-                              </Badge>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="text-right p-3 whitespace-nowrap">
-                        {formatCurrency(item.product.price)}
-                      </td>
-                      <td className="text-right p-3 whitespace-nowrap">{item.quantity}</td>
-                      <td className="text-right p-3 whitespace-nowrap font-medium">
-                        {formatCurrency(item.originalAmount)}
+                  {items && items.length > 0 ? (
+                    items.map((item) => (
+                      <tr key={item.id} className="border-t hover:bg-muted/50 transition-colors">
+                        <td className="p-3">
+                          <div className="break-words max-w-[200px] sm:max-w-[300px]">
+                            <p className="font-medium">{item.product?.name || 'Unknown Item'}</p>
+                            {item.discountApplied && (
+                              <div className="mt-1">
+                                <Badge variant="outline" className="text-xs text-rose-600">
+                                  {item.discountApplied.name}: -
+                                  {formatCurrency(item.discountApplied.amount)}
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="text-right p-3 whitespace-nowrap">
+                          {formatCurrency(item.product?.price || 0)}
+                        </td>
+                        <td className="text-right p-3 whitespace-nowrap">{item.quantity || 0}</td>
+                        <td className="text-right p-3 whitespace-nowrap font-medium">
+                          {formatCurrency(item.originalAmount || 0)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-3 text-center text-muted-foreground">
+                        No items found
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -166,25 +193,22 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
 
         <Separator />
 
-        {/* Pricing Summary */}
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('transaction.details.subtotal')}</span>
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
-          {/* Show product discounts total if present */}
-          {pricing.discounts.product && pricing.discounts.product > 0 && (
+          {pricing?.discounts?.products && Number(pricing.discounts.products) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground">
                 {t('transaction.details.productDiscounts')}
               </span>
-              <span className="text-rose-600">-{formatCurrency(pricing.discounts.product)}</span>
+              <span className="text-rose-600">-{formatCurrency(pricing.discounts.products)}</span>
             </div>
-          )}
+          ) : null}
 
-          {/* Show member discount if present */}
-          {pricing.discounts.member && (
+          {pricing?.discounts?.member && Number(pricing.discounts.member.amount || 0) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground flex items-center gap-1">
                 {t('transaction.details.memberDiscount')}
@@ -198,70 +222,38 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
                 -{formatCurrency(pricing.discounts.member.amount)}
               </span>
             </div>
-          )}
+          ) : null}
 
-          {/* Show tier discount if present */}
-          {pricing.discounts.tier && (
+          {pricing?.discounts?.total && Number(pricing.discounts.total) > 0 ? (
             <div className="flex justify-between">
-              <span className="text-muted-foreground flex items-center gap-1">
-                {t('transaction.details.tierDiscount')}
-                {pricing.discounts.tier.name && (
-                  <Badge variant="outline" className="text-xs">
-                    {pricing.discounts.tier.name}
-                  </Badge>
-                )}
+              <span className="text-muted-foreground">
+                {t('transaction.details.totalDiscount')}
               </span>
-              <span className="text-rose-600">
-                -{formatCurrency(pricing.discounts.tier.amount)}
-              </span>
+              <span className="text-rose-600">-{formatCurrency(pricing.discounts.total)}</span>
             </div>
-          )}
-
-          {/* Show global discount if present */}
-          {pricing.discounts.global && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground flex items-center gap-1">
-                {t('transaction.details.globalDiscount')}
-                {pricing.discounts.global.name && (
-                  <Badge variant="outline" className="text-xs">
-                    {pricing.discounts.global.code} - {pricing.discounts.global.name}
-                  </Badge>
-                )}
-              </span>
-              <span className="text-rose-600">
-                -{formatCurrency(pricing.discounts.global.amount)}
-              </span>
-            </div>
-          )}
-
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">{t('transaction.details.totalDiscount')}</span>
-            <span className="text-rose-600">-{formatCurrency(pricing.discounts.total)}</span>
-          </div>
+          ) : null}
 
           <Separator />
 
           <div className="flex justify-between text-lg font-bold">
             <span>{t('transaction.details.total')}</span>
-            <span>{formatCurrency(pricing.finalAmount)}</span>
+            <span>{formatCurrency(Math.abs(pricing?.finalAmount || 0))}</span>
           </div>
 
-          {/* Payment amount */}
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('transaction.details.paymentAmount')}</span>
-            <span>{formatCurrency(Number(payment.amount))}</span>
+            <span>{formatCurrency(Number(payment?.amount || 0))}</span>
           </div>
 
-          {payment.change && (
+          {payment?.change && Number(payment.change) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t('transaction.details.change')}</span>
               <span>{formatCurrency(Number(payment.change))}</span>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* Points Earned */}
-        {detail.pointsEarned > 0 && (
+        {transactionDetail.pointsEarned && transactionDetail.pointsEarned > 0 ? (
           <Card className="bg-primary/5 border-primary/20 p-4">
             <div className="flex items-center gap-3">
               <div className="bg-primary/10 p-2 rounded-full">
@@ -290,42 +282,45 @@ export function TransactionViewDialog({ open, onOpenChange, currentTransaction }
               <div>
                 <p className="font-medium">{t('transaction.details.pointsEarned')}</p>
                 <p className="text-sm text-muted-foreground">
-                  {t('transaction.details.pointsDescription', { points: detail.pointsEarned })}
+                  {t('transaction.details.pointsDescription', {
+                    points: transactionDetail.pointsEarned
+                  })}
                 </p>
               </div>
             </div>
           </Card>
-        )}
+        ) : null}
       </>
     )
   }
 
-  // Dialog footer content
   const footerContent = (
     <>
       <Button variant="outline" onClick={() => onOpenChange(false)}>
         {t('actions.close', { ns: 'common' })}
       </Button>
-      <Button>
+      <Button onClick={handlePrintReceipt} disabled={isPrinting}>
         <IconPrinter className="h-4 w-4 mr-2" />
-        {t('actions.print', { ns: 'common' })}
+        {isPrinting ? t('transaction.receipt.printing') : t('actions.print', { ns: 'common' })}
       </Button>
     </>
   )
 
   return (
-    <DetailDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      loading={loading}
-      loadingTitle={t('transaction.receipt.loading')}
-      loadingDescription={t('transaction.receipt.loadingDescription')}
-      title={t('transaction.receipt.title')}
-      description={detail ? `Transaction ID: ${detail.tranId}` : ''}
-      icon={<IconReceipt className="h-5 w-5" />}
-      footerContent={footerContent}
-    >
-      {generateReceiptContent()}
-    </DetailDialog>
+    <>
+      <DetailDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        loading={isLoadingDetail}
+        loadingTitle={t('transaction.receipt.loading')}
+        loadingDescription={t('transaction.receipt.loadingDescription')}
+        title={t('transaction.receipt.title')}
+        description={transactionDetail ? `Transaction ID: ${transactionDetail.tranId}` : ''}
+        icon={<IconReceipt className="h-5 w-5" />}
+        footerContent={footerContent}
+      >
+        {generateReceiptContent()}
+      </DetailDialog>
+    </>
   )
 }

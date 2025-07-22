@@ -1,86 +1,96 @@
-import { memo } from 'react'
+import { memo, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRange } from 'react-day-picker'
 import { FilterToolbar as BaseFilterToolbar } from '@/components/common/filter-toolbar'
 import { DataTableFacetedFilter } from '@/components/common/data-table-faceted-filter'
-import { useRewardClaims } from '../context/reward-claims-context'
+import { RewardClaimFilterParams } from '@/types/rewards'
 import { CheckCircle, XCircle, Clock } from 'lucide-react'
 import { DateRangePickerWithPresets } from '@/components/ui/date-range-picker-with-presets'
+import { useDebounce } from '@/hooks/use-debounce'
 
-function ClaimFilterToolbarComponent() {
+interface ClaimFilterToolbarProps {
+  filters: RewardClaimFilterParams
+  onFiltersChange: (filters: RewardClaimFilterParams) => void
+}
+
+function ClaimFilterToolbarComponent({ filters, onFiltersChange }: ClaimFilterToolbarProps) {
   const { t } = useTranslation(['rewards'])
-  const { filterUIState, setFilterUIState, updateFilters, resetFilters, debouncedSearch } =
-    useRewardClaims()
+  const [search, setSearch] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const filtersRef = useRef(filters)
 
-  // Status options for filtering with appropriate icons
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
+
+  const { debouncedValue } = useDebounce(search, { delay: 300 })
+
+  useEffect(() => {
+    if (debouncedValue !== filtersRef.current.search) {
+      onFiltersChange({
+        ...filtersRef.current,
+        search: debouncedValue,
+        page: 1
+      })
+    }
+  }, [debouncedValue, onFiltersChange])
+
   const statusOptions = [
     {
       label: t('statusOptions.claimed'),
-      value: 'Claimed',
+      value: 'claimed',
       icon: CheckCircle,
       color: '#16a34a'
     },
     {
       label: t('statusOptions.pending'),
-      value: 'Pending',
+      value: 'pending',
       icon: Clock,
       color: '#d97706'
     },
     {
       label: t('statusOptions.cancelled'),
-      value: 'Cancelled',
+      value: 'cancelled',
       icon: XCircle,
       color: '#ef4444'
     }
   ]
 
-  const { search, dateRange, status: selectedStatus } = filterUIState
-
-  // Handle search input change
   const handleSearchChange = (value: string) => {
-    setFilterUIState((prev) => ({ ...prev, search: value }))
-    debouncedSearch(value)
+    setSearch(value)
   }
 
-  // Handle date range change
-  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
-    setFilterUIState((prev) => ({
-      ...prev,
-      dateRange: dateRange ? { from: dateRange.from || null, to: dateRange.to || null } : undefined
-    }))
-
-    // Reset to page 1 when date range changes
-    updateFilters({
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range)
+    onFiltersChange({
+      ...filtersRef.current,
       page: 1
     })
   }
 
-  // Handle status filter change
   const handleStatusChange = (values: string[]) => {
-    setFilterUIState((prev) => ({
-      ...prev,
-      status: values
-    }))
-
-    updateFilters({
+    setSelectedStatus(values)
+    onFiltersChange({
+      ...filtersRef.current,
       statusFilter: values.length > 0 ? values.join(',') : undefined,
       page: 1
     })
   }
 
   const handleResetFilters = () => {
-    resetFilters()
+    setSearch('')
+    setSelectedStatus([])
+    setDateRange(undefined)
+    onFiltersChange({
+      page: 1,
+      pageSize: 10,
+      sortBy: 'claimDate',
+      sortDirection: 'desc'
+    })
   }
 
-  // Create date range object for the picker
-  const dateRangeValue: DateRange | undefined =
-    dateRange?.from || dateRange?.to
-      ? { from: dateRange.from || undefined, to: dateRange.to || undefined }
-      : undefined
-
-  // Determine if any filters are applied
   const hasFilters = !!(search || dateRange?.from || dateRange?.to || selectedStatus.length > 0)
-
   return (
     <BaseFilterToolbar
       onSearch={handleSearchChange}
@@ -91,7 +101,7 @@ function ClaimFilterToolbarComponent() {
       filterComponents={
         <div className="flex flex-wrap gap-2">
           <DateRangePickerWithPresets
-            value={dateRangeValue}
+            value={dateRange}
             onChange={handleDateRangeChange}
             isCompact={true}
           />
@@ -113,5 +123,4 @@ function ClaimFilterToolbarComponent() {
   )
 }
 
-// Memoize the toolbar to prevent unnecessary re-renders
 export const ClaimFilterToolbar = memo(ClaimFilterToolbarComponent)

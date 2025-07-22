@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Discount, CartListProps } from '@/types/cashier'
-import { isDiscountValid } from '../utils'
+import { isDiscountValid } from '../utils/cashier-utils'
 
 export default function CartList({
   items,
@@ -123,34 +123,41 @@ export default function CartList({
       ) : (
         <>
           <div className="rounded-md border overflow-hidden">
-            <div className="h-[calc(100vh-252px)] flex flex-col">
-              <Table className="table-fixed border-collapse">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px] px-4">
-                      <Checkbox
-                        checked={selectedItems.size === items.length && items.length > 0}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all items"
-                      />
-                    </TableHead>
-                    <TableHead className="w-[30%]">{t('cashier.cart.product')}</TableHead>
-                    <TableHead className="w-[15%] text-right">{t('cashier.cart.price')}</TableHead>
-                    <TableHead className="w-[15%] text-center">
-                      {t('cashier.cart.quantity')}
-                    </TableHead>
-                    <TableHead className="w-[20%] text-left">
-                      {t('cashier.cart.discount')}
-                    </TableHead>
-                    <TableHead className="w-[15%] text-right">
-                      {t('cashier.cart.subtotal')}
-                    </TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-              </Table>
-              <div className="flex-1 overflow-auto">
-                <Table className="table-fixed border-collapse">
+            <div className="flex flex-col">
+              {/* Fixed Header */}
+              <div className="border-b bg-background">
+                <Table className="table-fixed">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[40px] px-4">
+                        <Checkbox
+                          checked={selectedItems.size === items.length && items.length > 0}
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all items"
+                        />
+                      </TableHead>
+                      <TableHead className="w-[30%]">{t('cashier.cart.product')}</TableHead>
+                      <TableHead className="w-[15%] text-right">
+                        {t('cashier.cart.price')}
+                      </TableHead>
+                      <TableHead className="w-[15%] text-center">
+                        {t('cashier.cart.quantity')}
+                      </TableHead>
+                      <TableHead className="w-[20%] text-left">
+                        {t('cashier.cart.discount')}
+                      </TableHead>
+                      <TableHead className="w-[15%] text-right">
+                        {t('cashier.cart.subtotal')}
+                      </TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                </Table>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="max-h-[68vh] overflow-auto">
+                <Table className="table-fixed">
                   <TableBody>
                     {items.map((item) => (
                       <TableRow
@@ -242,17 +249,19 @@ export default function CartList({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                {item.discounts.filter(isDiscountValid).map((discount) => (
-                                  <DropdownMenuItem
-                                    key={discount.id}
-                                    onClick={() => onUpdateDiscount(item.id, discount)}
-                                    className={
-                                      item.selectedDiscount?.id === discount.id ? 'bg-accent' : ''
-                                    }
-                                  >
-                                    {discount.name} ({formatDiscount(discount)})
-                                  </DropdownMenuItem>
-                                ))}
+                                {item.discounts
+                                  ?.filter((discount) => isDiscountValid(discount, false))
+                                  .map((discount) => (
+                                    <DropdownMenuItem
+                                      key={discount.id}
+                                      onClick={() => onUpdateDiscount(item.id, discount)}
+                                      className={
+                                        item.selectedDiscount?.id === discount.id ? 'bg-accent' : ''
+                                      }
+                                    >
+                                      {discount.name} ({formatDiscount(discount)})
+                                    </DropdownMenuItem>
+                                  ))}
                                 {item.selectedDiscount && (
                                   <>
                                     <DropdownMenuSeparator />

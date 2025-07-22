@@ -38,6 +38,3 @@ publish:
   owner: ibobdb
   repo: sasuai-dekstop
   releaseType: release
-
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/

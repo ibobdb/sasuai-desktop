@@ -5,7 +5,11 @@
     "receipt": {
       "title": "Struk Transaksi",
       "loading": "Memuat Transaksi",
-      "loadingDescription": "Mengambil informasi detail transaksi"
+      "loadingDescription": "Mengambil informasi detail transaksi",
+      "printSuccess": "Struk berhasil dicetak",
+      "printError": "Gagal mencetak struk",
+      "printing": "Mencetak...",
+      "preview": "Pratinjau Cetak"
     },
     "table": {
       "id": "ID Transaksi",

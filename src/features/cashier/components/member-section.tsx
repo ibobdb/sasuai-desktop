@@ -4,30 +4,22 @@ import { X, Ticket, Check, UserPlus, Phone, CreditCard, MapPin, Mail } from 'luc
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Member, MemberSectionProps, Discount } from '@/types/cashier'
+import { Member, MemberSectionProps, Discount, EnhancedDiscount } from '@/types/cashier'
 import { MemberSearch } from './member-search'
 import { Card } from '@/components/ui/card'
 import { getTierBadgeVariant } from '@/features/member/components/member-columns'
-import { isDiscountValid } from '../utils'
-
-// Enhanced discount interface that includes source information for UI
-interface EnhancedDiscount extends Discount {
-  source: 'member' | 'tier'
-}
+import { isDiscountValid } from '../utils/cashier-utils'
 
 export function MemberSection({
   onMemberSelect,
   onMemberDiscountSelect,
   selectedDiscount,
-  subtotal = 0,
   member
 }: MemberSectionProps) {
   const { t } = useTranslation(['cashier'])
@@ -40,39 +32,14 @@ export function MemberSection({
 
   // Handle member selection and their available discounts
   const handleMemberSelect = (member: Member | null) => {
-    setSelectedMember(member)
-
-    // Pass to parent component
-    if (onMemberSelect) {
-      onMemberSelect(member)
-    }
-
-    // Reset member discount when changing members
-    if (onMemberDiscountSelect) {
-      onMemberDiscountSelect(null)
-    }
-
-    // Auto-select member discount if only one is available and meets minimum purchase
-    if (member) {
-      const availableDiscounts = getAvailableMemberDiscounts()
-      if (availableDiscounts.length === 1) {
-        const memberDiscount = availableDiscounts[0]
-        if (subtotal >= memberDiscount.minPurchase && onMemberDiscountSelect) {
-          onMemberDiscountSelect(memberDiscount)
-        }
-      }
-    }
+    onMemberSelect?.(member)
   }
 
   // Clear selected member
   const clearMember = () => {
     setSelectedMember(null)
-    if (onMemberSelect) {
-      onMemberSelect(null)
-    }
-    if (onMemberDiscountSelect) {
-      onMemberDiscountSelect(null)
-    }
+    onMemberSelect?.(null)
+    onMemberDiscountSelect?.(null)
   }
 
   // Format discount for display
@@ -83,57 +50,45 @@ export function MemberSection({
     return `Rp ${discount.value.toLocaleString()}`
   }
 
-  // Check if discount is applicable based on minimum purchase
-  const isDiscountApplicable = (discount: Discount) => {
-    return !discount.minPurchase || subtotal >= discount.minPurchase
-  }
-
-  // Get available member discounts from both member and tier
-  const getAvailableMemberDiscounts = (): EnhancedDiscount[] => {
+  // Get all available discounts from both member and tier (with basic validation)
+  const getAllAvailableDiscounts = (): EnhancedDiscount[] => {
     if (!selectedMember) return []
 
-    // Get member's direct discounts
-    const memberDiscounts: EnhancedDiscount[] = (selectedMember.discounts || [])
-      .filter(isDiscountValid)
-      .map((discount) => ({
-        ...discount,
-        source: 'member'
-      }))
+    const allDiscounts: EnhancedDiscount[] = []
 
-    // Get tier discounts
-    const tierDiscounts: EnhancedDiscount[] = (selectedMember.tier?.discounts || [])
-      .filter(isDiscountValid)
-      .map((discount) => ({
-        ...discount,
-        source: 'tier'
-      }))
+    // Add member personal discounts (filter only expired/usage limit)
+    if (selectedMember.discounts) {
+      const memberDiscounts = selectedMember.discounts
+        .filter((discount) => isDiscountValid(discount, false))
+        .map((discount) => ({
+          ...discount,
+          source: 'member' as const
+        }))
+      allDiscounts.push(...memberDiscounts)
+    }
 
-    // Combine both sources
-    return [...memberDiscounts, ...tierDiscounts]
+    // Add tier discounts (filter only expired/usage limit)
+    if (selectedMember.tier?.discounts) {
+      const tierDiscounts = selectedMember.tier.discounts
+        .filter((discount) => isDiscountValid(discount, false))
+        .map((discount) => ({
+          ...discount,
+          source: 'tier' as const
+        }))
+      allDiscounts.push(...tierDiscounts)
+    }
+
+    return allDiscounts
   }
 
-  // Get source label for discount (for display purposes)
+  // Get source label for discount
   const getSourceLabel = (discount: EnhancedDiscount) => {
     return discount.source === 'member'
       ? t('cashier.memberSection.personalDiscount')
-      : t('cashier.memberSection.tierDiscount')
+      : `${t('cashier.memberSection.tierDiscount')} (${selectedMember?.tier?.name})`
   }
 
-  // Handle discount selection with source information
-  const handleDiscountSelect = (discount: EnhancedDiscount, applicable: boolean) => {
-    if (applicable && onMemberDiscountSelect) {
-      // Pass both the discount and its source to the parent component
-      onMemberDiscountSelect(discount)
-    } else if (!applicable) {
-      toast.error(
-        `${t('cashier.memberSection.minPurchase', {
-          amount: discount.minPurchase?.toLocaleString()
-        })}`
-      )
-    }
-  }
-
-  const availableDiscounts = getAvailableMemberDiscounts()
+  const availableDiscounts = getAllAvailableDiscounts()
   const hasAvailableDiscounts = availableDiscounts.length > 0
 
   return (
@@ -209,96 +164,99 @@ export function MemberSection({
             )}
           </div>
 
-          {/* Member discount section - adjusted padding */}
-          {hasAvailableDiscounts && (
-            <div className="p-2 bg-primary/5 border-t">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div className="flex items-center">
-                  <Ticket className="h-4 w-4 mr-1 text-green-600 dark:text-green-500" />
-                  <span className="font-medium text-sm">
-                    {t('cashier.memberSection.discounts')}
-                  </span>
-                </div>
+          {/* Available Discounts Section */}
+          {selectedMember && (
+            <>
+              {hasAvailableDiscounts ? (
+                <div className="p-2 bg-primary/5 border-t">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <div className="flex items-center">
+                      <Ticket className="h-4 w-4 mr-1 text-green-600 dark:text-green-500" />
+                      <span className="font-medium text-sm">
+                        {t('cashier.memberSection.availableDiscounts')}
+                      </span>
+                    </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={
-                        selectedDiscount
-                          ? 'text-green-600 border-green-200 hover:bg-green-50 w-full sm:w-auto h-7 text-xs'
-                          : 'w-full sm:w-auto h-7 text-xs'
-                      }
-                    >
-                      {selectedDiscount
-                        ? `${selectedDiscount.name} (${formatDiscount(selectedDiscount)})`
-                        : t('cashier.memberSection.selectDiscount')}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[280px] sm:w-auto">
-                    {availableDiscounts.map((discount) => {
-                      const applicable = isDiscountApplicable(discount)
-                      return (
-                        <DropdownMenuItem
-                          key={discount.id}
-                          onClick={() => {
-                            if (applicable) {
-                              handleDiscountSelect(discount, applicable)
-                            } else {
-                              toast.error(
-                                `${t('cashier.memberSection.minPurchase', {
-                                  amount: discount.minPurchase?.toLocaleString()
-                                })}`
-                              )
-                            }
-                          }}
-                          disabled={!applicable}
-                          className={selectedDiscount?.id === discount.id ? 'bg-accent' : ''}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={
+                            selectedDiscount
+                              ? 'text-green-600 border-green-200 hover:bg-green-50 w-full sm:w-auto h-7 text-xs'
+                              : 'w-full sm:w-auto h-7 text-xs'
+                          }
                         >
-                          <div className="flex flex-col w-full">
-                            <div className="flex items-center justify-between">
-                              <span>
-                                {discount.name}
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  ({getSourceLabel(discount)})
-                                </span>
-                              </span>
-                              <span className="ml-2 text-xs">
-                                {selectedDiscount?.id === discount.id && (
-                                  <Check className="h-3 w-3 inline mr-1" />
+                          {selectedDiscount
+                            ? `${selectedDiscount.name} (${formatDiscount(selectedDiscount)})`
+                            : t('cashier.memberSection.selectDiscount')}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[280px] sm:w-auto">
+                        {availableDiscounts.map((discount) => {
+                          const sourceLabel = getSourceLabel(discount)
+
+                          return (
+                            <DropdownMenuItem
+                              key={`${discount.source}-${discount.id}`}
+                              onClick={() => onMemberDiscountSelect?.(discount)}
+                              className={selectedDiscount?.id === discount.id ? 'bg-accent' : ''}
+                            >
+                              <div className="flex flex-col w-full">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{discount.name}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {sourceLabel}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    {selectedDiscount?.id === discount.id && (
+                                      <Check className="h-3 w-3 mr-1 text-green-600" />
+                                    )}
+                                    <span className="text-xs font-medium">
+                                      {formatDiscount(discount)}
+                                    </span>
+                                  </div>
+                                </div>
+                                {discount.minPurchase > 0 && (
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    Min. purchase: Rp {discount.minPurchase.toLocaleString()}
+                                  </div>
                                 )}
-                                {formatDiscount(discount)}
-                              </span>
-                            </div>
-                            {discount.minPurchase > 0 && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {t('cashier.memberSection.minPurchase', {
-                                  amount: discount.minPurchase.toLocaleString()
-                                })}
-                              </p>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      )
-                    })}
+                              </div>
+                            </DropdownMenuItem>
+                          )
+                        })}
 
-                    {selectedDiscount && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onMemberDiscountSelect && onMemberDiscountSelect(null)}
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 font-medium"
-                        >
-                          <X className="h-4 w-4 mr-1.5" />
-                          {t('cashier.memberSection.removeDiscount')}
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
+                        {selectedDiscount && (
+                          <>
+                            <div className="border-t my-1" />
+                            <DropdownMenuItem
+                              onClick={() => onMemberDiscountSelect?.(null)}
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 font-medium"
+                            >
+                              <X className="h-4 w-4 mr-1.5" />
+                              {t('cashier.memberSection.removeDiscount')}
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-2 bg-muted/20 border-t">
+                  <div className="flex items-center">
+                    <Ticket className="h-4 w-4 mr-1 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      {t('cashier.memberSection.noDiscountsAvailable')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </Card>
       )}

@@ -68,7 +68,7 @@ export function useRewardClaimColumns(): ColumnDef<RewardClaim>[] {
             <div>
               <div className="font-medium">{reward.name}</div>
               <div className="text-xs text-amber-600">
-                {reward.pointsCost.toLocaleString()} points
+                {reward.pointsCost.toLocaleString()} {t('table.points')}
               </div>
             </div>
           )
@@ -96,7 +96,7 @@ export function useRewardClaimColumns(): ColumnDef<RewardClaim>[] {
           const member = row.original.member
           return (
             <div className="font-medium text-amber-600">
-              {member.totalPoints.toLocaleString()} points
+              {member.totalPoints.toLocaleString()} {t('table.points')}
             </div>
           )
         }

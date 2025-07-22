@@ -114,10 +114,13 @@ export interface TransactionDetail {
     finalAmount: number
     discounts: {
       total: number
-      product?: number
+      products?: number // Changed from 'product' to 'products'
       member?: {
-        id: string
+        id?: string
+        type?: string
         name: string
+        valueType?: string
+        value?: number
         amount: number
       }
       tier?: {
@@ -143,8 +146,8 @@ export interface TransactionDetail {
 export interface TransactionFilterParams {
   page: number
   pageSize: number
-  sortField?: string
-  sortDirection?: 'asc' | 'desc'
+  sortField: string
+  sortDirection: 'asc' | 'desc'
   search?: string
   cashierId?: string
   memberId?: string
@@ -165,3 +168,25 @@ export interface TransactionFilterUIState {
 }
 
 export type TransactionsDialogType = 'view'
+
+// Backend transaction response structure
+export interface TransactionListResponse {
+  success: boolean
+  data: {
+    transactions: Transaction[]
+    pagination: {
+      totalCount: number
+      totalPages: number
+      currentPage: number
+      pageSize: number
+    }
+  }
+}
+
+// API response structure for single transaction
+export interface TransactionDetailResponse {
+  success: boolean
+  data: {
+    transactionDetails: TransactionDetail
+  }
+}
