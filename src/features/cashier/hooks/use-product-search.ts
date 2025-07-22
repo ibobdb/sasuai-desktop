@@ -11,19 +11,38 @@ export function useProductSearch({
 }: UseProductSearchProps): UseProductSearchReturn {
   const [showResults, setShowResults] = useState(false)
   const [lastSearchedQuery, setLastSearchedQuery] = useState('')
+  const [previousQueryLength, setPreviousQueryLength] = useState(0)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  const searchCallback = useCallback((value: string) => {
-    if (value.trim().length >= 3) {
-      setLastSearchedQuery(value)
-      setShowResults(true)
-    } else if (value.trim().length === 0) {
-      setLastSearchedQuery('')
-      setShowResults(false)
-    }
-  }, [])
+  const searchCallback = useCallback(
+    (value: string) => {
+      const currentLength = value.trim().length
+      const isDeleting = currentLength < previousQueryLength
+
+      setPreviousQueryLength(currentLength)
+
+      if (currentLength >= 3) {
+        // Only search if not deleting or if the query is different from last searched
+        if (!isDeleting || value.trim() !== lastSearchedQuery) {
+          setLastSearchedQuery(value)
+          setShowResults(true)
+        } else if (isDeleting) {
+          // If deleting and have existing results, just show them without new search
+          setShowResults(true)
+        }
+      } else if (currentLength === 0) {
+        setLastSearchedQuery('')
+        setShowResults(false)
+        setPreviousQueryLength(0)
+      } else {
+        // Less than 3 characters but not empty - hide results
+        setShowResults(false)
+      }
+    },
+    [lastSearchedQuery, previousQueryLength]
+  )
 
   const {
     value: query,
@@ -82,6 +101,7 @@ export function useProductSearch({
     setQuery('')
     setShowResults(false)
     setLastSearchedQuery('')
+    setPreviousQueryLength(0)
     inputRef.current?.focus()
   }, [setQuery])
 

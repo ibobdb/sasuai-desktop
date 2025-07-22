@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Save, Loader2, Settings, Type, CheckCircle } from 'lucide-react'
+import { Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import {
   Select,
   SelectContent,
@@ -136,231 +134,157 @@ export function PrinterSettingsTab() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="pt-6 space-y-8">
-          {/* Basic Print Settings */}
+        <CardContent className="pt-6 space-y-6">
+          {/* Printer Selection */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              <Label className="text-sm font-medium">{t('printer.basicSettings')}</Label>
-            </div>
-
-            {/* Printer Selection */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
-                <div className="lg:col-span-3 space-y-2">
-                  <Label className="text-sm">{t('printer.selectPrinter')}</Label>
-                  <Select
-                    value={settings.printerName || 'system-default'}
-                    onValueChange={(printerName) =>
-                      updateSetting(
-                        'printerName',
-                        printerName === 'system-default' ? '' : printerName
-                      )
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('printer.selectPrinterPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system-default">{t('printer.systemDefault')}</SelectItem>
-                      {availablePrinters.map((printer) => (
-                        <SelectItem key={printer} value={printer}>
-                          {printer}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-end">
-                  <Button onClick={handleTestPrint} disabled={isTestingPrint} className="w-full">
-                    {isTestingPrint ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {t('printer.testing')}
-                      </>
-                    ) : (
-                      t('printer.testPrint')
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <Badge variant="secondary" className="text-xs w-fit">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                {t('printer.active')}: {settings.printerName || t('printer.systemDefault')}
-              </Badge>
-            </div>
-
-            {/* Print Configuration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.paperSize')}</Label>
-                <Select
-                  value={settings.paperSize}
-                  onValueChange={(paperSize: PrinterSettings['paperSize']) =>
-                    updateSetting('paperSize', paperSize)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="58mm">58mm</SelectItem>
-                    <SelectItem value="57mm">57mm</SelectItem>
-                    <SelectItem value="76mm">76mm</SelectItem>
-                    <SelectItem value="78mm">78mm</SelectItem>
-                    <SelectItem value="80mm">80mm</SelectItem>
-                    <SelectItem value="44mm">44mm</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.copies')}</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={settings.copies}
-                  onChange={(e) => updateSetting('copies', parseInt(e.target.value) || 1)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.margin')}</Label>
-                <Input
-                  type="text"
-                  placeholder="0 0 0 0"
-                  value={settings.margin}
-                  onChange={(e) => updateSetting('margin', e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">{t('printer.marginHelp')}</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.timeoutPerLine')}</Label>
-                <Input
-                  type="number"
-                  min="100"
-                  max="2000"
-                  value={settings.timeOutPerLine}
-                  onChange={(e) => updateSetting('timeOutPerLine', parseInt(e.target.value) || 400)}
-                />
-                <p className="text-xs text-muted-foreground">{t('printer.timeoutHelp')}</p>
-              </div>
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.selectPrinter')}</Label>
+              <Select
+                value={settings.printerName || 'system-default'}
+                onValueChange={(printerName) =>
+                  updateSetting('printerName', printerName === 'system-default' ? '' : printerName)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('printer.selectPrinterPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system-default">{t('printer.systemDefault')}</SelectItem>
+                  {availablePrinters.map((printer) => (
+                    <SelectItem key={printer} value={printer}>
+                      {printer}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Typography Settings */}
-          <Separator />
+          {/* Main Settings Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Paper & Print Settings */}
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.paperSize')}</Label>
+              <Select
+                value={settings.paperSize}
+                onValueChange={(paperSize: PrinterSettings['paperSize']) =>
+                  updateSetting('paperSize', paperSize)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="58mm">58mm</SelectItem>
+                  <SelectItem value="57mm">57mm</SelectItem>
+                  <SelectItem value="76mm">76mm</SelectItem>
+                  <SelectItem value="78mm">78mm</SelectItem>
+                  <SelectItem value="80mm">80mm</SelectItem>
+                  <SelectItem value="44mm">44mm</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.copies')}</Label>
+              <Input
+                type="number"
+                min="1"
+                max="10"
+                value={settings.copies}
+                onChange={(e) => updateSetting('copies', parseInt(e.target.value) || 1)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.fontSize')} (px)</Label>
+              <Input
+                type="number"
+                min="8"
+                max="24"
+                value={settings.fontSize}
+                onChange={(e) => updateSetting('fontSize', parseInt(e.target.value) || 12)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.fontFamily')}</Label>
+              <Select
+                value={settings.fontFamily}
+                onValueChange={(fontFamily: string) => updateSetting('fontFamily', fontFamily)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Courier New">Courier New</SelectItem>
+                  <SelectItem value="Consolas">Consolas</SelectItem>
+                  <SelectItem value="Monaco">Monaco</SelectItem>
+                  <SelectItem value="Lucida Console">Lucida Console</SelectItem>
+                  <SelectItem value="Arial">Arial</SelectItem>
+                  <SelectItem value="Verdana">Verdana</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.lineHeight')}</Label>
+              <Input
+                type="number"
+                min="0.8"
+                max="3"
+                step="0.1"
+                value={settings.lineHeight}
+                onChange={(e) => updateSetting('lineHeight', parseFloat(e.target.value) || 1.2)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.margin')}</Label>
+              <Input
+                type="text"
+                placeholder="0 0 0 0"
+                value={settings.margin}
+                onChange={(e) => updateSetting('margin', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Print Options */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Type className="h-4 w-4" />
-              <Label className="text-sm font-medium">{t('printer.typography')}</Label>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.fontFamily')}</Label>
-                <Select
-                  value={settings.fontFamily}
-                  onValueChange={(fontFamily: string) => updateSetting('fontFamily', fontFamily)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Courier New">Courier New</SelectItem>
-                    <SelectItem value="Arial">Arial</SelectItem>
-                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                    <SelectItem value="Verdana">Verdana</SelectItem>
-                    <SelectItem value="Tahoma">Tahoma</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.fontSize')} (px)</Label>
-                <Input
-                  type="number"
-                  min="8"
-                  max="24"
-                  value={settings.fontSize}
-                  onChange={(e) => updateSetting('fontSize', parseInt(e.target.value) || 12)}
+            <Label className="text-sm font-medium">{t('printer.printOptions')}</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <Switch
+                  id="enableBold"
+                  checked={settings.enableBold}
+                  onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
                 />
+                <Label htmlFor="enableBold" className="text-sm cursor-pointer flex-1">
+                  {t('printer.enableBold')}
+                </Label>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.lineHeight')}</Label>
-                <Input
-                  type="number"
-                  min="0.8"
-                  max="3"
-                  step="0.1"
-                  value={settings.lineHeight}
-                  onChange={(e) => updateSetting('lineHeight', parseFloat(e.target.value) || 1.2)}
+              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <Switch
+                  id="autocut"
+                  checked={settings.autocut}
+                  onCheckedChange={(autocut) => updateSetting('autocut', autocut)}
                 />
+                <Label htmlFor="autocut" className="text-sm cursor-pointer flex-1">
+                  {t('printer.autocut')}
+                </Label>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm">{t('printer.encoding')}</Label>
-                <Select
-                  value={settings.encoding}
-                  onValueChange={(encoding: string) => updateSetting('encoding', encoding)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="utf-8">UTF-8</SelectItem>
-                    <SelectItem value="iso-8859-1">ISO-8859-1</SelectItem>
-                    <SelectItem value="windows-1252">Windows-1252</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Print Options */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">{t('printer.printOptions')}</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card">
-                  <Switch
-                    id="enableBold"
-                    checked={settings.enableBold}
-                    onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
-                  />
-                  <Label htmlFor="enableBold" className="text-sm cursor-pointer">
-                    {t('printer.enableBold')}
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card">
-                  <Switch
-                    id="autocut"
-                    checked={settings.autocut}
-                    onCheckedChange={(autocut) => updateSetting('autocut', autocut)}
-                  />
-                  <Label htmlFor="autocut" className="text-sm cursor-pointer">
-                    {t('printer.autocut')}
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card">
-                  <Switch
-                    id="cashdrawer"
-                    checked={settings.cashdrawer}
-                    onCheckedChange={(cashdrawer) => updateSetting('cashdrawer', cashdrawer)}
-                  />
-                  <Label htmlFor="cashdrawer" className="text-sm cursor-pointer">
-                    {t('printer.drawer')}
-                  </Label>
-                </div>
+              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <Switch
+                  id="cashdrawer"
+                  checked={settings.cashdrawer}
+                  onCheckedChange={(cashdrawer) => updateSetting('cashdrawer', cashdrawer)}
+                />
+                <Label htmlFor="cashdrawer" className="text-sm cursor-pointer flex-1">
+                  {t('printer.drawer')}
+                </Label>
               </div>
             </div>
           </div>
@@ -378,6 +302,21 @@ export function PrinterSettingsTab() {
               )}
             </div>
             <div className="flex items-center gap-3 justify-end">
+              <Button
+                onClick={handleTestPrint}
+                disabled={isTestingPrint}
+                variant="outline"
+                className="min-w-[120px]"
+              >
+                {isTestingPrint ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    {t('printer.testing')}
+                  </>
+                ) : (
+                  t('printer.testPrint')
+                )}
+              </Button>
               {hasUnsavedChanges && (
                 <Button
                   variant="outline"

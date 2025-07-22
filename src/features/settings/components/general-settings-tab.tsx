@@ -3,9 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useCallback, useState, useEffect } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -30,23 +28,6 @@ export function GeneralSettingsTab() {
   const updateLocalConfig = useCallback((updates: Partial<GeneralConfig>) => {
     setLocalSettings((prev) => ({ ...prev, ...updates }))
   }, [])
-
-  // Auto-save for application behavior changes
-  const handleAppBehaviorChange = useCallback(
-    async (updates: Partial<GeneralConfig>) => {
-      setLocalSettings((prev) => ({ ...prev, ...updates }))
-      try {
-        const success = await updateGeneralSettings(updates)
-        if (success) {
-          setIsInitialized(false) // Sync with saved data
-        }
-      } catch (error) {
-        console.error('Failed to auto-save app behavior:', error)
-        toast.error(t('general.saveError'))
-      }
-    },
-    [updateGeneralSettings, t]
-  )
 
   // Check if there are changes for each section
   const hasStoreInfoChanges =
@@ -95,38 +76,6 @@ export function GeneralSettingsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Application Behavior */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('general.applicationBehavior')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>{t('general.autoStart')}</Label>
-              <p className="text-sm text-muted-foreground">{t('general.autoStartDescription')}</p>
-            </div>
-            <Switch
-              checked={localSettings.autoStart}
-              onCheckedChange={(autoStart) => handleAppBehaviorChange({ autoStart })}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>{t('general.autoUpdate')}</Label>
-              <p className="text-sm text-muted-foreground">{t('general.autoUpdateDescription')}</p>
-            </div>
-            <Switch
-              checked={localSettings.autoUpdate}
-              onCheckedChange={(autoUpdate) => handleAppBehaviorChange({ autoUpdate })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Store Information */}
       <Card>
         <CardHeader>

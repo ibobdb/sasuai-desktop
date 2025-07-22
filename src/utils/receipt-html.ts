@@ -2,6 +2,18 @@ import { PrinterSettings, FooterInfo } from '@/types/settings'
 import { formatCurrency } from '@/utils/format'
 import { ReceiptData } from './receipt-data'
 
+function getPaperWidthMm(paperSize: string): number {
+  const widthMap: Record<string, number> = {
+    '44mm': 44,
+    '57mm': 57,
+    '58mm': 58,
+    '76mm': 76,
+    '78mm': 78,
+    '80mm': 80
+  }
+  return widthMap[paperSize] || 58
+}
+
 export function generateReceiptHTML(
   receiptData: ReceiptData,
   printerSettings?: PrinterSettings,
@@ -23,24 +35,11 @@ export function generateReceiptHTML(
     fontFamily: 'Courier New',
     lineHeight: 1.3,
     enableBold: true,
-    paperSize: '80mm' as const,
+    paperSize: '58mm' as const,
     margin: '0'
   }
 
-  // Calculate paper width
-  const getPaperWidthMm = (paperSize: string): number => {
-    const widthMap: Record<string, number> = {
-      '44mm': 44,
-      '57mm': 57,
-      '58mm': 58,
-      '76mm': 76,
-      '78mm': 78,
-      '80mm': 80
-    }
-    return widthMap[paperSize] || 80
-  }
-
-  const paperWidth = getPaperWidthMm(settings.paperSize || '80mm')
+  const paperWidth = getPaperWidthMm(settings.paperSize || '58mm')
   const maxWidth = Math.max(280, paperWidth * 3.77953) // Convert mm to px (approx)
 
   // Calculate total items
@@ -61,40 +60,51 @@ export function generateReceiptHTML(
         body {
           width: ${paperWidth}mm;
           max-width: ${maxWidth}px;
-          font-family: '${settings.fontFamily}', monospace;
+          font-family: '${settings.fontFamily}', 'Courier New', 'Consolas', 'Monaco', 'Lucida Console', monospace;
           font-size: ${settings.fontSize}px;
           line-height: ${settings.lineHeight};
           margin: 0;
           padding: 6px;
-          color: #000;
-          ${settings.enableBold ? 'font-weight: bold;' : ''}
+          color: #000000 !important;
+          background-color: #ffffff !important;
+          font-weight: ${settings.enableBold ? 'bold' : '600'};
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
         
         .header {
           text-align: center;
           margin-bottom: 10px;
-          border-bottom: 1px dashed #000;
+          border-bottom: 2px solid #000000;
           padding-bottom: 8px;
         }
         
         .store-name {
           font-size: ${settings.fontSize + 2}px;
-          font-weight: bold;
+          font-weight: 900 !important;
           margin-bottom: 3px;
+          color: #000000 !important;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
         
         .store-info {
           font-size: ${settings.fontSize - 2}px;
           margin-bottom: 2px;
+          font-weight: 600;
+          color: #000000 !important;
         }
         
         .transaction-info {
           margin-bottom: 10px;
           font-size: ${settings.fontSize - 2}px;
+          font-weight: 600;
+          color: #000000 !important;
         }
         
         .transaction-info div {
           margin-bottom: 2px;
+          font-weight: 600;
         }
         
         .items-section {
@@ -102,21 +112,27 @@ export function generateReceiptHTML(
         }
         
         .items-header {
-          border-top: 1px dashed #000;
-          border-bottom: 1px dashed #000;
-          padding: 3px 0;
-          font-weight: bold;
-          font-size: ${settings.fontSize - 2}px;
+          border-top: 2px solid #000000;
+          border-bottom: 2px solid #000000;
+          padding: 4px 0;
+          font-weight: 900 !important;
+          font-size: ${settings.fontSize - 1}px;
+          color: #000000 !important;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
         
         .item {
           margin-bottom: 5px;
-          font-size: ${settings.fontSize - 2}px;
+          font-size: ${settings.fontSize - 1}px;
+          font-weight: 600;
+          color: #000000 !important;
         }
         
         .item-name {
           word-wrap: break-word;
           margin-bottom: 2px;
+          font-weight: 700;
         }
         
         .item-row {
@@ -129,62 +145,81 @@ export function generateReceiptHTML(
           display: flex;
           justify-content: space-between;
           margin-left: 10px;
-          font-size: ${settings.fontSize - 3}px;
+          font-size: ${settings.fontSize - 2}px;
+          font-weight: 600;
         }
         
         .item-discount {
-          font-size: ${settings.fontSize - 4}px;
-          color: #000;
+          font-size: ${settings.fontSize - 3}px;
+          color: #000000 !important;
           margin-left: 10px;
+          font-weight: 600;
         }
         
         .totals {
-          border-top: 1px dashed #000;
-          padding-top: 5px;
-          font-size: ${settings.fontSize - 2}px;
+          border-top: 2px solid #000000;
+          padding-top: 8px;
+          font-size: ${settings.fontSize - 1}px;
+          font-weight: 700;
+          color: #000000 !important;
         }
         
         .total-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 3px;
+          margin-bottom: 4px;
+          font-weight: 700;
         }
         
         .total-label {
           flex: 1;
+          font-weight: 700;
         }
         
         .total-value {
           flex-shrink: 0;
           text-align: right;
+          font-weight: 700;
         }
         
         .final-total {
-          border-top: 1px solid #000;
-          font-weight: bold;
-          font-size: ${settings.fontSize - 1}px;
-          padding-top: 5px;
-          margin-top: 5px;
+          border-top: 3px double #000000;
+          border-bottom: 2px solid #000000;
+          font-weight: 900 !important;
+          font-size: ${settings.fontSize + 1}px;
+          padding: 8px 0;
+          margin-top: 8px;
+          color: #000000 !important;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
         
         .payment-info {
-          margin-top: 8px;
-          font-size: ${settings.fontSize - 2}px;
+          margin-top: 10px;
+          font-size: ${settings.fontSize - 1}px;
+          font-weight: 700;
+          color: #000000 !important;
         }
         
         .points-earned {
           text-align: center;
-          margin-top: 10px;
-          border: 1px dashed #000;
-          padding: 8px;
-          font-size: ${settings.fontSize - 3}px;
+          margin-top: 8px;
+          border: 1px solid #000000;
+          padding: 4px;
+          font-size: ${settings.fontSize - 2}px;
+          font-weight: 700;
+          color: #000000 !important;
+          background-color: #ffffff;
         }
         
         .footer {
           text-align: center;
-          margin-top: 8px;
+          margin-top: 10px;
           font-size: ${settings.fontSize - 2}px;
-          padding-top: 8px;
+          padding-top: 10px;
+          border-top: 1px solid #000000;
+          font-weight: 600;
+          color: #000000 !important;
         }
         
         .text-right {
@@ -202,6 +237,8 @@ export function generateReceiptHTML(
         <div class="store-name">${storeInfo.name}</div>
         ${storeInfo.address ? `<div class="store-info">${storeInfo.address}</div>` : ''}
         ${storeInfo.phone ? `<div class="store-info">Tel: ${storeInfo.phone}</div>` : ''}
+        ${storeInfo.email ? `<div class="store-info">Email: ${storeInfo.email}</div>` : ''}
+        ${storeInfo.website ? `<div class="store-info">${storeInfo.website}</div>` : ''}
       </div>
       
       <!-- Transaction Info -->
@@ -209,7 +246,13 @@ export function generateReceiptHTML(
         <div>ID: ${transaction.id}</div>
         <div>Tanggal: ${transaction.date}</div>
         <div>Kasir: ${transaction.cashier}</div>
-        <div>Customer: ${transaction.customer}${transaction.customerTier ? ` (${transaction.customerTier})` : ''}</div>
+        ${
+          transaction.customer &&
+          transaction.customer !== 'Guest' &&
+          transaction.customer !== 'Umum'
+            ? `<div>Customer: ${transaction.customer}${transaction.customerTier ? ` (${transaction.customerTier})` : ''}</div>`
+            : ''
+        }
         <div>Pembayaran: ${payment.method}</div>
       </div>
       
@@ -308,7 +351,7 @@ export function generateReceiptHTML(
         pointsEarned && pointsEarned > 0
           ? `
       <div class="points-earned">
-        <div style="font-weight: bold;">🌟 POIN DIPEROLEH: ${pointsEarned} Poin 🌟</div>
+        Poin Diperoleh: ${pointsEarned} Poin
       </div>
       `
           : ''

@@ -17,6 +17,7 @@ import { isDiscountValid } from '../utils/cashier-utils'
 import { generateReceiptData } from '@/utils/receipt-data'
 import { generateReceiptHTML } from '@/utils/receipt-html'
 import { transactionOperations } from '@/features/transactions/actions/transaction-operations'
+import { useSettings } from '@/features/settings/hooks/use-settings'
 
 export function useTransaction(
   cart: CartItem[],
@@ -28,6 +29,7 @@ export function useTransaction(
   memberId?: string
 ): UseTransactionReturn {
   const { t } = useTranslation(['cashier'])
+  const { settings } = useSettings()
   const { user } = useAuthStore()
   const processTransactionMutation = useProcessTransaction()
 
@@ -114,38 +116,45 @@ export function useTransaction(
 
   // Handle payment processing
   // Helper function untuk auto-print receipt
-  const printReceiptAfterTransaction = useCallback(async (transactionId: string) => {
-    try {
-      // Get transaction detail first menggunakan API yang sama seperti di data-table-row-actions
-      const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
+  const printReceiptAfterTransaction = useCallback(
+    async (transactionId: string) => {
+      try {
+        // Get transaction detail first menggunakan API yang sama seperti di data-table-row-actions
+        const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
 
-      if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
-        console.error('Failed to load transaction details for printing')
-        return
+        if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
+          console.error('Failed to load transaction details for printing')
+          return
+        }
+
+        const transactionDetail = detailResponse.data.transactionDetails
+
+        // Get printer settings
+        const printerSettingsResponse = await window.api.printer.getSettings()
+        const printerSettings = printerSettingsResponse.success
+          ? (printerSettingsResponse.data as PrinterSettings)
+          : undefined
+
+        // Generate and print receipt menggunakan fungsi yang sudah ada
+        const receiptData = generateReceiptData(transactionDetail, settings.general.storeInfo)
+        const receiptHTML = generateReceiptHTML(
+          receiptData,
+          printerSettings,
+          settings.general.footerInfo
+        )
+        const response = await window.api.printer.printHTML(receiptHTML)
+
+        if (response.success) {
+          toast.success('Receipt dicetak otomatis')
+        } else {
+          console.error('Print failed:', response.error?.message)
+        }
+      } catch (error) {
+        console.error('Failed to print receipt:', error)
       }
-
-      const transactionDetail = detailResponse.data.transactionDetails
-
-      // Get printer settings
-      const printerSettingsResponse = await window.api.printer.getSettings()
-      const printerSettings = printerSettingsResponse.success
-        ? (printerSettingsResponse.data as PrinterSettings)
-        : undefined
-
-      // Generate and print receipt menggunakan fungsi yang sudah ada
-      const receiptData = generateReceiptData(transactionDetail)
-      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
-      const response = await window.api.printer.printHTML(receiptHTML)
-
-      if (response.success) {
-        toast.success('Receipt dicetak otomatis')
-      } else {
-        console.error('Print failed:', response.error?.message)
-      }
-    } catch (error) {
-      console.error('Failed to print receipt:', error)
-    }
-  }, [])
+    },
+    [settings.general.storeInfo, settings.general.footerInfo]
+  )
 
   const handlePayment = useCallback(async (): Promise<void> => {
     if (isProcessingTransaction) return

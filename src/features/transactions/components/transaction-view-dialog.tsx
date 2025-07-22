@@ -13,6 +13,7 @@ import { getTierBadgeVariant } from '@/features/member/components/member-columns
 import { toast } from 'sonner'
 import { generateReceiptData } from '@/utils/receipt-data'
 import { generateReceiptHTML } from '@/utils/receipt-html'
+import { useSettings } from '@/features/settings/hooks/use-settings'
 
 interface Props {
   open: boolean
@@ -28,6 +29,7 @@ export function TransactionViewDialog({
   isLoadingDetail
 }: Props) {
   const { t } = useTranslation(['transactions', 'common'])
+  const { settings } = useSettings()
   const [isPrinting, setIsPrinting] = useState(false)
 
   const handlePrintReceipt = async () => {
@@ -41,8 +43,12 @@ export function TransactionViewDialog({
         ? (printerSettingsResponse.data as PrinterSettings)
         : undefined
 
-      const receiptData = generateReceiptData(transactionDetail)
-      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
+      const receiptData = generateReceiptData(transactionDetail, settings.general.storeInfo)
+      const receiptHTML = generateReceiptHTML(
+        receiptData,
+        printerSettings,
+        settings.general.footerInfo
+      )
       const response = await window.api.printer.printHTML(receiptHTML)
 
       if (response.success) {

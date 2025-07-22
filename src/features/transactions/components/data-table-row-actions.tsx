@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { generateReceiptData } from '@/utils/receipt-data'
 import { generateReceiptHTML } from '@/utils/receipt-html'
 import { transactionOperations } from '@/features/transactions/actions/transaction-operations'
+import { useSettings } from '@/features/settings/hooks/use-settings'
 
 interface DataTableRowActionsProps {
   row: Row<Transaction>
@@ -25,6 +26,7 @@ interface DataTableRowActionsProps {
 
 export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
   const { t } = useTranslation(['transactions'])
+  const { settings } = useSettings()
   const [isPrinting, setIsPrinting] = useState(false)
 
   const handleView = () => {
@@ -51,8 +53,12 @@ export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
         : undefined
 
       // Generate and print receipt
-      const receiptData = generateReceiptData(transactionDetail)
-      const receiptHTML = generateReceiptHTML(receiptData, printerSettings)
+      const receiptData = generateReceiptData(transactionDetail, settings.general.storeInfo)
+      const receiptHTML = generateReceiptHTML(
+        receiptData,
+        printerSettings,
+        settings.general.footerInfo
+      )
       const response = await window.api.printer.printHTML(receiptHTML)
 
       if (response.success) {
