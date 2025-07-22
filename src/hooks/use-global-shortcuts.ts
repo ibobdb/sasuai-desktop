@@ -10,6 +10,7 @@ interface ShortcutHandlers {
   'add-discount'?: ShortcutHandler
   'search-member'?: ShortcutHandler
   'quick-payment'?: ShortcutHandler
+  'execute-transaction'?: ShortcutHandler
   'void-transaction'?: ShortcutHandler
 }
 

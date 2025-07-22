@@ -48,6 +48,13 @@ const baseKeyboardShortcuts = [
     defaultKeys: ['Ctrl', 'Enter']
   },
   {
+    id: 'execute-transaction',
+    translationKey: 'executeTransaction',
+    keys: ['F9'],
+    action: 'execute-transaction',
+    defaultKeys: ['F9']
+  },
+  {
     id: 'void-transaction',
     translationKey: 'voidTransaction',
     keys: ['F8'],
@@ -124,6 +131,14 @@ export const DEFAULT_KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
     keys: ['Ctrl', 'Enter'],
     action: 'quick-payment',
     defaultKeys: ['Ctrl', 'Enter']
+  },
+  {
+    id: 'execute-transaction',
+    name: 'Execute Transaction',
+    description: 'Execute transaction with current payment method',
+    keys: ['F9'],
+    action: 'execute-transaction',
+    defaultKeys: ['F9']
   },
   {
     id: 'void-transaction',

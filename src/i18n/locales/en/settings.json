@@ -87,6 +87,10 @@
         "name": "Quick Payment",
         "description": "Process payment instantly with exact amount"
       },
+      "executeTransaction": {
+        "name": "Execute Transaction",
+        "description": "Execute transaction with current payment method"
+      },
       "voidTransaction": {
         "name": "Void Transaction",
         "description": "Cancel transaction and clear cart"
@@ -147,6 +151,7 @@
     "saveSuccess": "Printer settings saved successfully",
     "saveError": "Failed to save printer settings",
     "loadError": "Failed to load printer settings",
-    "getPrintersError": "Failed to get available printers"
+    "getPrintersError": "Failed to get available printers",
+    "unsavedChanges": "Unsaved changes"
   }
 }

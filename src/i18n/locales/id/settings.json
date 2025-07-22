@@ -77,6 +77,10 @@
         "name": "Pembayaran Cepat",
         "description": "Proses pembayaran langsung dengan uang pas"
       },
+      "executeTransaction": {
+        "name": "Eksekusi Transaksi",
+        "description": "Eksekusi transaksi dengan metode pembayaran saat ini"
+      },
       "voidTransaction": {
         "name": "Batalkan Transaksi",
         "description": "Batalkan transaksi dan kosongkan keranjang"
@@ -137,6 +141,7 @@
     "saveSuccess": "Pengaturan printer berhasil disimpan",
     "saveError": "Gagal menyimpan pengaturan printer",
     "loadError": "Gagal memuat pengaturan printer",
-    "getPrintersError": "Gagal mendapatkan daftar printer"
+    "getPrintersError": "Gagal mendapatkan daftar printer",
+    "unsavedChanges": "Perubahan belum disimpan"
   }
 }

@@ -17,13 +17,11 @@ import { useTransaction } from './hooks/use-transaction'
 import { useCashierCalculations } from './hooks/use-cashier-calculations'
 import { usePointsCalculation } from './hooks/use-cashier-queries'
 import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts'
-import { useShortcutFeedback } from '@/hooks/use-shortcut-feedback'
 import { Member, Discount } from '@/types/cashier'
 
 export default function Cashier() {
   const { t } = useTranslation(['cashier'])
   const productSearchRef = useRef<HTMLInputElement>(null)
-  const { showShortcutFeedback, showShortcutError } = useShortcutFeedback()
 
   // Core hooks
   const cart = useCart()
@@ -63,26 +61,18 @@ export default function Cashier() {
   const shortcutHandlers = {
     'focus-product-search': () => {
       productSearchRef.current?.focus()
-      showShortcutFeedback('focus-product-search', 'Fokus ke pencarian produk')
     },
     'open-payment-dialog': () => {
       if (cart.cart.length === 0) {
-        showShortcutError(
-          'open-payment-dialog',
-          'Keranjang kosong, tidak bisa membuka dialog pembayaran'
-        )
         return
       }
       handleOpenPaymentDialog()
-      showShortcutFeedback('open-payment-dialog', 'Dialog pembayaran dibuka')
     },
     'clear-cart': () => {
       if (cart.cart.length === 0) {
-        showShortcutError('clear-cart', 'Keranjang sudah kosong')
         return
       }
       clearAll()
-      showShortcutFeedback('clear-cart', 'Keranjang berhasil dikosongkan')
     },
     'search-member': () => {
       // Focus to member search input
@@ -91,7 +81,6 @@ export default function Cashier() {
       ) as HTMLInputElement
       if (memberSearchInput) {
         memberSearchInput.focus()
-        showShortcutFeedback('search-member', 'Fokus ke pencarian member')
       }
     },
     'add-discount': () => {
@@ -99,29 +88,38 @@ export default function Cashier() {
       const redeemInput = document.querySelector('[data-redeem-input]') as HTMLInputElement
       if (redeemInput) {
         redeemInput.focus()
-        showShortcutFeedback('add-discount', 'Fokus ke input kode diskon')
       }
     },
     'quick-payment': () => {
       if (cart.cart.length === 0) {
-        showShortcutError(
-          'quick-payment',
-          'Keranjang kosong, tidak bisa melakukan pembayaran cepat'
-        )
         return
       }
       // Auto set payment amount to total and open dialog
       transaction.setPaymentAmount(calculations.total)
       handleOpenPaymentDialog()
-      showShortcutFeedback('quick-payment', 'Pembayaran cepat dengan uang pas')
+    },
+    'execute-transaction': () => {
+      if (cart.cart.length === 0) {
+        return
+      }
+
+      // Check if payment dialog is open
+      if (transaction.paymentDialogOpen) {
+        // Execute payment if dialog is open and payment is valid
+        if (transaction.paymentAmount >= calculations.total) {
+          transaction.handlePayment()
+        }
+      } else {
+        // Open payment dialog with current total
+        transaction.setPaymentAmount(calculations.total)
+        handleOpenPaymentDialog()
+      }
     },
     'void-transaction': () => {
       if (cart.cart.length === 0) {
-        showShortcutError('void-transaction', 'Tidak ada transaksi untuk dibatalkan')
         return
       }
       clearAll()
-      showShortcutFeedback('void-transaction', 'Transaksi berhasil dibatalkan')
     }
   }
 
