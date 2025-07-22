@@ -1,31 +1,50 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { KeyboardShortcut, PrinterConfig, GeneralConfig, SettingsConfig } from '@/types/settings'
+import {
+  KeyboardShortcut,
+  PrinterSettings,
+  GeneralConfig,
+  SettingsConfig,
+  StoreInfo,
+  FooterInfo
+} from '@/types/settings'
 import { DEFAULT_KEYBOARD_SHORTCUTS, getKeyboardShortcuts } from '@/config/keyboard-shortcuts'
+
+const defaultStoreInfo: StoreInfo = {
+  name: 'Sasuai Store',
+  address: 'Jl. Contoh No. 123, Jakarta',
+  phone: '021-12345678',
+  email: 'info@sasuaistore.com',
+  website: 'www.sasuaistore.com'
+}
+
+const defaultFooterInfo: FooterInfo = {
+  thankYouMessage: 'Terima kasih atas kunjungan Anda!',
+  returnMessage: 'Selamat berbelanja kembali'
+}
 
 const defaultGeneralConfig: GeneralConfig = {
   language: 'id',
   theme: 'system',
   autoStart: false,
-  minimizeToTray: true,
-  autoUpdate: true
+  autoUpdate: true,
+  storeInfo: defaultStoreInfo,
+  footerInfo: defaultFooterInfo
 }
 
-const defaultPrinterConfig: PrinterConfig = {
-  id: 'default-printer',
-  name: 'Default Printer',
-  type: 'thermal',
-  connection: 'usb',
-  settings: {
-    paperWidth: 80,
-    dpi: 203,
-    characterSet: 'utf-8',
-    autocut: true,
-    buzzer: false,
-    drawer: false
-  },
-  isDefault: true,
-  isActive: false
+const defaultPrinterConfig: PrinterSettings = {
+  printerName: '',
+  paperSize: '58mm',
+  margin: '0 0 0 0',
+  copies: 1,
+  timeOutPerLine: 400,
+  fontSize: 12,
+  fontFamily: 'Courier New',
+  lineHeight: 1.2,
+  enableBold: true,
+  autocut: false,
+  cashdrawer: false,
+  encoding: 'utf-8'
 }
 
 const defaultSettings: SettingsConfig = {
@@ -107,7 +126,7 @@ export function useSettings() {
   }, [])
 
   const updateGeneralSettings = useCallback(
-    async (updates: Partial<GeneralConfig>): Promise<boolean> => {
+    async (updates: Partial<GeneralConfig> | GeneralConfig): Promise<boolean> => {
       const newSettings = {
         ...settings,
         general: { ...settings.general, ...updates }
@@ -157,7 +176,7 @@ export function useSettings() {
   }, [settings.keyboard, updateKeyboardShortcuts])
 
   const updatePrinterSettings = useCallback(
-    async (updates: Partial<PrinterConfig>): Promise<boolean> => {
+    async (updates: Partial<PrinterSettings>): Promise<boolean> => {
       const newSettings = {
         ...settings,
         printer: { ...settings.printer, ...updates }

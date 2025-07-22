@@ -1,12 +1,21 @@
-import { PrinterSettings } from '@/types/settings'
+import { PrinterSettings, FooterInfo } from '@/types/settings'
 import { formatCurrency } from '@/utils/format'
 import { ReceiptData } from './receipt-data'
 
 export function generateReceiptHTML(
   receiptData: ReceiptData,
-  printerSettings?: PrinterSettings
+  printerSettings?: PrinterSettings,
+  footerInfo?: FooterInfo
 ): string {
   const { storeInfo, transaction, items, pricing, payment, pointsEarned } = receiptData
+
+  // Use footer info or defaults
+  const defaultFooterInfo: FooterInfo = {
+    thankYouMessage: 'Terima kasih atas kunjungan Anda!',
+    returnMessage: 'Selamat berbelanja kembali'
+  }
+
+  const footer = footerInfo || defaultFooterInfo
 
   // Use printer settings or defaults
   const settings = printerSettings || {
@@ -307,8 +316,8 @@ export function generateReceiptHTML(
       
       <!-- Footer -->
       <div class="footer">
-        <div>Terima kasih atas kunjungan Anda!</div>
-        <div>Selamat berbelanja kembali</div>
+        <div>${footer.thankYouMessage}</div>
+        <div>${footer.returnMessage}</div>
         <div style="margin-top: 5px;">Powered by samunu x ibobdb</div>
       </div>
     </body>

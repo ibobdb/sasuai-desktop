@@ -1,11 +1,5 @@
 import { TransactionDetail } from '@/types/transactions'
-
-// Store info constants to avoid duplication
-const DEFAULT_STORE_INFO = {
-  name: 'Sasuai Store',
-  address: 'Jl. Contoh No. 123, Jakarta',
-  phone: '021-12345678'
-}
+import { StoreInfo } from '@/types/settings'
 
 // Helper function to format payment method
 function formatPaymentMethod(paymentMethod?: string): string {
@@ -14,11 +8,7 @@ function formatPaymentMethod(paymentMethod?: string): string {
 }
 
 export interface ReceiptData {
-  storeInfo: {
-    name: string
-    address?: string
-    phone?: string
-  }
+  storeInfo: StoreInfo
   transaction: {
     id: string
     date: string
@@ -51,7 +41,10 @@ export interface ReceiptData {
   pointsEarned?: number
 }
 
-export function generateReceiptData(transactionDetail: TransactionDetail): ReceiptData {
+export function generateReceiptData(
+  transactionDetail: TransactionDetail,
+  storeInfo?: StoreInfo
+): ReceiptData {
   const { pricing, cashier, member, items = [], payment } = transactionDetail
   const paymentMethod = payment?.method || transactionDetail.paymentMethod
 
@@ -65,8 +58,12 @@ export function generateReceiptData(transactionDetail: TransactionDetail): Recei
     minute: '2-digit'
   })
 
-  // Store info - you may want to get this from settings
-  const storeInfo = DEFAULT_STORE_INFO
+  // Use provided store info or default
+  const receiptStoreInfo: StoreInfo = storeInfo || {
+    name: 'Sasuai Store',
+    address: 'Jl. Contoh No. 123, Jakarta',
+    phone: '021-12345678'
+  }
 
   // Items
   const receiptItems = items.map((item) => ({
@@ -99,7 +96,7 @@ export function generateReceiptData(transactionDetail: TransactionDetail): Recei
   }
 
   return {
-    storeInfo,
+    storeInfo: receiptStoreInfo,
     transaction: {
       id: transactionDetail.tranId || 'NO-TRANS',
       date: formattedDate,

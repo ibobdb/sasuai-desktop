@@ -25,6 +25,19 @@ export interface PrinterSettings {
   encoding: string
 }
 
+export interface StoreInfo {
+  name: string
+  address: string
+  phone: string
+  email?: string
+  website?: string
+}
+
+export interface FooterInfo {
+  thankYouMessage: string
+  returnMessage: string
+}
+
 export interface PrintReceipt {
   id: string
   storeName: string
@@ -52,8 +65,9 @@ export interface GeneralConfig {
   language: string
   theme: 'light' | 'dark' | 'system'
   autoStart: boolean
-  minimizeToTray: boolean
   autoUpdate: boolean
+  storeInfo: StoreInfo
+  footerInfo: FooterInfo
 }
 
 export interface SettingsConfig {
