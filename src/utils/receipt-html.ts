@@ -285,10 +285,9 @@ export function generateReceiptHTML(
         
         .footer {
           text-align: center;
-          margin-top: 10px;
+          margin-top: 5px;
           font-size: ${settings.fontSize - 2}px;
-          padding-top: 10px;
-          border-top: 1px solid #000000;
+          padding-top: 5px;
           font-weight: 600;
           color: #000000 !important;
         }

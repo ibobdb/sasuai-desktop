@@ -1,4 +1,4 @@
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, UserPlus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'

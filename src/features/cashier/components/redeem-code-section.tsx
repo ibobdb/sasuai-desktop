@@ -1,4 +1,4 @@
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ticket, X, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'

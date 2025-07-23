@@ -11,7 +11,7 @@ import { CheckCircle2, XCircle, Receipt, CreditCard, ArrowRight, Copy } from 'lu
 import { Button } from '@/components/ui/button'
 import { Member, PaymentMethod } from '@/types/cashier'
 import { cn } from '@/lib/utils'
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { paymentMethods } from '@/lib/payment-methods'
 
 interface PaymentStatusDialogProps {
