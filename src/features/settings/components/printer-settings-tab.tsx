@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Save, Loader2 } from 'lucide-react'
@@ -27,22 +27,17 @@ export function PrinterSettingsTab() {
   const [settings, setSettings] = useState<PrinterSettings>({
     printerName: '',
     paperSize: '58mm',
-    margin: '0 0 0 0',
+    margin: '0',
     copies: 1,
-    timeOutPerLine: 400,
     fontSize: 12,
     fontFamily: 'Courier New',
     lineHeight: 1.2,
-    enableBold: true,
-    autocut: false,
-    cashdrawer: false,
-    encoding: 'utf-8'
+    enableBold: true
   })
   const [originalSettings, setOriginalSettings] = useState<PrinterSettings>(settings)
   const [availablePrinters, setAvailablePrinters] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingPrint, setIsTestingPrint] = useState(false)
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const settingsHash = useMemo(() => {
     return Object.entries(settings)
@@ -70,9 +65,7 @@ export function PrinterSettingsTab() {
         setOriginalSettings(response.data)
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load printer settings:', error)
-      }
+      console.error('Failed to load printer settings:', error)
       toast.error(t('printer.loadError'))
     }
   }, [t])
@@ -86,9 +79,7 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.getPrintersError'))
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to get printers:', error)
-      }
+      console.error('Failed to get printers:', error)
       toast.error(t('printer.getPrintersError'))
     }
   }, [t])
@@ -98,62 +89,38 @@ export function PrinterSettingsTab() {
     loadPrinters()
   }, [loadSettings, loadPrinters])
 
-  const debouncedSave = useCallback(
+  const saveSettings = useCallback(
     async (newSettings: PrinterSettings) => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-
-      saveTimeoutRef.current = setTimeout(async () => {
-        setIsSaving(true)
-        try {
-          const response: PrinterResponse = await window.api.printer.saveSettings(newSettings)
-          if (response.success) {
-            setOriginalSettings(newSettings)
-            toast.success(t('printer.saveSuccess'))
-          } else {
-            throw new Error(response.error?.message || t('printer.saveError'))
-          }
-        } catch (error) {
-          if (import.meta.env.DEV) {
-            console.error('Failed to save printer settings:', error)
-          }
-          toast.error(t('printer.saveError'))
-        } finally {
-          setIsSaving(false)
+      setIsSaving(true)
+      try {
+        const response: PrinterResponse = await window.api.printer.saveSettings(newSettings)
+        if (response.success) {
+          setOriginalSettings(newSettings)
+          toast.success(t('printer.saveSuccess'))
+        } else {
+          throw new Error(response.error?.message || t('printer.saveError'))
         }
-      }, 1000)
+      } catch (error) {
+        console.error('Failed to save printer settings:', error)
+        toast.error(t('printer.saveError'))
+      } finally {
+        setIsSaving(false)
+      }
     },
     [t]
   )
 
-  const saveSettings = useCallback(
-    async (newSettings: PrinterSettings) => {
-      await debouncedSave(newSettings)
-    },
-    [debouncedSave]
-  )
-
   const updateSetting = useCallback(
     <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
-      setSettings((prevSettings) => {
-        const newSettings = { ...prevSettings, [key]: value }
-        if (saveTimeoutRef.current) {
-          clearTimeout(saveTimeoutRef.current)
-        }
-        saveTimeoutRef.current = setTimeout(() => {
-          debouncedSave(newSettings)
-        }, 500)
-        return newSettings
-      })
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        [key]: value
+      }))
     },
-    [debouncedSave]
+    []
   )
 
   const handleSaveSettings = useCallback(async () => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
     await saveSettings(settings)
   }, [saveSettings, settings])
 
@@ -167,9 +134,7 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.testPrintError'))
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Test print failed:', error)
-      }
+      console.error('Test print failed:', error)
       toast.error(error instanceof Error ? error.message : t('printer.testPrintError'))
     } finally {
       setIsTestingPrint(false)
@@ -271,6 +236,16 @@ export function PrinterSettingsTab() {
             </div>
 
             <div className="space-y-2">
+              <Label className="text-sm">{t('printer.margin')} (mm)</Label>
+              <Input
+                type="text"
+                placeholder="0"
+                value={settings.margin}
+                onChange={(e) => updateSetting('margin', e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label className="text-sm">{t('printer.fontSize')} (px)</Label>
               <Input
                 type="number"
@@ -311,54 +286,20 @@ export function PrinterSettingsTab() {
                 onChange={(e) => updateSetting('lineHeight', parseFloat(e.target.value) || 1.2)}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm">{t('printer.margin')}</Label>
-              <Input
-                type="text"
-                placeholder="0 0 0 0"
-                value={settings.margin}
-                onChange={(e) => updateSetting('margin', e.target.value)}
-              />
-            </div>
           </div>
 
           {/* Print Options */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="text-sm font-medium">{t('printer.printOptions')}</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="enableBold"
-                  checked={settings.enableBold}
-                  onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
-                />
-                <Label htmlFor="enableBold" className="text-sm cursor-pointer flex-1">
-                  {t('printer.enableBold')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="autocut"
-                  checked={settings.autocut}
-                  onCheckedChange={(autocut) => updateSetting('autocut', autocut)}
-                />
-                <Label htmlFor="autocut" className="text-sm cursor-pointer flex-1">
-                  {t('printer.autocut')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="cashdrawer"
-                  checked={settings.cashdrawer}
-                  onCheckedChange={(cashdrawer) => updateSetting('cashdrawer', cashdrawer)}
-                />
-                <Label htmlFor="cashdrawer" className="text-sm cursor-pointer flex-1">
-                  {t('printer.drawer')}
-                </Label>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="enableBold" className="text-sm cursor-pointer">
+                {t('printer.enableBold')}
+              </Label>
+              <Switch
+                id="enableBold"
+                checked={settings.enableBold}
+                onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
+              />
             </div>
           </div>
 
@@ -394,9 +335,6 @@ export function PrinterSettingsTab() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    if (saveTimeoutRef.current) {
-                      clearTimeout(saveTimeoutRef.current)
-                    }
                     setSettings(originalSettings)
                     toast.success(t('printer.changesDiscarded'))
                   }}

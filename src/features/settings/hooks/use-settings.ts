@@ -35,16 +35,12 @@ const defaultGeneralConfig: GeneralConfig = {
 const defaultPrinterConfig: PrinterSettings = {
   printerName: '',
   paperSize: '58mm',
-  margin: '0 0 0 0',
+  margin: '0',
   copies: 1,
-  timeOutPerLine: 400,
   fontSize: 12,
   fontFamily: 'Courier New',
   lineHeight: 1.2,
-  enableBold: true,
-  autocut: false,
-  cashdrawer: false,
-  encoding: 'utf-8'
+  enableBold: true
 }
 
 const defaultSettings: SettingsConfig = {

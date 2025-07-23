@@ -5,7 +5,7 @@ import { createWindow, getMainWindow } from './window'
 import { setupAutoUpdater } from './updater'
 import { AUTH_STORE_TOKEN_KEY, AUTH_STORE_USER_KEY } from './constants'
 import { CookieService } from './services/cookie-service'
-import { PrinterService } from './services/printer-service'
+import { setupPrinterHandlers } from './handlers/printer-handlers'
 import { createApiClient } from './api-client'
 
 export interface StoreSchema {
@@ -25,7 +25,6 @@ export const getTypedStore = (): Store<StoreSchema> => {
 
 class ElectronApp {
   private cookieService: CookieService | null = null
-  private printerService: PrinterService | null = null
   private apiClient: any = null
   private requestCache = new Map<string, { data: any; timestamp: number }>()
   private readonly CACHE_DURATION = 30000
@@ -52,7 +51,6 @@ class ElectronApp {
 
   private setupServices() {
     this.cookieService = new CookieService(persistentSession)
-    this.printerService = new PrinterService()
     this.apiClient = createApiClient()
   }
 
@@ -62,7 +60,7 @@ class ElectronApp {
     this.setupAppHandlers()
     this.setupWindowHandlers()
     this.setupCookieHandlers()
-    this.setupPrinterHandlers()
+    setupPrinterHandlers() // Use dedicated printer handlers
     this.setupApiHandlers()
   }
 
@@ -252,80 +250,6 @@ class ElectronApp {
 
     ipcMain.handle('cookies:clearAuth', async () => {
       return await this.cookieService!.clearAuthCookies()
-    })
-  }
-
-  private setupPrinterHandlers() {
-    if (!this.printerService) return
-
-    ipcMain.handle('printer:get-printers', async () => {
-      try {
-        const printers = await this.printerService!.getAvailablePrinters()
-        return { success: true, data: printers }
-      } catch (error) {
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to get printers'
-          }
-        }
-      }
-    })
-
-    ipcMain.handle('printer:get-settings', () => {
-      try {
-        const settings = this.printerService!.getSettings()
-        return { success: true, data: settings }
-      } catch (error) {
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to get printer settings'
-          }
-        }
-      }
-    })
-
-    ipcMain.handle('printer:save-settings', (_event, settings) => {
-      try {
-        this.printerService!.saveSettings(settings)
-        return { success: true }
-      } catch (error) {
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to save printer settings'
-          }
-        }
-      }
-    })
-
-    ipcMain.handle('printer:test-print', async () => {
-      try {
-        const result = await this.printerService!.testPrint()
-        return { success: true, data: result }
-      } catch (error) {
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to test print'
-          }
-        }
-      }
-    })
-
-    ipcMain.handle('printer:print-html', async (_event, htmlContent) => {
-      try {
-        const result = await this.printerService!.printHTML(htmlContent)
-        return { success: true, data: result }
-      } catch (error) {
-        return {
-          success: false,
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to print HTML content'
-          }
-        }
-      }
     })
   }
 

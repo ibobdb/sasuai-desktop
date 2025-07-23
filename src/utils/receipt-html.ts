@@ -2,6 +2,7 @@ import { PrinterSettings, FooterInfo } from '@/types/settings'
 import { formatCurrency } from '@/utils/format'
 import { ReceiptData } from './receipt-data'
 
+// Inline utility function
 function getPaperWidthMm(paperSize: string): number {
   const widthMap: Record<string, number> = {
     '44mm': 44,
@@ -42,6 +43,64 @@ export function generateReceiptHTML(
   const paperWidth = getPaperWidthMm(settings.paperSize || '58mm')
   const maxWidth = Math.max(280, paperWidth * 3.77953) // Convert mm to px (approx)
 
+  // Parse margin setting untuk CSS @page
+  const parseMarginForCSS = (marginString: string): string => {
+    if (
+      !marginString ||
+      marginString.trim() === '' ||
+      marginString === '0' ||
+      marginString === '0 0 0 0'
+    ) {
+      return '0mm'
+    }
+
+    const margins = marginString.trim().split(/\s+/)
+
+    if (margins.length === 1) {
+      return `${margins[0]}mm`
+    } else if (margins.length === 2) {
+      return `${margins[0]}mm ${margins[1]}mm`
+    } else if (margins.length === 4) {
+      return `${margins[0]}mm ${margins[1]}mm ${margins[2]}mm ${margins[3]}mm`
+    }
+
+    return '0mm'
+  }
+
+  // Parse margin setting untuk body padding (setengah dari margin)
+  const parseBodyPadding = (marginString: string): string => {
+    if (
+      !marginString ||
+      marginString.trim() === '' ||
+      marginString === '0' ||
+      marginString === '0 0 0 0'
+    ) {
+      return '1mm' // minimal padding untuk readability
+    }
+
+    const margins = marginString.trim().split(/\s+/)
+
+    if (margins.length === 1) {
+      const val = Math.max(0.5, parseFloat(margins[0]) / 2)
+      return `${val}mm`
+    } else if (margins.length === 2) {
+      const vertical = Math.max(0.5, parseFloat(margins[0]) / 2)
+      const horizontal = Math.max(0.5, parseFloat(margins[1]) / 2)
+      return `${vertical}mm ${horizontal}mm`
+    } else if (margins.length === 4) {
+      const top = Math.max(0.5, parseFloat(margins[0]) / 2)
+      const right = Math.max(0.5, parseFloat(margins[1]) / 2)
+      const bottom = Math.max(0.5, parseFloat(margins[2]) / 2)
+      const left = Math.max(0.5, parseFloat(margins[3]) / 2)
+      return `${top}mm ${right}mm ${bottom}mm ${left}mm`
+    }
+
+    return '1mm'
+  }
+
+  const cssMargin = parseMarginForCSS(settings.margin || '0')
+  const bodyPadding = parseBodyPadding(settings.margin || '0')
+
   // Calculate total items
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
@@ -53,8 +112,19 @@ export function generateReceiptHTML(
       <title>Receipt</title>
       <style>
         @page {
-          margin: ${settings.margin || '0'};
+          margin: ${cssMargin};
           size: ${paperWidth}mm auto;
+        }
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
         }
         
         body {
@@ -64,12 +134,13 @@ export function generateReceiptHTML(
           font-size: ${settings.fontSize}px;
           line-height: ${settings.lineHeight};
           margin: 0;
-          padding: 6px;
+          padding: ${bodyPadding};
           color: #000000 !important;
           background-color: #ffffff !important;
           font-weight: ${settings.enableBold ? 'bold' : '600'};
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
+          overflow: hidden;
         }
         
         .header {
@@ -144,7 +215,7 @@ export function generateReceiptHTML(
         .item-details {
           display: flex;
           justify-content: space-between;
-          margin-left: 10px;
+          margin-left: 5px; /* Reduced margin untuk memaksimalkan area */
           font-size: ${settings.fontSize - 2}px;
           font-weight: 600;
         }
@@ -152,7 +223,7 @@ export function generateReceiptHTML(
         .item-discount {
           font-size: ${settings.fontSize - 3}px;
           color: #000000 !important;
-          margin-left: 10px;
+          margin-left: 5px; /* Reduced margin untuk memaksimalkan area */
           font-weight: 600;
         }
         
