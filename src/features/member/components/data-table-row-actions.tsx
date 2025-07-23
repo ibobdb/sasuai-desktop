@@ -1,6 +1,6 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { User, Pencil, Trash2 } from 'lucide-react'
@@ -55,7 +55,8 @@ export function DataTableRowActions({ member, onEdit, onView }: DataTableRowActi
       }
     },
     onError: (error) => {
-      console.error('Error deleting member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error deleting member:', error)
       toast.error(t('member.messages.deleteError'), {
         description: t('member.messages.deleteErrorDescription')
       })

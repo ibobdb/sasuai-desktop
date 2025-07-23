@@ -156,5 +156,6 @@ export const formatCurrency = (value: number): string => {
 }
 
 export const showValidationError = (message: string, description?: string) => {
-  console.error('Validation Error:', { message, description })
+  if (import.meta.env.DEV)
+    if (import.meta.env.DEV) console.error('Validation Error:', { message, description })
 }

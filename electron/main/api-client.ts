@@ -8,6 +8,9 @@ class ApiClient {
   private instance: AxiosInstance
   private deviceInfo: any = null
   private sessionMetadata: any = null
+  private authToken: string | null = null
+  private lastAuthCheck: number = 0
+  private readonly AUTH_CACHE_DURATION = 30000 // 30 seconds
 
   constructor() {
     this.instance = axios.create({
@@ -15,22 +18,37 @@ class ApiClient {
       withCredentials: true
     })
 
+    this.initializeDeviceInfoSync()
     this.setupInterceptors()
   }
 
-  private async initializeDeviceInfo() {
+  private async initializeDeviceInfoSync() {
     if (!this.deviceInfo || !this.sessionMetadata) {
-      this.deviceInfo = await getDeviceInfo()
-      this.sessionMetadata = await getSessionMetadata()
+      try {
+        this.deviceInfo = await getDeviceInfo()
+        this.sessionMetadata = await getSessionMetadata()
+      } catch (error) {
+        console.error('Failed to initialize device info:', error)
+        this.deviceInfo = { userAgent: 'Unknown' }
+        this.sessionMetadata = {}
+      }
     }
   }
 
   private async getAuthToken(): Promise<string | null> {
+    const now = Date.now()
+
+    if (this.authToken && now - this.lastAuthCheck < this.AUTH_CACHE_DURATION) {
+      return this.authToken
+    }
+
     try {
       const cookies = await persistentSession.cookies.get({ name: AUTH_COOKIE_NAME })
 
       if (cookies.length > 0) {
-        return cookies[0].value
+        this.authToken = cookies[0].value
+        this.lastAuthCheck = now
+        return this.authToken
       }
 
       const typedStore = getTypedStore()
@@ -38,12 +56,18 @@ class ApiClient {
 
       if (storeToken) {
         await this.restoreCookieFromStore(storeToken)
-        return storeToken
+        this.authToken = storeToken
+        this.lastAuthCheck = now
+        return this.authToken
       }
 
+      this.authToken = null
+      this.lastAuthCheck = now
       return null
     } catch (error) {
       console.error('Failed to get auth token:', error)
+      this.authToken = null
+      this.lastAuthCheck = now
       return null
     }
   }
@@ -68,7 +92,9 @@ class ApiClient {
     this.instance.interceptors.request.use(
       async (config) => {
         try {
-          await this.initializeDeviceInfo()
+          if (!this.deviceInfo || !this.sessionMetadata) {
+            await this.initializeDeviceInfoSync()
+          }
 
           config.headers = config.headers || {}
           config.headers['User-Agent'] = this.deviceInfo.userAgent
@@ -101,6 +127,9 @@ class ApiClient {
 
   private async clearAuthData() {
     try {
+      this.authToken = null
+      this.lastAuthCheck = 0
+
       const typedStore = getTypedStore()
       typedStore.delete(AUTH_STORE_TOKEN_KEY)
 

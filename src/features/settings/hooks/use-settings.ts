@@ -97,7 +97,9 @@ export function useSettings() {
         printer: { ...defaultPrinterConfig, ...storedPrinter }
       })
     } catch (error) {
-      console.error('Failed to load settings from Electron Store:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV)
+          console.error('Failed to load settings from Electron Store:', error)
       setSettings(defaultSettings)
     } finally {
       setLoading(false)
@@ -120,7 +122,8 @@ export function useSettings() {
       setSettings(newSettings)
       return true
     } catch (error) {
-      console.error('Failed to save settings to Electron Store:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to save settings to Electron Store:', error)
       return false
     }
   }, [])
@@ -206,7 +209,8 @@ export function useSettings() {
 
       return true
     } catch (error) {
-      console.error('Failed to export settings:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to export settings:', error)
       return false
     }
   }, [settings])
@@ -227,7 +231,8 @@ export function useSettings() {
               resolve(false)
             }
           } catch (error) {
-            console.error('Failed to import settings:', error)
+            if (import.meta.env.DEV)
+              if (import.meta.env.DEV) console.error('Failed to import settings:', error)
             resolve(false)
           }
         }

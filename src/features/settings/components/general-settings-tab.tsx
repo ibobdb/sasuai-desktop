@@ -48,7 +48,8 @@ export function GeneralSettingsTab() {
         toast.error(t('general.saveError'))
       }
     } catch (error) {
-      console.error('Failed to update store info:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to update store info:', error)
       toast.error(t('general.saveError'))
     } finally {
       setIsSaving(false)
@@ -67,7 +68,8 @@ export function GeneralSettingsTab() {
         toast.error(t('general.saveError'))
       }
     } catch (error) {
-      console.error('Failed to update footer info:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to update footer info:', error)
       toast.error(t('general.saveError'))
     } finally {
       setIsSaving(false)

@@ -56,7 +56,8 @@ export function PrinterSettingsTab() {
         setOriginalSettings(response.data)
       }
     } catch (error) {
-      console.error('Failed to load printer settings:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to load printer settings:', error)
       toast.error(t('printer.loadError'))
     }
   }, [t])
@@ -70,7 +71,8 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.getPrintersError'))
       }
     } catch (error) {
-      console.error('Failed to get printers:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to get printers:', error)
       toast.error(t('printer.getPrintersError'))
     }
   }, [t])
@@ -94,7 +96,8 @@ export function PrinterSettingsTab() {
           throw new Error(response.error?.message || t('printer.saveError'))
         }
       } catch (error) {
-        console.error('Failed to save printer settings:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to save printer settings:', error)
         toast.error(t('printer.saveError'))
       } finally {
         setIsSaving(false)
@@ -124,7 +127,7 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.testPrintError'))
       }
     } catch (error) {
-      console.error('Test print failed:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Test print failed:', error)
       toast.error(error instanceof Error ? error.message : t('printer.testPrintError'))
     } finally {
       setIsTestingPrint(false)

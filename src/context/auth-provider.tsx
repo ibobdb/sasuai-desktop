@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, memo } from 'react'
 import { useNavigate, useMatches } from '@tanstack/react-router'
 import { useAuth } from '@/stores/authStore'
 
@@ -20,7 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate({ to: '/sign-in', replace: true })
       }
     } catch (error) {
-      console.error('Failed to initialize auth:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to initialize auth:', error)
       if (isAuthenticatedRoute) {
         navigate({ to: '/sign-in', replace: true })
       }

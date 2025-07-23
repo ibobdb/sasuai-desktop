@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
@@ -19,7 +19,7 @@ import { usePointsCalculation } from './hooks/use-cashier-queries'
 import { useGlobalShortcuts } from '@/hooks/use-global-shortcuts'
 import { Member, Discount } from '@/types/cashier'
 
-export default function Cashier() {
+function Cashier() {
   const { t } = useTranslation(['cashier'])
   const productSearchRef = useRef<HTMLInputElement>(null)
 
@@ -297,3 +297,5 @@ export default function Cashier() {
     </Main>
   )
 }
+
+export default memo(Cashier)

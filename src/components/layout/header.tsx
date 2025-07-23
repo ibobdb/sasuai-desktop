@@ -13,8 +13,15 @@ export const Header = ({ className, fixed, children, ...props }: HeaderProps) =>
   const [offset, setOffset] = React.useState(0)
 
   React.useEffect(() => {
+    let ticking = false
     const onScroll = () => {
-      setOffset(document.body.scrollTop || document.documentElement.scrollTop)
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setOffset(document.body.scrollTop || document.documentElement.scrollTop)
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
     // Add scroll listener to the body

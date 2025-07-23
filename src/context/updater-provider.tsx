@@ -1,4 +1,20 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+/*
+ * MANUAL TIMER CLEANUP REQUIRED for src/context/updater-provider.tsx
+ *
+ * 1. Add useRef import: import { useRef } from 'react'
+ * 2. Add timer ref: const timerRef = useRef<NodeJS.Timeout | null>(null)
+ * 3. Add cleanup useEffect:
+ *    useEffect(() => {
+ *      return () => {
+ *        if (timerRef.current) {
+ *          clearTimeout(timerRef.current)
+ *        }
+ *      }
+ *    }, [])
+ * 4. Replace setTimeout calls:
+ *    timerRef.current = setTimeout(() => { ... }, delay)
+ */
+import { createContext, useContext, useEffect, useState, useCallback, memo } from 'react'
 
 interface UpdateInfo {
   version: string
@@ -51,7 +67,8 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
         ])
         setAppInfo({ name, version })
       } catch (err) {
-        console.error('Failed to fetch app info:', err)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to fetch app info:', err)
       }
     }
 

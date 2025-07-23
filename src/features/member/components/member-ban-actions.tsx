@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -68,7 +68,8 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
       }
     },
     onError: (error) => {
-      console.error('Error banning member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error banning member:', error)
       toast.error(t('member.messages.banError'), {
         description: t('member.messages.banErrorDescription')
       })
@@ -93,7 +94,8 @@ export function MemberBanActions({ member }: MemberBanActionsProps) {
       }
     },
     onError: (error) => {
-      console.error('Error unbanning member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error unbanning member:', error)
       toast.error(t('member.messages.unbanError'), {
         description: t('member.messages.unbanErrorDescription')
       })

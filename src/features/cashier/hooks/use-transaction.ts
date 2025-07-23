@@ -123,7 +123,9 @@ export function useTransaction(
         const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
 
         if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
-          console.error('Failed to load transaction details for printing')
+          if (import.meta.env.DEV)
+            if (import.meta.env.DEV)
+              console.error('Failed to load transaction details for printing')
           return
         }
 
@@ -147,10 +149,12 @@ export function useTransaction(
         if (response.success) {
           toast.success('Receipt dicetak otomatis')
         } else {
-          console.error('Print failed:', response.error?.message)
+          if (import.meta.env.DEV)
+            if (import.meta.env.DEV) console.error('Print failed:', response.error?.message)
         }
       } catch (error) {
-        console.error('Failed to print receipt:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to print receipt:', error)
       }
     },
     [settings.general.storeInfo, settings.general.footerInfo]
@@ -222,7 +226,7 @@ export function useTransaction(
       setPaymentDialogOpen(false)
       setPaymentStatusDialogOpen(true)
     } catch (error) {
-      console.error('Transaction error:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Transaction error:', error)
       setPaymentStatus({
         success: false,
         errorMessage:

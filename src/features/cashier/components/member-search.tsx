@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Loader2, UserPlus, X, Ticket } from 'lucide-react'
 import { Input } from '@/components/ui/input'

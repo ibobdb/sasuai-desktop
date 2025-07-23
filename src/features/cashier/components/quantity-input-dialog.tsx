@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -73,7 +73,8 @@ export function QuantityInputDialog({
       await onConfirm(product, quantity)
       onOpenChange(false)
     } catch (error) {
-      console.error('Error confirming quantity:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error confirming quantity:', error)
     } finally {
       setIsLoading(false)
     }

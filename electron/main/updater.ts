@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
 const REPO_OWNER = 'ibobdb'
@@ -76,14 +76,6 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
   ipcMain.handle('update:install', () => {
     autoUpdater.quitAndInstall(false, true)
     return true
-  })
-
-  ipcMain.handle('app:getVersion', () => {
-    return app.getVersion()
-  })
-
-  ipcMain.handle('app:getName', () => {
-    return app.getName()
   })
 
   setTimeout(() => {

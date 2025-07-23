@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Minus,
@@ -45,24 +45,30 @@ export default function CartList({
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
 
-  const handleSelectItem = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedItems)
-    if (checked) {
-      newSelected.add(id)
-    } else {
-      newSelected.delete(id)
-    }
-    setSelectedItems(newSelected)
-  }
+  const handleSelectItem = useCallback(
+    (id: string, checked: boolean) => {
+      const newSelected = new Set(selectedItems)
+      if (checked) {
+        newSelected.add(id)
+      } else {
+        newSelected.delete(id)
+      }
+      setSelectedItems(newSelected)
+    },
+    [selectedItems]
+  )
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIds = items.map((item) => item.id)
-      setSelectedItems(new Set(allIds))
-    } else {
-      setSelectedItems(new Set())
-    }
-  }
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        const allIds = items.map((item) => item.id)
+        setSelectedItems(new Set(allIds))
+      } else {
+        setSelectedItems(new Set())
+      }
+    },
+    [items]
+  )
 
   const handleRemoveSelected = () => {
     selectedItems.forEach((id) => {

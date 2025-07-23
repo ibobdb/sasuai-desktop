@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ticket, X, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -69,7 +69,8 @@ export function RedeemCodeSection({
         })
       }
     } catch (error) {
-      console.error('Error validating discount code:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error validating discount code:', error)
       toast.error(t('cashier.redeemCode.validationError'), {
         description: t('cashier.redeemCode.tryAgainLater')
       })

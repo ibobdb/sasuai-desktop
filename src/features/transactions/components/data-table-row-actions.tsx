@@ -2,7 +2,7 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
 import { IconEye, IconReceipt } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -67,7 +67,7 @@ export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
         throw new Error(response.error?.message || t('transaction.receipt.printError'))
       }
     } catch (error) {
-      console.error('Print failed:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Print failed:', error)
       toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
     } finally {
       setIsPrinting(false)

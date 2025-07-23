@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect } from 'react'
+import { HTMLAttributes, useEffect, memo } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -90,7 +90,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       })
     } catch (error) {
       // This should rarely be reached as toast.promise handles the error
-      console.error('Unhandled login error:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Unhandled login error:', error)
       toast.error(t('auth.signIn.toast.unexpectedError'))
     }
   }

@@ -1,9 +1,10 @@
 import { Receipt, Minus, Award } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { memo } from 'react'
 import { cn } from '@/lib/utils'
 import { TransactionSummaryProps } from '@/types/cashier'
 
-export default function TransactionSummary({
+function TransactionSummary({
   subtotal,
   productDiscounts,
   memberDiscount,
@@ -107,3 +108,5 @@ export default function TransactionSummary({
     </div>
   )
 }
+
+export default memo(TransactionSummary)

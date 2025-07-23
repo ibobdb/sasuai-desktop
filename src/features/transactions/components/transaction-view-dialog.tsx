@@ -1,6 +1,6 @@
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { TransactionDetail } from '@/types/transactions'
 import { PrinterSettings } from '@/types/settings'
@@ -57,7 +57,7 @@ export function TransactionViewDialog({
         throw new Error(response.error?.message || t('transaction.receipt.printError'))
       }
     } catch (error) {
-      console.error('Print failed:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Print failed:', error)
       toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
     } finally {
       setIsPrinting(false)

@@ -1,4 +1,4 @@
-import { BrowserWindow, shell, ipcMain } from 'electron'
+import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -6,6 +6,18 @@ import { PERSIST_PARTITION, persistentSession } from './index'
 import { getDeviceInfo } from './device-info'
 
 let mainWindow: BrowserWindow | null = null
+let cookieFlushTimeout: NodeJS.Timeout | null = null
+
+const debouncedCookieFlush = () => {
+  if (cookieFlushTimeout) {
+    clearTimeout(cookieFlushTimeout)
+  }
+
+  cookieFlushTimeout = setTimeout(() => {
+    persistentSession.cookies.flushStore().catch(() => {})
+    cookieFlushTimeout = null
+  }, 1000) // Debounce for 1 second
+}
 
 export async function createWindow(): Promise<BrowserWindow> {
   const deviceInfo = await getDeviceInfo()
@@ -27,13 +39,9 @@ export async function createWindow(): Promise<BrowserWindow> {
 
   mainWindow.webContents.setUserAgent(deviceInfo.userAgent)
 
-  mainWindow.webContents.on('did-start-navigation', () => {
-    persistentSession.cookies.flushStore().catch(() => {})
-  })
-
-  mainWindow.webContents.on('did-navigate', () => {
-    persistentSession.cookies.flushStore().catch(() => {})
-  })
+  // Use debounced cookie flush to reduce I/O operations
+  mainWindow.webContents.on('did-start-navigation', debouncedCookieFlush)
+  mainWindow.webContents.on('did-navigate', debouncedCookieFlush)
 
   mainWindow.on('ready-to-show', () => {
     if (mainWindow) {
@@ -69,36 +77,4 @@ export async function createWindow(): Promise<BrowserWindow> {
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
-}
-
-export function setupWindowHandlers() {
-  ipcMain.handle('window:minimize', () => {
-    const mainWindow = getMainWindow()
-    if (mainWindow) mainWindow.minimize()
-    return null
-  })
-
-  ipcMain.handle('window:maximize', () => {
-    const mainWindow = getMainWindow()
-    if (!mainWindow) return false
-
-    if (mainWindow.isMaximized()) {
-      mainWindow.unmaximize()
-      return false
-    } else {
-      mainWindow.maximize()
-      return true
-    }
-  })
-
-  ipcMain.handle('window:close', () => {
-    const mainWindow = getMainWindow()
-    if (mainWindow) mainWindow.close()
-    return null
-  })
-
-  ipcMain.handle('window:isMaximized', () => {
-    const mainWindow = getMainWindow()
-    return mainWindow ? mainWindow.isMaximized() : false
-  })
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Loader2, X, Ticket, Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,16 @@ export default function ProductSearch({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [quantityDialogOpen, setQuantityDialogOpen] = useState(false)
   const [quickAddMode, setQuickAddMode] = useState<boolean>(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
 
   // Use the new product search hook
   const productSearch = useProductSearchHook({
@@ -80,8 +90,12 @@ export default function ProductSearch({
   const handleProductSelect = useCallback(
     (product: Product) => {
       handleSelect(product)
+      // Clear existing timer
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
       // Clear search after selection to hide results
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         clearSearch()
         activeInputRef.current?.focus()
       }, 100)
