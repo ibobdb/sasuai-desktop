@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   KeyboardShortcut,
@@ -72,61 +72,85 @@ export function useSettings() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<SettingsConfig>(defaultSettings)
   const [loading, setLoading] = useState(true)
+  const pendingSaveRef = useRef<NodeJS.Timeout | null>(null)
+  const cacheRef = useRef<SettingsConfig | null>(null)
 
-  // Get translated keyboard shortcuts
   const translatedKeyboardShortcuts = getKeyboardShortcuts(t)
 
   const loadSettings = useCallback(async () => {
+    if (cacheRef.current) {
+      setSettings(cacheRef.current)
+      setLoading(false)
+      return
+    }
+
     try {
-      // Load settings from Electron Store instead of localStorage
       const [storedGeneral, storedKeyboard, storedPrinter] = await Promise.all([
         window.api?.store?.get('settings.general'),
         window.api?.store?.get('settings.keyboard'),
         window.api?.store?.get('settings.printer')
       ])
 
-      // Merge keyboard shortcuts to ensure all defaults exist
       const keyboardShortcuts = mergeKeyboardShortcuts(
         storedKeyboard as KeyboardShortcut[] | undefined,
         translatedKeyboardShortcuts
       )
 
-      setSettings({
+      const loadedSettings = {
         general: { ...defaultGeneralConfig, ...storedGeneral },
         keyboard: keyboardShortcuts,
         printer: { ...defaultPrinterConfig, ...storedPrinter }
-      })
+      }
+
+      cacheRef.current = loadedSettings
+      setSettings(loadedSettings)
     } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV)
-          console.error('Failed to load settings from Electron Store:', error)
+      if (import.meta.env.DEV) {
+        console.error('Failed to load settings from Electron Store:', error)
+      }
       setSettings(defaultSettings)
     } finally {
       setLoading(false)
     }
   }, [translatedKeyboardShortcuts])
 
+  const debouncedSave = useCallback(async (newSettings: SettingsConfig): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (pendingSaveRef.current) {
+        clearTimeout(pendingSaveRef.current)
+      }
+
+      pendingSaveRef.current = setTimeout(async () => {
+        try {
+          await Promise.all([
+            window.api?.store?.set('settings.general', newSettings.general),
+            window.api?.store?.set('settings.keyboard', newSettings.keyboard),
+            window.api?.store?.set('settings.printer', newSettings.printer)
+          ])
+
+          cacheRef.current = newSettings
+          setSettings(newSettings)
+          resolve(true)
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.error('Failed to save settings to Electron Store:', error)
+          }
+          resolve(false)
+        }
+      }, 300)
+    })
+  }, [])
+
+  const saveSettings = useCallback(
+    async (newSettings: SettingsConfig): Promise<boolean> => {
+      return await debouncedSave(newSettings)
+    },
+    [debouncedSave]
+  )
+
   useEffect(() => {
     loadSettings()
   }, [loadSettings])
-
-  const saveSettings = useCallback(async (newSettings: SettingsConfig): Promise<boolean> => {
-    try {
-      // Save to Electron Store instead of localStorage
-      await Promise.all([
-        window.api?.store?.set('settings.general', newSettings.general),
-        window.api?.store?.set('settings.keyboard', newSettings.keyboard),
-        window.api?.store?.set('settings.printer', newSettings.printer)
-      ])
-
-      setSettings(newSettings)
-      return true
-    } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Failed to save settings to Electron Store:', error)
-      return false
-    }
-  }, [])
 
   const updateGeneralSettings = useCallback(
     async (updates: Partial<GeneralConfig> | GeneralConfig): Promise<boolean> => {

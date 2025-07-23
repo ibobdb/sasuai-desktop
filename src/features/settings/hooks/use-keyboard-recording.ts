@@ -1,30 +1,23 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+
+const MODIFIER_KEYS = new Set(['Control', 'Alt', 'Shift', 'Meta'])
+
+const KEY_MAP = new Map([
+  [' ', 'Space'],
+  ['Enter', 'Enter'],
+  ['Tab', 'Tab'],
+  ['Escape', 'Escape'],
+  ['Backspace', 'Backspace'],
+  ['Delete', 'Delete']
+])
 
 export function useKeyboardRecording() {
   const [keySequence, setKeySequence] = useState<string[]>([])
   const [isRecording, setIsRecording] = useState(false)
   const keyInputRef = useRef<HTMLInputElement>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const startRecording = () => {
-    setIsRecording(true)
-    setKeySequence([])
-    setTimeout(() => {
-      if (keyInputRef.current) {
-        keyInputRef.current.focus()
-      }
-    }, 50)
-  }
-
-  const stopRecording = () => {
-    setIsRecording(false)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isRecording) return
-
-    e.preventDefault()
-    e.stopPropagation()
-
+  const parseKeyEvent = useCallback((e: KeyboardEvent | React.KeyboardEvent): string[] | null => {
     const keys: string[] = []
     let hasNonModifierKey = false
 
@@ -33,76 +26,71 @@ export function useKeyboardRecording() {
     if (e.shiftKey) keys.push('Shift')
     if (e.metaKey) keys.push('Meta')
 
-    if (!['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
-      let key = e.key
+    if (!MODIFIER_KEYS.has(e.key)) {
       hasNonModifierKey = true
+      const mappedKey = KEY_MAP.get(e.key)
 
-      if (key === ' ') {
-        key = 'Space'
-      } else if (key === 'Enter') {
-        key = 'Enter'
-      } else if (key === 'Tab') {
-        key = 'Tab'
-      } else if (key === 'Escape') {
-        key = 'Escape'
-      } else if (key === 'Backspace') {
-        key = 'Backspace'
-      } else if (key === 'Delete') {
-        key = 'Delete'
-      } else if (key.length === 1) {
-        key = key.toUpperCase()
+      if (mappedKey) {
+        keys.push(mappedKey)
+      } else if (e.key.length === 1) {
+        keys.push(e.key.toUpperCase())
+      } else {
+        keys.push(e.key)
       }
-
-      keys.push(key)
     }
 
-    if (hasNonModifierKey && keys.length > 0) {
-      setKeySequence(keys)
-      setIsRecording(false)
+    return hasNonModifierKey && keys.length > 0 ? keys : null
+  }, [])
+
+  const startRecording = useCallback(() => {
+    setIsRecording(true)
+    setKeySequence([])
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
     }
-  }
+
+    timeoutRef.current = setTimeout(() => {
+      if (keyInputRef.current) {
+        keyInputRef.current.focus()
+      }
+      timeoutRef.current = null
+    }, 50)
+  }, [])
+
+  const stopRecording = useCallback(() => {
+    setIsRecording(false)
+  }, [])
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isRecording) return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      const keys = parseKeyEvent(e)
+      if (keys) {
+        setKeySequence(keys)
+        setIsRecording(false)
+      }
+    },
+    [isRecording, parseKeyEvent]
+  )
+
+  const clearKeySequence = useCallback(() => setKeySequence([]), [])
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (isRecording) {
-        e.preventDefault()
-        e.stopPropagation()
+      if (!isRecording) return
 
-        const keys: string[] = []
-        let hasNonModifierKey = false
+      e.preventDefault()
+      e.stopPropagation()
 
-        if (e.ctrlKey) keys.push('Ctrl')
-        if (e.altKey) keys.push('Alt')
-        if (e.shiftKey) keys.push('Shift')
-        if (e.metaKey) keys.push('Meta')
-
-        if (!['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) {
-          let key = e.key
-          hasNonModifierKey = true
-
-          if (key === ' ') {
-            key = 'Space'
-          } else if (key === 'Enter') {
-            key = 'Enter'
-          } else if (key === 'Tab') {
-            key = 'Tab'
-          } else if (key === 'Escape') {
-            key = 'Escape'
-          } else if (key === 'Backspace') {
-            key = 'Backspace'
-          } else if (key === 'Delete') {
-            key = 'Delete'
-          } else if (key.length === 1) {
-            key = key.toUpperCase()
-          }
-
-          keys.push(key)
-        }
-
-        if (hasNonModifierKey && keys.length > 0) {
-          setKeySequence(keys)
-          setIsRecording(false)
-        }
+      const keys = parseKeyEvent(e)
+      if (keys) {
+        setKeySequence(keys)
+        setIsRecording(false)
       }
     }
 
@@ -113,18 +101,29 @@ export function useKeyboardRecording() {
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown, true)
     }
-  }, [isRecording])
+  }, [isRecording, parseKeyEvent])
 
-  const clearKeySequence = () => setKeySequence([])
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
-  return {
-    keySequence,
-    setKeySequence,
-    isRecording,
-    keyInputRef,
-    startRecording,
-    stopRecording,
-    handleKeyDown,
-    clearKeySequence
-  }
+  const returnValue = useMemo(
+    () => ({
+      keySequence,
+      setKeySequence,
+      isRecording,
+      keyInputRef,
+      startRecording,
+      stopRecording,
+      handleKeyDown,
+      clearKeySequence
+    }),
+    [keySequence, isRecording, startRecording, stopRecording, handleKeyDown, clearKeySequence]
+  )
+
+  return returnValue
 }

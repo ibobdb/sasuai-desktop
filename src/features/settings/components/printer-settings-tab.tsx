@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Save, Loader2 } from 'lucide-react'
@@ -42,11 +42,25 @@ export function PrinterSettingsTab() {
   const [availablePrinters, setAvailablePrinters] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingPrint, setIsTestingPrint] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Check if there are unsaved changes
+  const settingsHash = useMemo(() => {
+    return Object.entries(settings)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}:${value}`)
+      .join('|')
+  }, [settings])
+
+  const originalHash = useMemo(() => {
+    return Object.entries(originalSettings)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}:${value}`)
+      .join('|')
+  }, [originalSettings])
+
   const hasUnsavedChanges = useMemo(() => {
-    return JSON.stringify(settings) !== JSON.stringify(originalSettings)
-  }, [settings, originalSettings])
+    return settingsHash !== originalHash
+  }, [settingsHash, originalHash])
 
   const loadSettings = useCallback(async () => {
     try {
@@ -56,8 +70,9 @@ export function PrinterSettingsTab() {
         setOriginalSettings(response.data)
       }
     } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Failed to load printer settings:', error)
+      if (import.meta.env.DEV) {
+        console.error('Failed to load printer settings:', error)
+      }
       toast.error(t('printer.loadError'))
     }
   }, [t])
@@ -71,49 +86,74 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.getPrintersError'))
       }
     } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Failed to get printers:', error)
+      if (import.meta.env.DEV) {
+        console.error('Failed to get printers:', error)
+      }
       toast.error(t('printer.getPrintersError'))
     }
   }, [t])
 
-  // Load settings on mount
   useEffect(() => {
     loadSettings()
     loadPrinters()
   }, [loadSettings, loadPrinters])
 
-  const saveSettings = useCallback(
+  const debouncedSave = useCallback(
     async (newSettings: PrinterSettings) => {
-      setIsSaving(true)
-      try {
-        const response: PrinterResponse = await window.api.printer.saveSettings(newSettings)
-        if (response.success) {
-          setSettings(newSettings)
-          setOriginalSettings(newSettings)
-          toast.success(t('printer.saveSuccess'))
-        } else {
-          throw new Error(response.error?.message || t('printer.saveError'))
-        }
-      } catch (error) {
-        if (import.meta.env.DEV)
-          if (import.meta.env.DEV) console.error('Failed to save printer settings:', error)
-        toast.error(t('printer.saveError'))
-      } finally {
-        setIsSaving(false)
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
       }
+
+      saveTimeoutRef.current = setTimeout(async () => {
+        setIsSaving(true)
+        try {
+          const response: PrinterResponse = await window.api.printer.saveSettings(newSettings)
+          if (response.success) {
+            setOriginalSettings(newSettings)
+            toast.success(t('printer.saveSuccess'))
+          } else {
+            throw new Error(response.error?.message || t('printer.saveError'))
+          }
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.error('Failed to save printer settings:', error)
+          }
+          toast.error(t('printer.saveError'))
+        } finally {
+          setIsSaving(false)
+        }
+      }, 1000)
     },
     [t]
   )
 
+  const saveSettings = useCallback(
+    async (newSettings: PrinterSettings) => {
+      await debouncedSave(newSettings)
+    },
+    [debouncedSave]
+  )
+
   const updateSetting = useCallback(
     <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
-      setSettings((prevSettings) => ({ ...prevSettings, [key]: value }))
+      setSettings((prevSettings) => {
+        const newSettings = { ...prevSettings, [key]: value }
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+          debouncedSave(newSettings)
+        }, 500)
+        return newSettings
+      })
     },
-    []
+    [debouncedSave]
   )
 
   const handleSaveSettings = useCallback(async () => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
     await saveSettings(settings)
   }, [saveSettings, settings])
 
@@ -127,12 +167,45 @@ export function PrinterSettingsTab() {
         throw new Error(response.error?.message || t('printer.testPrintError'))
       }
     } catch (error) {
-      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Test print failed:', error)
+      if (import.meta.env.DEV) {
+        console.error('Test print failed:', error)
+      }
       toast.error(error instanceof Error ? error.message : t('printer.testPrintError'))
     } finally {
       setIsTestingPrint(false)
     }
   }, [t])
+
+  const paperSizeOptions = useMemo(
+    () => [
+      { value: '58mm', label: '58mm' },
+      { value: '57mm', label: '57mm' },
+      { value: '76mm', label: '76mm' },
+      { value: '78mm', label: '78mm' },
+      { value: '80mm', label: '80mm' },
+      { value: '44mm', label: '44mm' }
+    ],
+    []
+  )
+
+  const fontFamilyOptions = useMemo(
+    () => [
+      { value: 'Courier New', label: 'Courier New' },
+      { value: 'Consolas', label: 'Consolas' },
+      { value: 'Monaco', label: 'Monaco' },
+      { value: 'Lucida Console', label: 'Lucida Console' },
+      { value: 'Arial', label: 'Arial' },
+      { value: 'Verdana', label: 'Verdana' }
+    ],
+    []
+  )
+
+  const printerOptions = useMemo(() => {
+    return [
+      { value: 'system-default', label: t('printer.systemDefault') },
+      ...availablePrinters.map((printer) => ({ value: printer, label: printer }))
+    ]
+  }, [availablePrinters, t])
 
   return (
     <div className="space-y-6">
@@ -152,10 +225,9 @@ export function PrinterSettingsTab() {
                   <SelectValue placeholder={t('printer.selectPrinterPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="system-default">{t('printer.systemDefault')}</SelectItem>
-                  {availablePrinters.map((printer) => (
-                    <SelectItem key={printer} value={printer}>
-                      {printer}
+                  {printerOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -178,12 +250,11 @@ export function PrinterSettingsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="58mm">58mm</SelectItem>
-                  <SelectItem value="57mm">57mm</SelectItem>
-                  <SelectItem value="76mm">76mm</SelectItem>
-                  <SelectItem value="78mm">78mm</SelectItem>
-                  <SelectItem value="80mm">80mm</SelectItem>
-                  <SelectItem value="44mm">44mm</SelectItem>
+                  {paperSizeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -220,12 +291,11 @@ export function PrinterSettingsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Courier New">Courier New</SelectItem>
-                  <SelectItem value="Consolas">Consolas</SelectItem>
-                  <SelectItem value="Monaco">Monaco</SelectItem>
-                  <SelectItem value="Lucida Console">Lucida Console</SelectItem>
-                  <SelectItem value="Arial">Arial</SelectItem>
-                  <SelectItem value="Verdana">Verdana</SelectItem>
+                  {fontFamilyOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -324,6 +394,9 @@ export function PrinterSettingsTab() {
                 <Button
                   variant="outline"
                   onClick={() => {
+                    if (saveTimeoutRef.current) {
+                      clearTimeout(saveTimeoutRef.current)
+                    }
                     setSettings(originalSettings)
                     toast.success(t('printer.changesDiscarded'))
                   }}
