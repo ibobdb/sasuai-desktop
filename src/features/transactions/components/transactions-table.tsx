@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Transaction } from '@/types/transactions'
 import { DataTable } from '@/components/common/data-table'
@@ -17,7 +18,7 @@ interface TransactionsTableProps {
   totalCount?: number
 }
 
-export function TransactionsTable({
+function TransactionsTableComponent({
   columns,
   data,
   pageCount = 0,
@@ -36,3 +37,5 @@ export function TransactionsTable({
     />
   )
 }
+
+export const TransactionsTable = memo(TransactionsTableComponent)

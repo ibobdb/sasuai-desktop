@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { TransactionViewDialog } from './transaction-view-dialog'
 import type { Transaction, TransactionDetail, TransactionsDialogType } from '@/types/transactions'
 
@@ -10,32 +11,29 @@ interface TransactionsDialogsProps {
   onRefetch: () => void
 }
 
-export function TransactionsDialogs({
+function TransactionsDialogsComponent({
   open,
   currentTransaction,
   transactionDetail,
   isLoadingDetail,
   onOpenChange
 }: TransactionsDialogsProps) {
+  if (!currentTransaction) return null
+
   const handleDialogClose = () => {
     onOpenChange(null)
   }
 
   return (
-    <>
-      {currentTransaction && (
-        <>
-          <TransactionViewDialog
-            key={`transaction-view-${currentTransaction.id}`}
-            open={open === 'view'}
-            onOpenChange={(isOpen) => {
-              if (!isOpen) handleDialogClose()
-            }}
-            transactionDetail={transactionDetail}
-            isLoadingDetail={isLoadingDetail}
-          />
-        </>
-      )}
-    </>
+    <TransactionViewDialog
+      open={open === 'view'}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleDialogClose()
+      }}
+      transactionDetail={transactionDetail}
+      isLoadingDetail={isLoadingDetail}
+    />
   )
 }
+
+export const TransactionsDialogs = memo(TransactionsDialogsComponent)

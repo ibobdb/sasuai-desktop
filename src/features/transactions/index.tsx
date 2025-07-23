@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -56,19 +56,22 @@ export default function Transactions() {
     select: (response) => response.data?.transactionDetails
   })
 
-  const transactions = transactionsResponse?.data?.transactions ?? []
-  const transactionDetail = transactionDetailResponse || null
-  const paginationResponse = transactionsResponse?.data?.pagination
-  const totalPages = paginationResponse?.totalPages ?? 0
-  const currentPage = paginationResponse?.currentPage ?? 1
-  const totalCount = paginationResponse?.totalCount ?? 0
+  const transactions = useMemo(
+    () => transactionsResponse?.data?.transactions ?? [],
+    [transactionsResponse?.data?.transactions]
+  )
 
-  const pagination = {
-    totalPages,
-    currentPage,
-    pageSize: filters.pageSize ?? 10,
-    totalCount
-  }
+  const transactionDetail = transactionDetailResponse || null
+
+  const pagination = useMemo(() => {
+    const paginationResponse = transactionsResponse?.data?.pagination
+    return {
+      totalPages: paginationResponse?.totalPages ?? 0,
+      currentPage: paginationResponse?.currentPage ?? 1,
+      pageSize: filters.pageSize ?? 10,
+      totalCount: paginationResponse?.totalCount ?? 0
+    }
+  }, [transactionsResponse?.data?.pagination, filters.pageSize])
 
   const updateFilters = useCallback((newFilters: Partial<TransactionFilterParams>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }))
@@ -79,23 +82,46 @@ export default function Transactions() {
     setFilterUIState(defaultTransactionFilterUIState)
   }, [])
 
+  const handleViewTransaction = useCallback((transaction: Transaction) => {
+    setCurrentTransaction(transaction)
+    setOpen('view')
+  }, [])
+
   const columns = useTransactionColumns({
-    onView: (transaction) => {
-      setCurrentTransaction(transaction)
-      setOpen('view')
-    }
+    onView: handleViewTransaction
   })
 
-  const transactionData = Array.isArray(transactions) ? transactions : []
+  const paginationConfig = useMemo(
+    () => ({
+      pageIndex: (pagination.currentPage || 1) - 1,
+      pageSize: pagination.pageSize || 10
+    }),
+    [pagination.currentPage, pagination.pageSize]
+  )
 
-  return (
-    <Main>
+  const paginationHandlers = useMemo(
+    () => ({
+      onPageChange: (page: number) => updateFilters({ page }),
+      onPageSizeChange: (size: number) => updateFilters({ pageSize: size, page: 1 })
+    }),
+    [updateFilters]
+  )
+
+  const headerContent = useMemo(
+    () => (
       <div className="mb-6 flex flex-wrap items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{t('transaction.title')}</h2>
           <p className="text-muted-foreground">{t('transaction.description')}</p>
         </div>
       </div>
+    ),
+    [t]
+  )
+
+  return (
+    <Main>
+      {headerContent}
 
       <FilterToolbar
         filters={filters}
@@ -113,17 +139,11 @@ export default function Transactions() {
           </div>
         ) : (
           <TransactionsTable
-            data={transactionData}
+            data={transactions}
             columns={columns}
             pageCount={pagination.totalPages}
-            pagination={{
-              pageIndex: (pagination.currentPage || 1) - 1,
-              pageSize: pagination.pageSize || 10
-            }}
-            onPaginationChange={{
-              onPageChange: (page) => updateFilters({ page }),
-              onPageSizeChange: (size) => updateFilters({ pageSize: size, page: 1 })
-            }}
+            pagination={paginationConfig}
+            onPaginationChange={paginationHandlers}
             totalCount={pagination.totalCount}
           />
         )}

@@ -57,7 +57,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.id')} />
         ),
-        cell: ({ row }) => <div className="font-medium">{row.getValue('tranId') as string}</div>,
+        cell: ({ row }) => {
+          const tranId = row.getValue('tranId') as string | undefined
+          if (!tranId) return <span className="text-muted-foreground">-</span>
+          return <div className="font-medium">{tranId}</div>
+        },
         enableHiding: false
       },
       {
@@ -65,7 +69,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.originalAmount')} />
         ),
-        cell: ({ row }) => <div>{formatCurrency(row.original.pricing.originalAmount)}</div>
+        cell: ({ row }) => {
+          const originalAmount = row.original?.pricing?.originalAmount
+          if (originalAmount == null) return <span className="text-muted-foreground">-</span>
+          return <div>{formatCurrency(originalAmount)}</div>
+        }
       },
       {
         id: 'totalDiscount',
@@ -73,19 +81,26 @@ export function useTransactionColumns({
           <DataTableColumnHeader column={column} title={t('transaction.table.totalDiscount')} />
         ),
         cell: ({ row }) => {
-          const pricing = row.original.pricing
+          const pricing = row.original?.pricing
+          if (!pricing) return <span className="text-muted-foreground">-</span>
+
           let totalDiscount = 0
 
-          if (pricing.discounts) {
+          // Handle actual API structure for discounts
+          if (pricing.totalDiscount != null) {
+            totalDiscount = pricing.totalDiscount
+          } else if (pricing.discounts?.total != null) {
             totalDiscount = pricing.discounts.total
-          } else if ('totalDiscount' in pricing) {
-            totalDiscount = pricing.totalDiscount as number
           }
 
           if (totalDiscount === 0) return <span className="text-muted-foreground">-</span>
 
-          // Show discount type indicator if available
+          // Check for multiple discounts based on actual API structure
           const hasMultipleDiscounts =
+            (pricing.memberDiscount &&
+              pricing.memberDiscount > 0 &&
+              pricing.productDiscounts &&
+              pricing.productDiscounts > 0) ||
             (pricing.discounts?.member && pricing.discounts?.product) ||
             pricing.discounts?.tier ||
             pricing.discounts?.global
@@ -107,9 +122,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.finalAmount')} />
         ),
-        cell: ({ row }) => (
-          <div className="font-medium">{formatCurrency(row.original.pricing.finalAmount)}</div>
-        )
+        cell: ({ row }) => {
+          const finalAmount = row.original?.pricing?.finalAmount
+          if (finalAmount == null) return <span className="text-muted-foreground">-</span>
+          return <div className="font-medium">{formatCurrency(finalAmount)}</div>
+        }
       },
       {
         id: 'customer',
@@ -117,7 +134,7 @@ export function useTransactionColumns({
           <DataTableColumnHeader column={column} title={t('transaction.table.customer')} />
         ),
         cell: ({ row }) => {
-          const member = row.original.member
+          const member = row.original?.member
           if (!member)
             return <span className="text-muted-foreground">{t('transaction.details.guest')}</span>
           return <div>{member.name}</div>
@@ -128,7 +145,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.items')} />
         ),
-        cell: ({ row }) => `${row.getValue('itemCount') as number} item(s)`
+        cell: ({ row }) => {
+          const itemCount = row.getValue('itemCount') as number | undefined
+          if (!itemCount) return <span className="text-muted-foreground">-</span>
+          return `${itemCount} item(s)`
+        }
       },
       {
         accessorKey: 'pointsEarned',
@@ -136,8 +157,8 @@ export function useTransactionColumns({
           <DataTableColumnHeader column={column} title={t('transaction.table.points')} />
         ),
         cell: ({ row }) => {
-          const points = row.getValue('pointsEarned') as number
-          if (points === 0) return <span className="text-muted-foreground">-</span>
+          const points = row.getValue('pointsEarned') as number | undefined
+          if (!points || points === 0) return <span className="text-muted-foreground">-</span>
           return <span>{points} pts</span>
         }
       },
@@ -146,9 +167,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.paymentAmount')} />
         ),
-        cell: ({ row }) => (
-          <div className="font-medium">{formatCurrency(row.original.payment.amount)}</div>
-        )
+        cell: ({ row }) => {
+          const paymentAmount = row.original?.payment?.amount
+          if (paymentAmount == null) return <span className="text-muted-foreground">-</span>
+          return <div className="font-medium">{formatCurrency(paymentAmount)}</div>
+        }
       },
       {
         accessorKey: 'paymentMethod',
@@ -157,7 +180,7 @@ export function useTransactionColumns({
         ),
         cell: ({ row }) => {
           // Get payment method from payment.method instead of directly from paymentMethod
-          const paymentMethod = row.original.payment?.method as PaymentMethod | undefined
+          const paymentMethod = row.original?.payment?.method as PaymentMethod | undefined
 
           // Handle null/undefined paymentMethod
           if (!paymentMethod) {
@@ -177,7 +200,7 @@ export function useTransactionColumns({
         },
         filterFn: (row, value) => {
           // Adjust to get payment method from payment.method
-          const paymentMethod = row.original.payment?.method
+          const paymentMethod = row.original?.payment?.method
           return value.includes(paymentMethod || '')
         }
       },
@@ -186,7 +209,11 @@ export function useTransactionColumns({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('transaction.table.cashier')} />
         ),
-        cell: ({ row }) => row.original.cashier.name
+        cell: ({ row }) => {
+          const cashierName = row.original?.cashier?.name
+          if (!cashierName) return <span className="text-muted-foreground">-</span>
+          return cashierName
+        }
       },
       {
         accessorKey: 'createdAt',
@@ -194,7 +221,10 @@ export function useTransactionColumns({
           <DataTableColumnHeader column={column} title={t('transaction.table.date')} />
         ),
         cell: ({ row }) => {
-          const date = new Date(row.getValue('createdAt') as string | Date)
+          const dateValue = row.getValue('createdAt') as string | Date | undefined
+          if (!dateValue) return <span className="text-muted-foreground">-</span>
+
+          const date = new Date(dateValue)
           return (
             <div className="flex flex-col">
               <span>{date.toLocaleDateString()}</span>
