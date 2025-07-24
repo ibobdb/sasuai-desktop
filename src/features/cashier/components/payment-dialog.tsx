@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -36,7 +36,7 @@ interface PaymentDialogProps {
   isProcessing: boolean
 }
 
-export default function PaymentDialog({
+function PaymentDialog({
   open,
   onOpenChange,
   total,
@@ -51,7 +51,22 @@ export default function PaymentDialog({
   const { t } = useTranslation(['cashier'])
   const payButtonRef = useRef<HTMLButtonElement>(null)
 
-  const formatNumber = (value: number): string => value.toLocaleString('id-ID')
+  const formatNumber = useCallback((value: number): string => value.toLocaleString('id-ID'), [])
+
+  const getPaymentMethodIcon = useCallback((method: PaymentMethod) => {
+    const paymentMethod = paymentMethods.find((p) => p.value === method)
+    if (paymentMethod) {
+      const Icon = paymentMethod.icon
+      return <Icon className="h-4 w-4 mr-2" />
+    }
+    return null
+  }, [])
+
+  const dialogClassName = useMemo(
+    () =>
+      cn('p-0 overflow-hidden', paymentMethod === 'cash' ? 'sm:max-w-[850px]' : 'sm:max-w-[500px]'),
+    [paymentMethod]
+  )
 
   useEffect(() => {
     if (open && paymentMethod !== 'cash') {
@@ -61,24 +76,9 @@ export default function PaymentDialog({
     }
   }, [open, paymentMethod, total, onPaymentAmountChange])
 
-  const getPaymentMethodIcon = (method: PaymentMethod) => {
-    const paymentMethod = paymentMethods.find((p) => p.value === method)
-    if (paymentMethod) {
-      const Icon = paymentMethod.icon
-      return <Icon className="h-4 w-4 mr-2" />
-    }
-    return null
-  }
-
   return (
     <Dialog open={open} onOpenChange={isProcessing ? () => {} : onOpenChange}>
-      <DialogContent
-        className={cn(
-          'p-0 overflow-hidden',
-          paymentMethod === 'cash' ? 'sm:max-w-[850px]' : 'sm:max-w-[500px]'
-        )}
-        aria-describedby="payment-dialog-description"
-      >
+      <DialogContent className={dialogClassName} aria-describedby="payment-dialog-description">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>{t('cashier.payment.title')}</DialogTitle>
           <DialogDescription id="payment-dialog-description">
@@ -236,3 +236,5 @@ export default function PaymentDialog({
     </Dialog>
   )
 }
+
+export default memo(PaymentDialog)

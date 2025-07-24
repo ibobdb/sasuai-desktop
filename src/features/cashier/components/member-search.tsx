@@ -260,3 +260,5 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
     </div>
   )
 }
+
+export default memo(MemberSearch)

@@ -7,7 +7,7 @@ type UseDebounceOptions = {
 }
 
 export function useDebounce(initialValue: string = '', options: UseDebounceOptions = {}) {
-  const { delay = 300, minLength = 3 } = options // Increased delay and minLength for better performance
+  const { delay = 500, minLength = 3 } = options
   const [value, setValue] = useState(initialValue)
   const [debouncedValue, setDebouncedValue] = useState(initialValue)
   const [isDebouncing, setIsDebouncing] = useState(false)

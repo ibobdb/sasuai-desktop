@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from 'react'
+import { useEffect, useRef, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
@@ -23,12 +23,10 @@ function Cashier() {
   const { t } = useTranslation(['cashier'])
   const productSearchRef = useRef<HTMLInputElement>(null)
 
-  // Core hooks
   const cart = useCart()
   const memberDiscounts = useMemberDiscounts()
   const globalDiscount = useGlobalDiscount()
 
-  // Calculations
   const calculations = useCashierCalculations(
     cart.subtotal,
     cart.productDiscountsTotal,
@@ -37,16 +35,24 @@ function Cashier() {
     globalDiscount.globalDiscount
   )
 
-  // Points calculation - should be based on subtotal, not final total
-  const { data: pointsToEarn = 0 } = usePointsCalculation(
-    {
-      amount: calculations.subtotal, // Use subtotal instead of total
+  const pointsCalculationParams = useMemo(
+    () => ({
+      amount: calculations.subtotal,
       memberId: memberDiscounts.selectedMember?.id
-    },
-    calculations.subtotal > 0 && !!memberDiscounts.selectedMember
+    }),
+    [calculations.subtotal, memberDiscounts.selectedMember?.id]
   )
 
-  // Transaction handling
+  const pointsCalculationEnabled = useMemo(
+    () => calculations.subtotal > 0 && !!memberDiscounts.selectedMember,
+    [calculations.subtotal, memberDiscounts.selectedMember]
+  )
+
+  const { data: pointsToEarn = 0 } = usePointsCalculation(
+    pointsCalculationParams,
+    pointsCalculationEnabled
+  )
+
   const transaction = useTransaction(
     cart.cart,
     calculations.total,
@@ -57,126 +63,150 @@ function Cashier() {
     memberDiscounts.selectedMember?.id
   )
 
-  // Keyboard shortcuts handlers
-  const shortcutHandlers = {
-    'focus-product-search': () => {
-      productSearchRef.current?.focus()
-    },
-    'open-payment-dialog': () => {
-      if (cart.cart.length === 0) {
-        return
-      }
-      handleOpenPaymentDialog()
-    },
-    'clear-cart': () => {
-      if (cart.cart.length === 0) {
-        return
-      }
-      clearAll()
-    },
-    'search-member': () => {
-      // Focus to member search input
-      const memberSearchInput = document.querySelector(
-        '[data-member-search-input]'
-      ) as HTMLInputElement
-      if (memberSearchInput) {
-        memberSearchInput.focus()
-      }
-    },
-    'add-discount': () => {
-      // Focus to discount/redeem code section
-      const redeemInput = document.querySelector('[data-redeem-input]') as HTMLInputElement
-      if (redeemInput) {
-        redeemInput.focus()
-      }
-    },
-    'quick-payment': () => {
-      if (cart.cart.length === 0) {
-        return
-      }
-      // Auto set payment amount to total and open dialog
-      transaction.setPaymentAmount(calculations.total)
-      handleOpenPaymentDialog()
-    },
-    'execute-transaction': () => {
-      if (cart.cart.length === 0) {
-        return
-      }
-
-      // Check if payment dialog is open
-      if (transaction.paymentDialogOpen) {
-        // Execute payment if dialog is open and payment is valid
-        if (transaction.paymentAmount >= calculations.total) {
-          transaction.handlePayment()
-        }
-      } else {
-        // Open payment dialog with current total
-        transaction.setPaymentAmount(calculations.total)
-        handleOpenPaymentDialog()
-      }
-    },
-    'void-transaction': () => {
-      if (cart.cart.length === 0) {
-        return
-      }
-      clearAll()
-    }
-  }
-
-  // Initialize global shortcuts
-  useGlobalShortcuts(shortcutHandlers)
-
-  // Clear cart and reset transaction state
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     cart.clearCart()
     memberDiscounts.clearMemberData()
     globalDiscount.clearGlobalDiscount()
     transaction.setPaymentAmount(0)
-  }
+  }, [cart, memberDiscounts, globalDiscount, transaction])
 
-  const handleOpenPaymentDialog = () => {
+  const handleOpenPaymentDialog = useCallback(() => {
     transaction.setPaymentDialogOpen(true)
-  }
+  }, [transaction])
 
-  // Handle member selection with discount reset
-  const handleMemberSelect = (member: Member | null) => {
-    memberDiscounts.handleMemberSelect(member)
-    if (member) {
-      globalDiscount.clearGlobalDiscount()
-    }
-  }
+  const shortcutHandlers = useMemo(
+    () => ({
+      'focus-product-search': () => {
+        productSearchRef.current?.focus()
+      },
+      'open-payment-dialog': () => {
+        if (cart.cart.length === 0) return
+        handleOpenPaymentDialog()
+      },
+      'clear-cart': () => {
+        if (cart.cart.length === 0) return
+        clearAll()
+      },
+      'search-member': () => {
+        const memberSearchInput = document.querySelector(
+          '[data-member-search-input]'
+        ) as HTMLInputElement
+        if (memberSearchInput) {
+          memberSearchInput.focus()
+        }
+      },
+      'add-discount': () => {
+        const redeemInput = document.querySelector('[data-redeem-input]') as HTMLInputElement
+        if (redeemInput) {
+          redeemInput.focus()
+        }
+      },
+      'quick-payment': () => {
+        if (cart.cart.length === 0) return
+        transaction.setPaymentAmount(calculations.total)
+        handleOpenPaymentDialog()
+      },
+      'execute-transaction': () => {
+        if (cart.cart.length === 0) return
 
-  // Handle member discount selection with global discount reset
-  const handleMemberDiscountSelect = (discount: Discount | null) => {
-    memberDiscounts.handleMemberDiscountSelect(discount)
-    if (discount) {
-      globalDiscount.clearGlobalDiscount()
-    }
-  }
+        if (transaction.paymentDialogOpen) {
+          if (transaction.paymentAmount >= calculations.total) {
+            transaction.handlePayment()
+          }
+        } else {
+          transaction.setPaymentAmount(calculations.total)
+          handleOpenPaymentDialog()
+        }
+      },
+      'void-transaction': () => {
+        if (cart.cart.length === 0) return
+        clearAll()
+      }
+    }),
+    [cart.cart.length, handleOpenPaymentDialog, clearAll, transaction, calculations.total]
+  )
 
-  // Handle global discount application with member discount reset
-  const handleGlobalDiscountApply = (discount: Discount | null) => {
-    globalDiscount.setGlobalDiscount(discount)
-    if (discount) {
-      memberDiscounts.handleMemberDiscountSelect(null)
-    }
-  }
+  useGlobalShortcuts(shortcutHandlers)
 
-  // Auto-set payment amount when total changes
+  const handleMemberSelect = useCallback(
+    (member: Member | null) => {
+      memberDiscounts.handleMemberSelect(member)
+      if (member) {
+        globalDiscount.clearGlobalDiscount()
+      }
+    },
+    [memberDiscounts, globalDiscount]
+  )
+
+  const handleMemberDiscountSelect = useCallback(
+    (discount: Discount | null) => {
+      memberDiscounts.handleMemberDiscountSelect(discount)
+      if (discount) {
+        globalDiscount.clearGlobalDiscount()
+      }
+    },
+    [memberDiscounts, globalDiscount]
+  )
+
+  const handleGlobalDiscountApply = useCallback(
+    (discount: Discount | null) => {
+      globalDiscount.setGlobalDiscount(discount)
+      if (discount) {
+        memberDiscounts.handleMemberDiscountSelect(null)
+      }
+    },
+    [globalDiscount, memberDiscounts]
+  )
+
   useEffect(() => {
     if (calculations.total > 0 && transaction.paymentMethod === 'cash') {
       transaction.setPaymentAmount(calculations.total)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calculations.total, transaction.paymentMethod])
+  }, [calculations.total, transaction.paymentMethod, transaction])
 
-  // Handle successful payment
-  const handleStatusDialogClose = () => {
+  const handleStatusDialogClose = useCallback(() => {
     transaction.handleStatusDialogClose()
     if (transaction.paymentStatus.success) {
       clearAll()
     }
-  }
+  }, [transaction, clearAll])
+
+  const selectedDiscount = useMemo(
+    () => memberDiscounts.selectedMemberDiscount || memberDiscounts.selectedTierDiscount,
+    [memberDiscounts.selectedMemberDiscount, memberDiscounts.selectedTierDiscount]
+  )
+
+  const isDisabled = useMemo(
+    () => !!(memberDiscounts.selectedMemberDiscount || memberDiscounts.selectedTierDiscount),
+    [memberDiscounts.selectedMemberDiscount, memberDiscounts.selectedTierDiscount]
+  )
+
+  const disabledReason = useMemo(() => {
+    if (memberDiscounts.selectedMemberDiscount) {
+      return t('cashier.redeemCode.memberDiscountActive')
+    }
+    if (memberDiscounts.selectedTierDiscount) {
+      return t('cashier.redeemCode.tierDiscountActive')
+    }
+    return undefined
+  }, [memberDiscounts.selectedMemberDiscount, memberDiscounts.selectedTierDiscount, t])
+
+  const memberInfo = useMemo(
+    () => (memberDiscounts.selectedMember ? { member: memberDiscounts.selectedMember } : undefined),
+    [memberDiscounts.selectedMember]
+  )
+
+  const isPayEnabled = useMemo(
+    () => cart.cart.length > 0 && transaction.paymentAmount >= calculations.total,
+    [cart.cart.length, transaction.paymentAmount, calculations.total]
+  )
+
+  const paymentButtonText = useMemo(() => {
+    if (calculations.total > 0) {
+      return `${t('cashier.actions.pay')} (Rp ${calculations.total.toLocaleString('id-ID')})`
+    }
+    return t('cashier.actions.pay')
+  }, [calculations.total, t])
 
   return (
     <Main>
@@ -201,9 +231,7 @@ function Cashier() {
           <MemberSection
             onMemberSelect={handleMemberSelect}
             onMemberDiscountSelect={handleMemberDiscountSelect}
-            selectedDiscount={
-              memberDiscounts.selectedMemberDiscount || memberDiscounts.selectedTierDiscount
-            }
+            selectedDiscount={selectedDiscount}
             subtotal={calculations.subtotal}
             member={memberDiscounts.selectedMember}
           />
@@ -211,16 +239,8 @@ function Cashier() {
           <RedeemCodeSection
             onApplyDiscount={handleGlobalDiscountApply}
             appliedDiscount={globalDiscount.globalDiscount}
-            disabled={
-              !!(memberDiscounts.selectedMemberDiscount || memberDiscounts.selectedTierDiscount)
-            }
-            disabledReason={
-              memberDiscounts.selectedMemberDiscount
-                ? t('cashier.redeemCode.memberDiscountActive')
-                : memberDiscounts.selectedTierDiscount
-                  ? t('cashier.redeemCode.tierDiscountActive')
-                  : undefined
-            }
+            disabled={isDisabled}
+            disabledReason={disabledReason}
             subtotal={calculations.subtotal}
           />
 
@@ -259,10 +279,7 @@ function Cashier() {
           >
             <CreditCard className="mr-2 h-4 w-4" />
             <span className="hidden md:inline">{t('cashier.actions.payment')}</span>
-            <span className="md:hidden">
-              {t('cashier.actions.pay')}{' '}
-              {calculations.total > 0 ? `(Rp ${calculations.total.toLocaleString('id-ID')})` : ''}
-            </span>
+            <span className="md:hidden">{paymentButtonText}</span>
           </Button>
         </div>
       </div>
@@ -277,7 +294,7 @@ function Cashier() {
         onPaymentMethodChange={transaction.setPaymentMethod}
         onPaymentAmountChange={transaction.setPaymentAmount}
         onPay={transaction.handlePayment}
-        isPayEnabled={cart.cart.length > 0 && transaction.paymentAmount >= calculations.total}
+        isPayEnabled={isPayEnabled}
         isProcessing={transaction.isProcessingTransaction}
       />
 
@@ -290,9 +307,7 @@ function Cashier() {
         change={transaction.paymentStatus.change}
         paymentAmount={transaction.paymentAmount}
         errorMessage={transaction.paymentStatus.errorMessage}
-        memberInfo={
-          memberDiscounts.selectedMember ? { member: memberDiscounts.selectedMember } : undefined
-        }
+        memberInfo={memberInfo}
       />
     </Main>
   )

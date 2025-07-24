@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Loader2, X, Ticket, Package, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,7 @@ interface ProductSearchProps {
   inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
-export default function ProductSearch({
+function ProductSearch({
   onProductSelect,
   autoFocus = true,
   inputRef: externalInputRef
@@ -43,18 +43,22 @@ export default function ProductSearch({
     }
   }, [])
 
-  // Use the new product search hook
-  const productSearch = useProductSearchHook({
-    onProductSelect: (product: Product, quantity?: number) => {
-      if (quickAddMode) {
-        onProductSelect(product, quantity || 1)
-      } else {
-        setSelectedProduct(product)
-        setQuantityDialogOpen(true)
-      }
-    },
-    quickAddMode
-  })
+  const productSearchConfig = useMemo(
+    () => ({
+      onProductSelect: (product: Product, quantity?: number) => {
+        if (quickAddMode) {
+          onProductSelect(product, quantity || 1)
+        } else {
+          setSelectedProduct(product)
+          setQuantityDialogOpen(true)
+        }
+      },
+      quickAddMode
+    }),
+    [quickAddMode, onProductSelect]
+  )
+
+  const productSearch = useProductSearchHook(productSearchConfig)
 
   const {
     query,
@@ -74,27 +78,25 @@ export default function ProductSearch({
     resultsRef
   } = productSearch
 
-  // Use external ref if provided, otherwise use internal ref
   const activeInputRef = externalInputRef || inputRef
 
-  // Handle adding product with quantity
-  const handleAddWithQuantity = (product: Product, quantity: number) => {
-    onProductSelect(product, quantity)
-    setQuantityDialogOpen(false)
-    setSelectedProduct(null)
-    clearSearch()
-    activeInputRef.current?.focus()
-  }
+  const handleAddWithQuantity = useCallback(
+    (product: Product, quantity: number) => {
+      onProductSelect(product, quantity)
+      setQuantityDialogOpen(false)
+      setSelectedProduct(null)
+      clearSearch()
+      activeInputRef.current?.focus()
+    },
+    [onProductSelect, clearSearch, activeInputRef]
+  )
 
-  // Custom handleSelect to ensure cleanup
   const handleProductSelect = useCallback(
     (product: Product) => {
       handleSelect(product)
-      // Clear existing timer
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
-      // Clear search after selection to hide results
       timerRef.current = setTimeout(() => {
         clearSearch()
         activeInputRef.current?.focus()
@@ -196,84 +198,102 @@ export default function ProductSearch({
         </div>
       </div>
 
-      {showResults && results.length > 0 && (
+      {showResults && (
         <Card
           ref={resultsRef}
           className="absolute top-full mt-1 w-full z-50 max-h-96 overflow-auto border shadow-lg"
         >
           <div className="p-2">
-            <div className="space-y-1">
-              {results.map((product, index) => {
-                const expiryInfo = getExpiryInfo(product)
-                const stockStatus = getStockStatus(product.currentStock)
-                const bestDiscount = getBestDiscount(product)
-                const isFocused = index === focusedIndex
+            {results.length > 0 ? (
+              <div className="space-y-1">
+                {results.map((product, index) => {
+                  const expiryInfo = getExpiryInfo(product)
+                  const stockStatus = getStockStatus(product.currentStock)
+                  const bestDiscount = getBestDiscount(product)
+                  const isFocused = index === focusedIndex
 
-                return (
-                  <div
-                    key={product.id}
-                    ref={(el) => {
-                      listItemsRef.current[index] = el
-                    }}
-                    className={`p-3 rounded-md cursor-pointer transition-colors ${
-                      isFocused ? 'bg-primary/10 ring-1 ring-primary/20' : 'hover:bg-muted/50'
-                    }`}
-                    onClick={() => handleProductSelect(product)}
-                    onMouseEnter={() => handleItemMouseEnter(index)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                          <p className="font-medium text-sm truncate">{product.name}</p>
-                        </div>
+                  return (
+                    <div
+                      key={product.id}
+                      ref={(el) => {
+                        listItemsRef.current[index] = el
+                      }}
+                      className={`p-3 rounded-md cursor-pointer transition-colors ${
+                        isFocused ? 'bg-primary/10 ring-1 ring-primary/20' : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleProductSelect(product)}
+                      onMouseEnter={() => handleItemMouseEnter(index)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <p className="font-medium text-sm truncate">{product.name}</p>
+                          </div>
 
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>Rp {product.price.toLocaleString()}</span>
-                          <span>•</span>
-                          <span className={stockStatus.color}>
-                            {product.currentStock} {t('cashier.productSearch.inStock')}
-                          </span>
-                          {product.barcode && (
-                            <>
-                              <span>•</span>
-                              <span>{product.barcode}</span>
-                            </>
-                          )}
-                        </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>Rp {product.price.toLocaleString()}</span>
+                            <span>•</span>
+                            <span className={stockStatus.color}>
+                              {product.currentStock} {t('cashier.productSearch.inStock')}
+                            </span>
+                            {product.barcode && (
+                              <>
+                                <span>•</span>
+                                <span>{product.barcode}</span>
+                              </>
+                            )}
+                          </div>
 
-                        <div className="flex items-center gap-2 mt-1">
-                          {bestDiscount && (
-                            <Badge variant="secondary" className="text-xs">
-                              <Ticket className="h-3 w-3 mr-1" />
-                              {formatDiscountLabel(bestDiscount)}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            {bestDiscount && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Ticket className="h-3 w-3 mr-1" />
+                                {formatDiscountLabel(bestDiscount)}
+                              </Badge>
+                            )}
 
-                          {expiryInfo?.isWarning && (
-                            <Badge
-                              variant={expiryInfo.isExpired ? 'destructive' : 'outline'}
-                              className="text-xs"
-                            >
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              {expiryInfo.isExpired
-                                ? t('cashier.productSearch.expired')
-                                : `${expiryInfo.daysRemaining}d`}
-                            </Badge>
-                          )}
+                            {expiryInfo?.isWarning && (
+                              <Badge
+                                variant={expiryInfo.isExpired ? 'destructive' : 'outline'}
+                                className="text-xs"
+                              >
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                {expiryInfo.isExpired
+                                  ? t('cashier.productSearch.expired')
+                                  : `${expiryInfo.daysRemaining}d`}
+                              </Badge>
+                            )}
 
-                          {product.currentStock <= 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {t('cashier.productSearch.outOfStock')}
-                            </Badge>
-                          )}
+                            {product.currentStock <= 0 && (
+                              <Badge variant="destructive" className="text-xs">
+                                {t('cashier.productSearch.outOfStock')}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )
+                })}
+              </div>
+            ) : query.trim().length >= 3 && !isLoading ? (
+              <div className="p-6 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground" />
                   </div>
-                )
-              })}
-            </div>
+                  <div className="space-y-1">
+                    <p className="font-medium text-sm text-muted-foreground">
+                      Produk tidak ditemukan
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('cashier.productSearch.noResults', { query: query.trim() })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         </Card>
       )}
@@ -288,3 +308,5 @@ export default function ProductSearch({
     </div>
   )
 }
+
+export default memo(ProductSearch)

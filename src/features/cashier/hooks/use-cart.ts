@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Product, CartItem, Discount, UseCartReturn } from '@/types/cashier'
 
 export function useCart(): UseCartReturn {
@@ -133,10 +133,12 @@ export function useCart(): UseCartReturn {
     setCart([])
   }, [])
 
-  // Computed values
-  const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0)
-  const productDiscountsTotal = cart.reduce((sum, item) => sum + item.discountAmount, 0)
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.subtotal, 0), [cart])
+  const productDiscountsTotal = useMemo(
+    () => cart.reduce((sum, item) => sum + item.discountAmount, 0),
+    [cart]
+  )
+  const totalItems = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart])
 
   return {
     cart,

@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Ticket, Check, UserPlus, Phone, CreditCard, MapPin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,30 +25,29 @@ export function MemberSection({
   const { t } = useTranslation(['cashier'])
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
 
-  // Synchronize internal state with parent state
   useEffect(() => {
     setSelectedMember(member)
   }, [member])
 
-  // Handle member selection and their available discounts
-  const handleMemberSelect = (member: Member | null) => {
-    onMemberSelect?.(member)
-  }
+  const handleMemberSelect = useCallback(
+    (member: Member | null) => {
+      onMemberSelect?.(member)
+    },
+    [onMemberSelect]
+  )
 
-  // Clear selected member
-  const clearMember = () => {
+  const clearMember = useCallback(() => {
     setSelectedMember(null)
     onMemberSelect?.(null)
     onMemberDiscountSelect?.(null)
-  }
+  }, [onMemberSelect, onMemberDiscountSelect])
 
-  // Format discount for display
-  const formatDiscount = (discount: Discount) => {
+  const formatDiscount = useCallback((discount: Discount) => {
     if (discount.type === 'PERCENTAGE') {
       return `${discount.value}%`
     }
     return `Rp ${discount.value.toLocaleString()}`
-  }
+  }, [])
 
   // Get all available discounts from both member and tier (with basic validation)
   const getAllAvailableDiscounts = (): EnhancedDiscount[] => {
@@ -263,3 +262,5 @@ export function MemberSection({
     </div>
   )
 }
+
+export default memo(MemberSection)
