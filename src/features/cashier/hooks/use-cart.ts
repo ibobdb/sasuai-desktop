@@ -4,7 +4,6 @@ import { Product, CartItem, Discount, UseCartReturn } from '@/types/cashier'
 export function useCart(): UseCartReturn {
   const [cart, setCart] = useState<CartItem[]>([])
 
-  // Calculate discount amount based on price, quantity and selected discount
   const calculateDiscountAmount = useCallback(
     (price: number, quantity: number, discount: Discount | null | undefined) => {
       if (!discount) return 0
@@ -20,7 +19,6 @@ export function useCart(): UseCartReturn {
     []
   )
 
-  // Add to cart function
   const addToCart = useCallback(
     (product: Product, quantity: number = 1) => {
       const batch =
@@ -53,7 +51,6 @@ export function useCart(): UseCartReturn {
           )
         }
 
-        // Create new cart item
         const itemSubtotal = product.price * quantity
         return [
           ...prevCart,
@@ -73,7 +70,6 @@ export function useCart(): UseCartReturn {
     [calculateDiscountAmount]
   )
 
-  // Update cart item quantity
   const updateQuantity = useCallback(
     (id: string, quantity: number) => {
       if (quantity < 1) return
@@ -102,7 +98,6 @@ export function useCart(): UseCartReturn {
     [calculateDiscountAmount]
   )
 
-  // Update item discount
   const updateItemDiscount = useCallback(
     (id: string, discount: Discount | null) => {
       setCart((prevCart) =>
@@ -123,12 +118,10 @@ export function useCart(): UseCartReturn {
     [calculateDiscountAmount]
   )
 
-  // Remove item from cart
   const removeItem = useCallback((id: string) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id))
   }, [])
 
-  // Clear cart
   const clearCart = useCallback(() => {
     setCart([])
   }, [])

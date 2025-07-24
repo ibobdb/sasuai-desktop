@@ -26,93 +26,98 @@ const errors500LazyRouteImport = createFileRoute('/(errors)/500')()
 const errors404LazyRouteImport = createFileRoute('/(errors)/404')()
 const errors403LazyRouteImport = createFileRoute('/(errors)/403')()
 const errors401LazyRouteImport = createFileRoute('/(errors)/401')()
-const authForgotPasswordLazyRouteImport = createFileRoute('/(auth)/forgot-password')()
+const authForgotPasswordLazyRouteImport = createFileRoute(
+  '/(auth)/forgot-password',
+)()
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const errors503LazyRoute = errors503LazyRouteImport
   .update({
     id: '/(errors)/503',
     path: '/503',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
   .lazy(() => import('./routes/(errors)/503.lazy').then((d) => d.Route))
 const errors500LazyRoute = errors500LazyRouteImport
   .update({
     id: '/(errors)/500',
     path: '/500',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
   .lazy(() => import('./routes/(errors)/500.lazy').then((d) => d.Route))
 const errors404LazyRoute = errors404LazyRouteImport
   .update({
     id: '/(errors)/404',
     path: '/404',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
   .lazy(() => import('./routes/(errors)/404.lazy').then((d) => d.Route))
 const errors403LazyRoute = errors403LazyRouteImport
   .update({
     id: '/(errors)/403',
     path: '/403',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
   .lazy(() => import('./routes/(errors)/403.lazy').then((d) => d.Route))
 const errors401LazyRoute = errors401LazyRouteImport
   .update({
     id: '/(errors)/401',
     path: '/401',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
 const authForgotPasswordLazyRoute = authForgotPasswordLazyRouteImport
   .update({
     id: '/(auth)/forgot-password',
     path: '/forgot-password',
-    getParentRoute: () => rootRouteImport
+    getParentRoute: () => rootRouteImport,
   } as any)
-  .lazy(() => import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route))
-const AuthenticatedTransactionsRoute = AuthenticatedTransactionsRouteImport.update({
-  id: '/transactions',
-  path: '/transactions',
-  getParentRoute: () => AuthenticatedRouteRoute
-} as any)
+  .lazy(() =>
+    import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
+  )
+const AuthenticatedTransactionsRoute =
+  AuthenticatedTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMemberRoute = AuthenticatedMemberRouteImport.update({
   id: '/member',
   path: '/member',
-  getParentRoute: () => AuthenticatedRouteRoute
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const legalTermsRoute = legalTermsRouteImport.update({
   id: '/(legal)/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 const legalPrivacyRoute = legalPrivacyRouteImport.update({
   id: '/(legal)/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 const authSignInRoute = authSignInRouteImport.update({
   id: '/(auth)/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -353,12 +358,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren = AuthenticatedRouteRoute._addFileChildren(
-  AuthenticatedRouteRouteChildren
-)
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -370,7 +374,7 @@ const rootRouteChildren: RootRouteChildren = {
   errors403LazyRoute: errors403LazyRoute,
   errors404LazyRoute: errors404LazyRoute,
   errors500LazyRoute: errors500LazyRoute,
-  errors503LazyRoute: errors503LazyRoute
+  errors503LazyRoute: errors503LazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

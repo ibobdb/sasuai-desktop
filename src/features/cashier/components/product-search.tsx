@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Product, Discount } from '@/types/cashier'
 import { QuantityInputDialog } from './quantity-input-dialog'
 import { useProductSearch as useProductSearchHook } from '../hooks/use-product-search'
+import { formatCurrency } from '@/utils/format'
 import {
   getExpiryInfo,
   getBestDiscount,
@@ -204,7 +205,22 @@ function ProductSearch({
           className="absolute top-full mt-1 w-full z-50 max-h-96 overflow-auto border shadow-lg"
         >
           <div className="p-2">
-            {results.length > 0 ? (
+            {isLoading ? (
+              // Simple spinner loading state
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t('cashier.productSearch.searching')}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('cashier.productSearch.searchingDescription')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : results.length > 0 ? (
               <div className="space-y-1">
                 {results.map((product, index) => {
                   const expiryInfo = getExpiryInfo(product)
@@ -232,7 +248,7 @@ function ProductSearch({
                           </div>
 
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>Rp {product.price.toLocaleString()}</span>
+                            <span>{formatCurrency(product.price)}</span>
                             <span>•</span>
                             <span className={stockStatus.color}>
                               {product.currentStock} {t('cashier.productSearch.inStock')}
@@ -261,7 +277,9 @@ function ProductSearch({
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 {expiryInfo.isExpired
                                   ? t('cashier.productSearch.expired')
-                                  : `${expiryInfo.daysRemaining}d`}
+                                  : t('cashier.productSearch.daysLeft', {
+                                      days: expiryInfo.daysRemaining
+                                    })}
                               </Badge>
                             )}
 
@@ -285,7 +303,7 @@ function ProductSearch({
                   </div>
                   <div className="space-y-1">
                     <p className="font-medium text-sm text-muted-foreground">
-                      Produk tidak ditemukan
+                      {t('cashier.productSearch.productNotFound')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t('cashier.productSearch.noResults', { query: query.trim() })}

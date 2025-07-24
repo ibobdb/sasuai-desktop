@@ -15,22 +15,21 @@
       "select": "Pilih"
     },
     "productSearch": {
-      "title": "Pencarian Produk",
+      "title": "Cari Produk",
       "placeholder": "Cari berdasarkan nama, barcode, atau SKU...",
       "noResults": "Tidak ada produk yang cocok dengan \"{{query}}\"",
-      "minCharacters": "Masukkan minimal 3 karakter untuk mencari",
       "quickAdd": "Tambah Cepat",
-      "barcode": "Barcode",
-      "sku": "SKU",
+      "searching": "Mencari produk...",
+      "searchingDescription": "Silakan tunggu sebentar",
       "inStock": "Tersedia",
-      "limitedStock": "Terbatas",
-      "lowStock": "Stok rendah",
       "outOfStock": "Habis",
       "expired": "Kadaluarsa",
-      "expiringFormat": "Segera kadaluarsa: {{date}} ({{days}} hari)",
-      "expiresOn": "Kadaluarsa: {{date}}",
-      "fetchError": "Gagal mengambil produk",
-      "fetchErrorDescription": "Silakan coba lagi nanti"
+      "productNotFound": "Produk tidak ditemukan",
+      "daysLeft": "{{days}}h",
+      "barcode": "Barcode",
+      "sku": "SKU",
+      "expiresOn": "Kadaluarsa pada {{date}}",
+      "expiringFormat": "Kadaluarsa {{date}} ({{days}} hari lagi)"
     },
     "quantityDialog": {
       "title": "Tambahkan Produk ke Keranjang",
@@ -49,7 +48,7 @@
     "memberSection": {
       "title": "Pelanggan",
       "clear": "Hapus",
-      "points": "poin",
+      "points": "{{points}} poin",
       "memberDiscount": "Diskon Pelanggan:",
       "selectDiscount": "Pilih diskon",
       "removeDiscount": "Hapus Diskon",
@@ -65,11 +64,15 @@
       "noMembersFound": "Pelanggan tidak ditemukan",
       "minCharacters": "Masukkan minimal 3 karakter untuk mencari",
       "newMember": "Pelanggan Baru",
-      "phone": "Telepon",
-      "cardId": "ID Kartu",
+      "phone": "Telepon: {{phone}}",
+      "cardId": "ID Kartu: {{cardId}}",
       "banned": "Diblokir",
       "memberBanned": "Pelanggan diblokir",
-      "memberBannedDescription": "Pelanggan ini telah diblokir dan tidak dapat dipilih."
+      "memberBannedDescription": "Pelanggan ini telah diblokir dan tidak dapat dipilih.",
+      "discounts": "{{count}} diskon",
+      "searching": "Mencari pelanggan...",
+      "searchingDescription": "Silakan tunggu sebentar",
+      "noResults": "Tidak ada pelanggan yang cocok dengan \"{{query}}\""
     },
     "createMember": {
       "title": "Tambah Pelanggan Baru",
@@ -119,7 +122,13 @@
       "amountPaid": "Jumlah Dibayar",
       "change": "Kembalian",
       "close": "Tutup",
-      "tryAgain": "Coba Lagi"
+      "tryAgain": "Coba Lagi",
+      "retryPrint": "Cetak Ulang",
+      "retryingPrint": "Mencetak...",
+      "printSuccess": "Struk berhasil dicetak",
+      "printSuccessDescription": "Struk transaksi telah berhasil dicetak",
+      "printError": "Gagal mencetak struk",
+      "printErrorDescription": "Terjadi kesalahan saat mencetak struk. Silakan coba lagi."
     },
     "summary": {
       "title": "Total Pembayaran",

@@ -1,18 +1,20 @@
-import { useState, useCallback, useRef } from 'react'
-import { useProductSearch as useProductSearchQuery } from './use-cashier-queries'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { Member } from '@/types/cashier'
 import { useDebounce } from '@/hooks/use-debounce'
-import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
 import { useClickOutside } from '@/hooks/use-click-outside'
-import { Product, UseProductSearchReturn, UseProductSearchProps } from '@/types/cashier'
+import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation'
+import { useMemberSearch as useMemberSearchQuery } from './use-cashier-queries'
 
-export function useProductSearch({
-  onProductSelect,
-  quickAddMode = false
-}: UseProductSearchProps): UseProductSearchReturn {
+interface MemberSearchConfig {
+  onMemberSelect: (member: Member) => void
+}
+
+export function useMemberSearch(config: MemberSearchConfig) {
+  const { onMemberSelect } = config
+
   const [showResults, setShowResults] = useState(false)
   const [lastSearchedQuery, setLastSearchedQuery] = useState('')
   const [previousQueryLength, setPreviousQueryLength] = useState(0)
-
   const inputRef = useRef<HTMLInputElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
@@ -44,37 +46,55 @@ export function useProductSearch({
   const {
     value: query,
     setValue: setQuery,
-    isDebouncing
+    isDebouncing,
+    isTooShort
   } = useDebounce('', {
-    delay: 50,
     minLength: 3,
     callback: searchCallback
   })
 
-  const handleSelect = useCallback(
-    (product: Product) => {
-      if (quickAddMode) {
-        onProductSelect(product, 1)
-        setQuery('')
-        setShowResults(false)
-      } else {
-        onProductSelect(product)
-      }
-    },
-    [quickAddMode, onProductSelect, setQuery]
-  )
-
-  const { data: searchResults = [], isLoading } = useProductSearchQuery(
+  const { data: searchResults = [], isLoading } = useMemberSearchQuery(
     { query: lastSearchedQuery },
     lastSearchedQuery.length >= 3
   )
 
+  const handleSelect = useCallback(
+    (member: Member) => {
+      setQuery('')
+      setShowResults(false)
+      setLastSearchedQuery('')
+
+      onMemberSelect(member)
+
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    },
+    [onMemberSelect, setQuery]
+  )
+
   const handleManualSearch = useCallback(() => {
-    if (query.trim().length >= 3) {
+    if (query.trim().length >= 3 && query !== lastSearchedQuery) {
       setLastSearchedQuery(query)
       setShowResults(true)
     }
-  }, [query])
+  }, [query, lastSearchedQuery])
+
+  const handleAutoSelect = useCallback(() => {
+    if (searchResults.length > 0 && query.trim().length >= 3) {
+      const exactMatch = searchResults.find(
+        (m) =>
+          m.phone === query || m.cardId === query || m.name.toLowerCase() === query.toLowerCase()
+      )
+      if (exactMatch) {
+        handleSelect(exactMatch)
+      }
+    }
+  }, [searchResults, query, handleSelect])
+
+  useEffect(() => {
+    handleAutoSelect()
+  }, [handleAutoSelect])
 
   const { focusedIndex, listItemsRef, handleKeyDown, handleItemMouseEnter } = useKeyboardNavigation(
     {
@@ -92,13 +112,18 @@ export function useProductSearch({
     setShowResults(false)
   })
 
-  const clearSearch = useCallback(() => {
+  const handleInputFocus = () => {
+    if (searchResults.length > 0) {
+      setShowResults(true)
+    }
+  }
+
+  const clearSearch = () => {
     setQuery('')
     setShowResults(false)
     setLastSearchedQuery('')
-    setPreviousQueryLength(0)
     inputRef.current?.focus()
-  }, [setQuery])
+  }
 
   return {
     query,
@@ -106,14 +131,20 @@ export function useProductSearch({
     results: searchResults,
     showResults,
     setShowResults,
-    isLoading: isLoading || isDebouncing,
+    isLoading,
+    isDebouncing,
+    isTooShort,
+
     handleSelect,
     handleManualSearch,
     clearSearch,
+    handleInputFocus,
+
     focusedIndex,
     listItemsRef,
     handleKeyDown,
     handleItemMouseEnter,
+
     inputRef,
     resultsRef
   }

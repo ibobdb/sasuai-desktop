@@ -39,7 +39,6 @@ export function QuantityInputDialog({
     }
   }, [open, product])
 
-  // Focus input when dialog opens
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.select()
@@ -92,13 +91,11 @@ export function QuantityInputDialog({
     }
   }
 
-  // Get expiry information
   const getExpiryInfo = (product: Product | null) => {
     if (!product || !product.batches || product.batches.length === 0) {
       return null
     }
 
-    // Find the closest expiry date
     const sortedBatches = [...product.batches].sort(
       (a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
     )
@@ -137,7 +134,6 @@ export function QuantityInputDialog({
         </DialogHeader>
 
         <div className="py-4 space-y-4">
-          {/* Product info card */}
           <div className="p-3 bg-muted/20 rounded-lg border">
             <h3 className="font-medium text-lg">{product.name}</h3>
 
@@ -162,7 +158,6 @@ export function QuantityInputDialog({
                 {t('cashier.quantityDialog.availableStock')}: {product.currentStock || 0}
               </p>
 
-              {/* Stock indicator - simple bar */}
               {product.currentStock > 0 && (
                 <div className="mt-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                   <div
@@ -180,7 +175,6 @@ export function QuantityInputDialog({
               )}
             </div>
 
-            {/* Expiry date information with improved styling */}
             {expiryInfo && (
               <div
                 className={`mt-2 text-sm p-1.5 rounded-md flex items-center ${
@@ -208,7 +202,6 @@ export function QuantityInputDialog({
             )}
           </div>
 
-          {/* Quantity selector with improved accessibility */}
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium mb-2">
               {t('cashier.quantityDialog.quantity')}
@@ -249,7 +242,6 @@ export function QuantityInputDialog({
               </Button>
             </div>
 
-            {/* Warning when quantity exceeds stock */}
             {maxQuantity && quantity > maxQuantity && (
               <p className="mt-2 text-sm text-amber-600 flex items-center">
                 <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
@@ -258,7 +250,6 @@ export function QuantityInputDialog({
             )}
           </div>
 
-          {/* Total price with more prominence */}
           <div className="p-2 bg-muted/20 rounded-md">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">

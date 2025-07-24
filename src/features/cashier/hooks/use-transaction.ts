@@ -40,12 +40,11 @@ export function useTransaction(
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({
     success: false
   })
+  const [isRetryingPrint, setIsRetryingPrint] = useState(false)
 
   const isProcessingTransaction = processTransactionMutation.isPending
 
-  // Validate transaction before processing
   const validateTransaction = useCallback((): boolean => {
-    // Check if cart has items
     if (cart.length === 0) {
       toast.error(t('cashier.validation.emptyCart'), {
         description: t('cashier.validation.emptyCartDescription')
@@ -53,7 +52,6 @@ export function useTransaction(
       return false
     }
 
-    // Check stock levels
     const invalidStockItem = cart.find((item) => item.quantity > (item.currentStock || 0))
 
     if (invalidStockItem) {
@@ -66,7 +64,6 @@ export function useTransaction(
       return false
     }
 
-    // Validate payment amount against the total after discounts
     if (paymentAmount < total) {
       toast.error(t('cashier.validation.insufficientPayment'), {
         description: t('cashier.validation.insufficientPaymentDescription', {
@@ -76,7 +73,6 @@ export function useTransaction(
       return false
     }
 
-    // Check if any selected discounts are still valid (expired/usage limit)
     const cartItemWithInvalidDiscount = cart.find(
       (item) => item.selectedDiscount && !isDiscountValid(item.selectedDiscount, false)
     )
@@ -91,7 +87,6 @@ export function useTransaction(
       return false
     }
 
-    // Check member personal discount validity (expired/usage limit)
     if (selectedMemberDiscount && !isDiscountValid(selectedMemberDiscount, false)) {
       toast.error(t('cashier.validation.invalidMemberDiscount'), {
         description: t('cashier.validation.invalidMemberDiscountDescription', {
@@ -101,7 +96,6 @@ export function useTransaction(
       return false
     }
 
-    // Check tier discount validity (expired/usage limit)
     if (selectedTierDiscount && !isDiscountValid(selectedTierDiscount, false)) {
       toast.error(t('cashier.validation.invalidTierDiscount'), {
         description: t('cashier.validation.invalidTierDiscountDescription', {
@@ -114,30 +108,23 @@ export function useTransaction(
     return true
   }, [cart, paymentAmount, total, selectedMemberDiscount, selectedTierDiscount, t])
 
-  // Handle payment processing
-  // Helper function untuk auto-print receipt
   const printReceiptAfterTransaction = useCallback(
     async (transactionId: string) => {
       try {
-        // Get transaction detail first menggunakan API yang sama seperti di data-table-row-actions
         const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
 
         if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
-          if (import.meta.env.DEV)
-            if (import.meta.env.DEV)
-              console.error('Failed to load transaction details for printing')
+          if (import.meta.env.DEV) console.error('Failed to load transaction details for printing')
           return
         }
 
         const transactionDetail = detailResponse.data.transactionDetails
 
-        // Get printer settings
         const printerSettingsResponse = await window.api.printer.getSettings()
         const printerSettings = printerSettingsResponse.success
           ? (printerSettingsResponse.data as PrinterSettings)
           : undefined
 
-        // Generate and print receipt menggunakan fungsi yang sudah ada
         const receiptData = generateReceiptData(transactionDetail, settings.general.storeInfo)
         const receiptHTML = generateReceiptHTML(
           receiptData,
@@ -149,16 +136,34 @@ export function useTransaction(
         if (response.success) {
           toast.success('Receipt dicetak otomatis')
         } else {
-          if (import.meta.env.DEV)
-            if (import.meta.env.DEV) console.error('Print failed:', response.error?.message)
+          if (import.meta.env.DEV) console.error('Print failed:', response.error?.message)
         }
       } catch (error) {
-        if (import.meta.env.DEV)
-          if (import.meta.env.DEV) console.error('Failed to print receipt:', error)
+        if (import.meta.env.DEV) console.error('Failed to print receipt:', error)
       }
     },
     [settings.general.storeInfo, settings.general.footerInfo]
   )
+
+  const retryPrintReceipt = useCallback(async (): Promise<void> => {
+    if (!paymentStatus.internalId || isRetryingPrint) return
+
+    setIsRetryingPrint(true)
+
+    try {
+      await printReceiptAfterTransaction(paymentStatus.internalId)
+      toast.success(t('cashier.paymentStatus.printSuccess'), {
+        description: t('cashier.paymentStatus.printSuccessDescription')
+      })
+    } catch (error) {
+      toast.error(t('cashier.paymentStatus.printError'), {
+        description: t('cashier.paymentStatus.printErrorDescription')
+      })
+      if (import.meta.env.DEV) console.error('Failed to retry print:', error)
+    } finally {
+      setIsRetryingPrint(false)
+    }
+  }, [paymentStatus.internalId, isRetryingPrint, printReceiptAfterTransaction, t])
 
   const handlePayment = useCallback(async (): Promise<void> => {
     if (isProcessingTransaction) return
@@ -168,6 +173,10 @@ export function useTransaction(
     try {
       const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
       const finalAmount = totalAmount - totalDiscount
+
+      if (paymentMethod !== 'cash') {
+        setPaymentAmount(finalAmount)
+      }
 
       const transactionItems: TransactionItem[] = cart.map((item) => {
         const batch = item.batches?.find((b) => b.id === item.batchId)
@@ -209,10 +218,10 @@ export function useTransaction(
         setPaymentStatus({
           success: true,
           transactionId: result.data.tranId,
+          internalId: result.data.id,
           change: change > 0 ? change : undefined
         })
 
-        // Auto-print receipt setelah transaksi berhasil
         if (result.data.id) {
           printReceiptAfterTransaction(result.data.id)
         }
@@ -226,7 +235,7 @@ export function useTransaction(
       setPaymentDialogOpen(false)
       setPaymentStatusDialogOpen(true)
     } catch (error) {
-      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Transaction error:', error)
+      if (import.meta.env.DEV) console.error('Transaction error:', error)
       setPaymentStatus({
         success: false,
         errorMessage:
@@ -247,6 +256,7 @@ export function useTransaction(
     globalDiscount?.code,
     paymentMethod,
     paymentAmount,
+    setPaymentAmount,
     processTransactionMutation,
     printReceiptAfterTransaction,
     t
@@ -254,7 +264,6 @@ export function useTransaction(
 
   const handleStatusDialogClose = useCallback(() => {
     setPaymentStatusDialogOpen(false)
-    // Reset payment status after closing
     setTimeout(() => {
       setPaymentStatus({ success: false })
     }, 500)
@@ -267,10 +276,12 @@ export function useTransaction(
     paymentStatusDialogOpen,
     paymentStatus,
     isProcessingTransaction,
+    isRetryingPrint,
     setPaymentMethod,
     setPaymentAmount,
     setPaymentDialogOpen,
     handlePayment,
-    handleStatusDialogClose
+    handleStatusDialogClose,
+    retryPrintReceipt
   }
 }
