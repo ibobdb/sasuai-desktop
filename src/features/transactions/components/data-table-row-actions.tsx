@@ -2,7 +2,7 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
 import { IconEye, IconReceipt } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,

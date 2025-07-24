@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Member } from '@/types/members'
 import { DataTable } from '@/components/common/data-table'
@@ -17,14 +18,14 @@ interface MemberTableProps {
   totalCount?: number
 }
 
-export function MemberTable({
+const MemberTableComponent = ({
   columns,
   data,
   pageCount = 0,
   pagination,
   onPaginationChange,
   totalCount
-}: MemberTableProps) {
+}: MemberTableProps) => {
   return (
     <DataTable
       columns={columns}
@@ -36,3 +37,5 @@ export function MemberTable({
     />
   )
 }
+
+export const MemberTable = memo(MemberTableComponent)

@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatCurrency } from '@/utils/format'
 import { TrendingUp, TrendingDown, ArrowUpDown } from 'lucide-react'
@@ -7,20 +8,33 @@ interface MemberTransactionSummaryProps {
   memberDetail: MemberDetail
 }
 
-export function MemberTransactionSummary({ memberDetail }: MemberTransactionSummaryProps) {
+const MemberTransactionSummaryComponent = ({ memberDetail }: MemberTransactionSummaryProps) => {
   const { t } = useTranslation(['member'])
 
-  const totalTransactions = memberDetail.transactions?.length || 0
-  const totalSpent =
-    memberDetail.transactions?.reduce((sum, transaction) => sum + transaction.totalAmount, 0) || 0
+  const { totalTransactions, totalSpent } = useMemo(() => {
+    const transactions = memberDetail.transactions || []
+    const count = transactions.length
+    const total = transactions.reduce((sum, transaction) => sum + transaction.totalAmount, 0)
 
-  const totalSaved =
-    memberDetail.transactions?.reduce(
+    return {
+      totalTransactions: count,
+      totalSpent: total
+    }
+  }, [memberDetail.transactions])
+
+  const { totalSaved, averageTransactionValue } = useMemo(() => {
+    const transactions = memberDetail.transactions || []
+    const saved = transactions.reduce(
       (sum, transaction) => sum + (transaction.discountAmount || 0),
       0
-    ) || 0
+    )
+    const average = totalTransactions > 0 ? totalSpent / totalTransactions : 0
 
-  const averageTransactionValue = totalTransactions > 0 ? totalSpent / totalTransactions : 0
+    return {
+      totalSaved: saved,
+      averageTransactionValue: average
+    }
+  }, [memberDetail.transactions, totalTransactions, totalSpent])
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -57,3 +71,5 @@ export function MemberTransactionSummary({ memberDetail }: MemberTransactionSumm
     </div>
   )
 }
+
+export const MemberTransactionSummary = memo(MemberTransactionSummaryComponent)

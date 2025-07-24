@@ -1,20 +1,4 @@
-/*
- * MANUAL TIMER CLEANUP REQUIRED for src/context/updater-provider.tsx
- *
- * 1. Add useRef import: import { useRef } from 'react'
- * 2. Add timer ref: const timerRef = useRef<NodeJS.Timeout | null>(null)
- * 3. Add cleanup useEffect:
- *    useEffect(() => {
- *      return () => {
- *        if (timerRef.current) {
- *          clearTimeout(timerRef.current)
- *        }
- *      }
- *    }, [])
- * 4. Replace setTimeout calls:
- *    timerRef.current = setTimeout(() => { ... }, delay)
- */
-import { createContext, useContext, useEffect, useState, useCallback, memo } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
 interface UpdateInfo {
   version: string
@@ -180,7 +164,6 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
   return <UpdaterContext.Provider value={value}>{children}</UpdaterContext.Provider>
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useUpdater = () => {
   const context = useContext(UpdaterContext)
   if (context === undefined) {

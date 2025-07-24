@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DataTable } from '@/components/common/data-table'
@@ -7,7 +7,7 @@ import { useRewardClaimColumns } from './reward-claim-columns'
 import { RewardClaimFilterParams } from '@/types/rewards'
 import { fetchRewardClaims } from '../actions/reward-operations'
 
-export function RewardClaimsTable() {
+const RewardClaimsTableComponent = () => {
   const columns = useRewardClaimColumns()
   const [filters, setFilters] = useState<RewardClaimFilterParams>({
     page: 1,
@@ -77,3 +77,5 @@ export function RewardClaimsTable() {
     </>
   )
 }
+
+export const RewardClaimsTable = memo(RewardClaimsTableComponent)

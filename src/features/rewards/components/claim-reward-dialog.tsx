@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -32,7 +32,7 @@ interface ClaimRewardDialogProps {
   onClaimSuccess?: () => void
 }
 
-export function ClaimRewardDialog({
+function ClaimRewardDialogComponent({
   reward: initialReward,
   isOpen,
   onClose,
@@ -57,43 +57,53 @@ export function ClaimRewardDialog({
     }
   }, [isOpen])
 
-  const availableRewards = rewards.filter((r) => r.isActive && r.stock > 0)
-  const selectedReward = availableRewards.find((r) => r.id === selectedRewardId) || null
+  const availableRewards = useMemo(
+    () => rewards.filter((r) => r.isActive && r.stock > 0),
+    [rewards]
+  )
 
-  const handleMemberSelect = (member: Member | null) => {
+  const selectedReward = useMemo(
+    () => availableRewards.find((r) => r.id === selectedRewardId) || null,
+    [availableRewards, selectedRewardId]
+  )
+
+  const handleMemberSelect = useCallback((member: Member | null) => {
     setSelectedMember(member)
-  }
+  }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
 
-    if (!selectedReward || !selectedMember) return
+      if (!selectedReward || !selectedMember) return
 
-    setIsSubmitting(true)
+      setIsSubmitting(true)
 
-    try {
-      const response = await claimReward(selectedMember.id, selectedReward.id)
-      if (response.success) {
-        toast.success(t('messages.claimSuccess'), {
-          description: t('messages.claimSuccessDesc')
-        })
-        onClaimSuccess?.()
-        onClose()
-        setSelectedMember(null)
-        setSelectedRewardId('')
-      } else {
+      try {
+        const response = await claimReward(selectedMember.id, selectedReward.id)
+        if (response.success) {
+          toast.success(t('messages.claimSuccess'), {
+            description: t('messages.claimSuccessDesc')
+          })
+          onClaimSuccess?.()
+          onClose()
+          setSelectedMember(null)
+          setSelectedRewardId('')
+        } else {
+          toast.error(t('messages.claimError'), {
+            description: response.error || t('messages.claimErrorDesc')
+          })
+        }
+      } catch (error) {
         toast.error(t('messages.claimError'), {
-          description: response.error || t('messages.claimErrorDesc')
+          description: error instanceof Error ? error.message : t('messages.claimErrorDesc')
         })
+      } finally {
+        setIsSubmitting(false)
       }
-    } catch (error) {
-      toast.error(t('messages.claimError'), {
-        description: error instanceof Error ? error.message : t('messages.claimErrorDesc')
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+    },
+    [selectedReward, selectedMember, t, onClaimSuccess, onClose]
+  )
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -204,3 +214,5 @@ export function ClaimRewardDialog({
     </Dialog>
   )
 }
+
+export const ClaimRewardDialog = memo(ClaimRewardDialogComponent)

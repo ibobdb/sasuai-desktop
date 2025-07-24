@@ -1,6 +1,6 @@
 import { IconReceipt, IconPrinter } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TransactionDetail } from '@/types/transactions'
 import { PrinterSettings } from '@/types/settings'

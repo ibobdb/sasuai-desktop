@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -10,7 +11,7 @@ interface MemberHeaderProps {
   memberDetail: MemberDetail
 }
 
-export function MemberHeader({ memberDetail }: MemberHeaderProps) {
+const MemberHeaderComponent = ({ memberDetail }: MemberHeaderProps) => {
   const { t } = useTranslation(['member'])
 
   return (
@@ -57,3 +58,5 @@ export function MemberHeader({ memberDetail }: MemberHeaderProps) {
     </div>
   )
 }
+
+export const MemberHeader = memo(MemberHeaderComponent)

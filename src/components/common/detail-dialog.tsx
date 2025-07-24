@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react'
+import { ReactNode } from 'react'
 import { IconLoader2 } from '@tabler/icons-react'
 import {
   Dialog,
