@@ -27,26 +27,35 @@ export function PrinterSettingsTab() {
   const [settings, setSettings] = useState<PrinterSettings>({
     printerName: '',
     paperSize: '58mm',
-    margin: '0 0 0 0',
+    margin: '0',
     copies: 1,
-    timeOutPerLine: 400,
     fontSize: 12,
     fontFamily: 'Courier New',
     lineHeight: 1.2,
-    enableBold: true,
-    autocut: false,
-    cashdrawer: false,
-    encoding: 'utf-8'
+    enableBold: true
   })
   const [originalSettings, setOriginalSettings] = useState<PrinterSettings>(settings)
   const [availablePrinters, setAvailablePrinters] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingPrint, setIsTestingPrint] = useState(false)
 
-  // Check if there are unsaved changes
+  const settingsHash = useMemo(() => {
+    return Object.entries(settings)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}:${value}`)
+      .join('|')
+  }, [settings])
+
+  const originalHash = useMemo(() => {
+    return Object.entries(originalSettings)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}:${value}`)
+      .join('|')
+  }, [originalSettings])
+
   const hasUnsavedChanges = useMemo(() => {
-    return JSON.stringify(settings) !== JSON.stringify(originalSettings)
-  }, [settings, originalSettings])
+    return settingsHash !== originalHash
+  }, [settingsHash, originalHash])
 
   const loadSettings = useCallback(async () => {
     try {
@@ -75,7 +84,6 @@ export function PrinterSettingsTab() {
     }
   }, [t])
 
-  // Load settings on mount
   useEffect(() => {
     loadSettings()
     loadPrinters()
@@ -87,7 +95,6 @@ export function PrinterSettingsTab() {
       try {
         const response: PrinterResponse = await window.api.printer.saveSettings(newSettings)
         if (response.success) {
-          setSettings(newSettings)
           setOriginalSettings(newSettings)
           toast.success(t('printer.saveSuccess'))
         } else {
@@ -105,7 +112,10 @@ export function PrinterSettingsTab() {
 
   const updateSetting = useCallback(
     <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
-      setSettings((prevSettings) => ({ ...prevSettings, [key]: value }))
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        [key]: value
+      }))
     },
     []
   )
@@ -131,6 +141,37 @@ export function PrinterSettingsTab() {
     }
   }, [t])
 
+  const paperSizeOptions = useMemo(
+    () => [
+      { value: '58mm', label: '58mm' },
+      { value: '57mm', label: '57mm' },
+      { value: '76mm', label: '76mm' },
+      { value: '78mm', label: '78mm' },
+      { value: '80mm', label: '80mm' },
+      { value: '44mm', label: '44mm' }
+    ],
+    []
+  )
+
+  const fontFamilyOptions = useMemo(
+    () => [
+      { value: 'Courier New', label: 'Courier New' },
+      { value: 'Consolas', label: 'Consolas' },
+      { value: 'Monaco', label: 'Monaco' },
+      { value: 'Lucida Console', label: 'Lucida Console' },
+      { value: 'Arial', label: 'Arial' },
+      { value: 'Verdana', label: 'Verdana' }
+    ],
+    []
+  )
+
+  const printerOptions = useMemo(() => {
+    return [
+      { value: 'system-default', label: t('printer.systemDefault') },
+      ...availablePrinters.map((printer) => ({ value: printer, label: printer }))
+    ]
+  }, [availablePrinters, t])
+
   return (
     <div className="space-y-6">
       <Card>
@@ -149,10 +190,9 @@ export function PrinterSettingsTab() {
                   <SelectValue placeholder={t('printer.selectPrinterPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="system-default">{t('printer.systemDefault')}</SelectItem>
-                  {availablePrinters.map((printer) => (
-                    <SelectItem key={printer} value={printer}>
-                      {printer}
+                  {printerOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -175,12 +215,11 @@ export function PrinterSettingsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="58mm">58mm</SelectItem>
-                  <SelectItem value="57mm">57mm</SelectItem>
-                  <SelectItem value="76mm">76mm</SelectItem>
-                  <SelectItem value="78mm">78mm</SelectItem>
-                  <SelectItem value="80mm">80mm</SelectItem>
-                  <SelectItem value="44mm">44mm</SelectItem>
+                  {paperSizeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -193,6 +232,16 @@ export function PrinterSettingsTab() {
                 max="10"
                 value={settings.copies}
                 onChange={(e) => updateSetting('copies', parseInt(e.target.value) || 1)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm">{t('printer.margin')} (mm)</Label>
+              <Input
+                type="text"
+                placeholder="0"
+                value={settings.margin}
+                onChange={(e) => updateSetting('margin', e.target.value)}
               />
             </div>
 
@@ -217,12 +266,11 @@ export function PrinterSettingsTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Courier New">Courier New</SelectItem>
-                  <SelectItem value="Consolas">Consolas</SelectItem>
-                  <SelectItem value="Monaco">Monaco</SelectItem>
-                  <SelectItem value="Lucida Console">Lucida Console</SelectItem>
-                  <SelectItem value="Arial">Arial</SelectItem>
-                  <SelectItem value="Verdana">Verdana</SelectItem>
+                  {fontFamilyOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -238,54 +286,20 @@ export function PrinterSettingsTab() {
                 onChange={(e) => updateSetting('lineHeight', parseFloat(e.target.value) || 1.2)}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm">{t('printer.margin')}</Label>
-              <Input
-                type="text"
-                placeholder="0 0 0 0"
-                value={settings.margin}
-                onChange={(e) => updateSetting('margin', e.target.value)}
-              />
-            </div>
           </div>
 
           {/* Print Options */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="text-sm font-medium">{t('printer.printOptions')}</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="enableBold"
-                  checked={settings.enableBold}
-                  onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
-                />
-                <Label htmlFor="enableBold" className="text-sm cursor-pointer flex-1">
-                  {t('printer.enableBold')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="autocut"
-                  checked={settings.autocut}
-                  onCheckedChange={(autocut) => updateSetting('autocut', autocut)}
-                />
-                <Label htmlFor="autocut" className="text-sm cursor-pointer flex-1">
-                  {t('printer.autocut')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <Switch
-                  id="cashdrawer"
-                  checked={settings.cashdrawer}
-                  onCheckedChange={(cashdrawer) => updateSetting('cashdrawer', cashdrawer)}
-                />
-                <Label htmlFor="cashdrawer" className="text-sm cursor-pointer flex-1">
-                  {t('printer.drawer')}
-                </Label>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="enableBold" className="text-sm cursor-pointer">
+                {t('printer.enableBold')}
+              </Label>
+              <Switch
+                id="enableBold"
+                checked={settings.enableBold}
+                onCheckedChange={(enableBold) => updateSetting('enableBold', enableBold)}
+              />
             </div>
           </div>
 

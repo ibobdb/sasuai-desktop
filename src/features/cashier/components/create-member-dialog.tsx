@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, UserPlus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { API_ENDPOINTS } from '@/config/api'
+import { cashierOperations } from '@/features/cashier/actions/cashier-operations'
 import {
   Dialog,
   DialogContent,
@@ -15,11 +15,11 @@ import {
   DialogClose
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Member, CreateMemberDialogProps } from '@/types/cashier'
+import { CreateMemberDialogProps } from '@/types/cashier'
 
 const REQUIRED_FIELDS = ['name', 'cardId', 'phone'] as const
 
-export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemberDialogProps) {
+function CreateMemberDialogComponent({ open, onOpenChange, onSuccess }: CreateMemberDialogProps) {
   const { t } = useTranslation(['cashier'])
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -31,7 +31,7 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
     phone: ''
   })
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const formErrors: Record<string, string> = {}
     let isValid = true
 
@@ -58,51 +58,9 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
 
     setErrors(formErrors)
     return isValid
-  }
+  }, [newMember, t])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      const memberData = {
-        ...newMember,
-        email: newMember.email.trim() === '' ? null : newMember.email,
-        address: newMember.address.trim() === '' ? null : newMember.address
-      }
-
-      const response = (await window.api.request(API_ENDPOINTS.MEMBERS.BASE, {
-        method: 'POST',
-        data: memberData
-      })) as { success: boolean; data: Member; message?: string }
-
-      if (response.success) {
-        toast.success(t('cashier.createMember.successTitle'), {
-          description: t('cashier.createMember.successDescription', { name: newMember.name })
-        })
-        onSuccess(response.data)
-        handleClose()
-      } else {
-        toast.error(t('cashier.createMember.errorTitle'), {
-          description: response.message || t('cashier.createMember.errorDefault')
-        })
-      }
-    } catch (error) {
-      console.error('Error creating member:', error)
-      toast.error(t('cashier.createMember.errorTitle'), {
-        description: t('cashier.createMember.errorDefault')
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setNewMember({
       name: '',
       address: '',
@@ -111,23 +69,68 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
       phone: ''
     })
     setErrors({})
-  }
+  }, [])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isLoading) {
       resetForm()
       onOpenChange(false)
     }
-  }
+  }, [isLoading, resetForm, onOpenChange])
 
-  const handleInputChange = (field: keyof typeof newMember, value: string) => {
-    setNewMember((prev) => ({ ...prev, [field]: value }))
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
 
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }))
-    }
-  }
+      if (!validateForm()) {
+        return
+      }
+
+      setIsLoading(true)
+
+      try {
+        const memberData = {
+          ...newMember,
+          email: newMember.email.trim() === '' ? null : newMember.email,
+          address: newMember.address.trim() === '' ? null : newMember.address
+        }
+
+        const response = await cashierOperations.createMember(memberData)
+
+        if (response.success) {
+          toast.success(t('cashier.createMember.successTitle'), {
+            description: t('cashier.createMember.successDescription', { name: newMember.name })
+          })
+          onSuccess(response.data)
+          handleClose()
+        } else {
+          toast.error(t('cashier.createMember.errorTitle'), {
+            description: response.message || t('cashier.createMember.errorDefault')
+          })
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) console.error('Error creating member:', error)
+        toast.error(t('cashier.createMember.errorTitle'), {
+          description: t('cashier.createMember.errorDefault')
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [newMember, t, onSuccess, validateForm, handleClose]
+  )
+
+  const handleInputChange = useCallback(
+    (field: keyof typeof newMember, value: string) => {
+      setNewMember((prev) => ({ ...prev, [field]: value }))
+
+      // Clear error when user starts typing
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: '' }))
+      }
+    },
+    [errors]
+  )
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? () => {} : onOpenChange}>
@@ -261,3 +264,5 @@ export function CreateMemberDialog({ open, onOpenChange, onSuccess }: CreateMemb
     </Dialog>
   )
 }
+
+export const CreateMemberDialog = memo(CreateMemberDialogComponent)

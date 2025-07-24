@@ -69,7 +69,8 @@ export function MemberFormDialog({
       }
     },
     onError: (error) => {
-      console.error('Error creating member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error creating member:', error)
       toast.error(t('member.form.createError'), {
         description: t('member.form.errorDefault')
       })
@@ -94,7 +95,8 @@ export function MemberFormDialog({
       }
     },
     onError: (error) => {
-      console.error('Error updating member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error updating member:', error)
       toast.error(t('member.form.updateError'), {
         description: t('member.form.errorDefault')
       })

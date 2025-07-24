@@ -32,7 +32,12 @@ export interface Discounts {
 
 export interface Pricing {
   originalAmount: number
-  discounts: {
+  memberDiscount: number
+  productDiscounts: number
+  totalDiscount: number
+  finalAmount: number
+  // Legacy support for nested discounts structure
+  discounts?: {
     total: number
     product?: number
     member?: {
@@ -51,7 +56,6 @@ export interface Pricing {
       amount: number
     }
   }
-  finalAmount: number
 }
 
 export interface Payment {
@@ -68,10 +72,9 @@ export interface Transaction {
   member: Entity | null
   pricing: Pricing
   payment: Payment
-  paymentMethod: PaymentMethod
   itemCount: number
   pointsEarned: number
-  createdAt: Date
+  createdAt: string | Date // API returns string, but can be Date after parsing
 }
 
 // Transaction detail types

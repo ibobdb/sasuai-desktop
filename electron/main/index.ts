@@ -1,12 +1,12 @@
 import { app, BrowserWindow, session, ipcMain } from 'electron'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { electronApp as electronAppUtils, optimizer } from '@electron-toolkit/utils'
 import Store from 'electron-store'
-import { createWindow, getMainWindow, setupWindowHandlers } from './window'
-import { setupApiHandlers } from './handlers/api-handlers'
-import { setupCookieHandlers } from './handlers/cookie-handlers'
-import { setupPrinterHandlers } from './handlers/printer-handlers'
+import { createWindow, getMainWindow } from './window'
 import { setupAutoUpdater } from './updater'
 import { AUTH_STORE_TOKEN_KEY, AUTH_STORE_USER_KEY } from './constants'
+import { CookieService } from './services/cookie-service'
+import { setupPrinterHandlers } from './handlers/printer-handlers'
+import { createApiClient } from './api-client'
 
 export interface StoreSchema {
   [AUTH_STORE_TOKEN_KEY]?: string
@@ -23,58 +23,261 @@ export const getTypedStore = (): Store<StoreSchema> => {
   return store
 }
 
-const setupStoreHandlers = () => {
-  ipcMain.handle('store:get', (_event, key) => {
-    return store.get(key)
-  })
+class ElectronApp {
+  private cookieService: CookieService | null = null
+  private apiClient: any = null
+  private requestCache = new Map<string, { data: any; timestamp: number }>()
+  private readonly CACHE_DURATION = 30000
 
-  ipcMain.handle('store:set', (_event, key, value) => {
-    store.set(key, value)
-    return true
-  })
+  async initialize() {
+    electronAppUtils.setAppUserModelId('com.electron')
 
-  ipcMain.handle('store:delete', (_event, key) => {
-    store.delete(key)
-    return true
-  })
-}
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
 
-const setupLanguageHandlers = () => {
-  ipcMain.handle('language:get', () => {
-    return store.get('language', 'en')
-  })
+    persistentSession = session.fromPartition(PERSIST_PARTITION)
 
-  ipcMain.handle('language:set', (_event, lang) => {
-    store.set('language', lang)
-    return true
-  })
-}
+    await createWindow()
 
-const initializeApp = async () => {
-  electronApp.setAppUserModelId('com.electron')
+    const mainWindow = getMainWindow()
+    if (mainWindow) {
+      setupAutoUpdater(mainWindow)
+    }
 
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  persistentSession = session.fromPartition(PERSIST_PARTITION)
-
-  await createWindow()
-
-  const mainWindow = getMainWindow()
-  if (mainWindow) {
-    setupAutoUpdater(mainWindow)
+    this.setupServices()
+    this.setupHandlers()
   }
 
-  setupApiHandlers()
-  setupCookieHandlers()
-  setupPrinterHandlers()
-  setupWindowHandlers()
-  setupStoreHandlers()
-  setupLanguageHandlers()
+  private setupServices() {
+    this.cookieService = new CookieService(persistentSession)
+    this.apiClient = createApiClient()
+  }
+
+  private setupHandlers() {
+    this.setupStoreHandlers()
+    this.setupLanguageHandlers()
+    this.setupAppHandlers()
+    this.setupWindowHandlers()
+    this.setupCookieHandlers()
+    setupPrinterHandlers() // Use dedicated printer handlers
+    this.setupApiHandlers()
+  }
+
+  private setupAppHandlers() {
+    ipcMain.handle('app:getVersion', () => app.getVersion())
+    ipcMain.handle('app:getName', () => app.getName())
+  }
+
+  private setupApiHandlers() {
+    ipcMain.handle('api:request', async (_event, url, options = {}) => {
+      const cacheKey = `${options.method || 'GET'}:${url}:${JSON.stringify(options.params || {})}`
+      const cached = this.requestCache.get(cacheKey)
+
+      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        return { success: true, data: cached.data }
+      }
+
+      try {
+        const response = await this.apiClient({
+          url,
+          ...options
+        })
+
+        const result = { success: true, data: response.data }
+        this.requestCache.set(cacheKey, { data: response.data, timestamp: Date.now() })
+        return result
+      } catch (error: any) {
+        if (error.response) {
+          if (error.response.status === 401 || error.response.status === 403) {
+            await this.clearAuthCookies()
+          }
+          return {
+            success: false,
+            error: {
+              status: error.response.status,
+              message: error.response.data?.message || 'Server error',
+              data: error.response.data
+            }
+          }
+        }
+        if (error.request) {
+          return {
+            success: false,
+            error: {
+              status: 0,
+              message: 'Network error: No response from server'
+            }
+          }
+        }
+        return {
+          success: false,
+          error: {
+            status: 0,
+            message: error.message || 'Unknown error occurred'
+          }
+        }
+      }
+    })
+
+    ipcMain.handle('api:clear-cache', () => {
+      this.requestCache.clear()
+      return { success: true }
+    })
+  }
+
+  private setupStoreHandlers() {
+    const storeCache = new Map<string, any>()
+
+    ipcMain.handle('store:get', (_event, key) => {
+      if (!storeCache.has(key)) {
+        storeCache.set(key, store.get(key))
+      }
+      return storeCache.get(key)
+    })
+
+    ipcMain.handle('store:set', (_event, key, value) => {
+      store.set(key, value)
+      storeCache.set(key, value)
+      return true
+    })
+
+    ipcMain.handle('store:delete', (_event, key) => {
+      store.delete(key)
+      storeCache.delete(key)
+      return true
+    })
+  }
+
+  private setupLanguageHandlers() {
+    let cachedLanguage: string | null = null
+
+    ipcMain.handle('language:get', () => {
+      if (!cachedLanguage) {
+        cachedLanguage = store.get('language', 'en')
+      }
+      return cachedLanguage
+    })
+
+    ipcMain.handle('language:set', (_event, lang) => {
+      store.set('language', lang)
+      cachedLanguage = lang
+      return true
+    })
+  }
+
+  private setupWindowHandlers() {
+    let cachedMaximizedState: boolean | null = null
+
+    ipcMain.handle('window:minimize', () => {
+      const mainWindow = getMainWindow()
+      if (mainWindow) {
+        mainWindow.minimize()
+        return true
+      }
+      return false
+    })
+
+    ipcMain.handle('window:maximize', () => {
+      const mainWindow = getMainWindow()
+      if (!mainWindow) return false
+
+      if (mainWindow.isMaximized()) {
+        mainWindow.unmaximize()
+        cachedMaximizedState = false
+        return false
+      } else {
+        mainWindow.maximize()
+        cachedMaximizedState = true
+        return true
+      }
+    })
+
+    ipcMain.handle('window:close', () => {
+      const mainWindow = getMainWindow()
+      if (mainWindow) {
+        mainWindow.close()
+        return true
+      }
+      return false
+    })
+
+    ipcMain.handle('window:isMaximized', () => {
+      const mainWindow = getMainWindow()
+      if (!mainWindow) return false
+
+      if (cachedMaximizedState === null) {
+        cachedMaximizedState = mainWindow.isMaximized()
+      }
+      return cachedMaximizedState
+    })
+
+    const mainWindow = getMainWindow()
+    if (mainWindow) {
+      mainWindow.on('maximize', () => {
+        cachedMaximizedState = true
+      })
+      mainWindow.on('unmaximize', () => {
+        cachedMaximizedState = false
+      })
+    }
+  }
+
+  private setupCookieHandlers() {
+    if (!this.cookieService) return
+
+    ipcMain.handle('cookies:get', async (_event, filter) => {
+      if (typeof filter === 'string') {
+        return await this.cookieService!.getCookie(filter)
+      }
+      if (filter?.name) {
+        return await this.cookieService!.getCookie(filter.name)
+      }
+      return null
+    })
+
+    ipcMain.handle('cookies:set', async (_event, details) => {
+      if (typeof details === 'object' && details.name && details.value !== undefined) {
+        return await this.cookieService!.setCookie(details)
+      }
+      return false
+    })
+
+    ipcMain.handle('cookies:remove', async (_event, url, name) => {
+      const cookieName = name || url
+      return await this.cookieService!.removeCookie(cookieName)
+    })
+
+    ipcMain.handle('cookies:clearAuth', async () => {
+      return await this.cookieService!.clearAuthCookies()
+    })
+  }
+
+  async clearAuthCookies() {
+    if (this.cookieService) {
+      return await this.cookieService.clearAuthCookies()
+    }
+    return false
+  }
+
+  cleanup() {
+    this.requestCache.clear()
+    if (this.cookieService) {
+      this.cookieService.cleanup()
+    }
+  }
+
+  getCacheStats() {
+    return {
+      requestCache: this.requestCache.size,
+      cookieCache: this.cookieService?.getCacheStats() || { size: 0, keys: [] }
+    }
+  }
 }
 
-app.whenReady().then(initializeApp)
+const electronApp = new ElectronApp()
+
+app.whenReady().then(() => electronApp.initialize())
 
 app.on('activate', async () => {
   if (BrowserWindow.getAllWindows().length === 0) {
@@ -83,7 +286,20 @@ app.on('activate', async () => {
 })
 
 app.on('window-all-closed', () => {
+  electronApp.cleanup()
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
+
+app.on('before-quit', () => {
+  electronApp.cleanup()
+})
+
+export async function clearAuthCookies() {
+  return await electronApp.clearAuthCookies()
+}
+
+export function getAppCacheStats() {
+  return electronApp.getCacheStats()
+}

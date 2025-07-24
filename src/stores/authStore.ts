@@ -56,7 +56,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           })
         ])
       } catch (error) {
-        console.error('Error storing session data locally:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Error storing session data locally:', error)
       }
     } catch (error) {
       set({ isLoading: false, error: (error as Error).message || 'Sign in failed' })
@@ -71,7 +72,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         data: {}
       })
     } catch (error) {
-      console.error('Error during sign out:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error during sign out:', error)
     } finally {
       await window.api.cookies.clearAuth()
       set({
@@ -125,7 +127,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           return await get().validateSession()
         } catch (error) {
-          console.error('Error parsing user data:', error)
+          if (import.meta.env.DEV)
+            if (import.meta.env.DEV) console.error('Error parsing user data:', error)
           await window.api.cookies.clearAuth()
         }
       }
@@ -133,7 +136,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false })
       return false
     } catch (error) {
-      console.error('Error during initialization:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error during initialization:', error)
       set({ isLoading: false })
       return false
     }

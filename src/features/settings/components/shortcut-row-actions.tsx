@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { RotateCcw, Edit3, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { KeyboardShortcut } from '@/types/settings'
+import { memo, useMemo } from 'react'
 
 interface ShortcutRowActionsProps {
   shortcut: KeyboardShortcut
@@ -13,7 +14,7 @@ interface ShortcutRowActionsProps {
   canSave: boolean
 }
 
-export function ShortcutRowActions({
+export const ShortcutRowActions = memo(function ShortcutRowActions({
   shortcut,
   isEditing,
   onEdit,
@@ -23,6 +24,11 @@ export function ShortcutRowActions({
   canSave
 }: ShortcutRowActionsProps) {
   const { t } = useTranslation('settings')
+
+  const isResetDisabled = useMemo(
+    () => JSON.stringify(shortcut.keys) === JSON.stringify(shortcut.defaultKeys),
+    [shortcut.keys, shortcut.defaultKeys]
+  )
 
   if (isEditing) {
     return (
@@ -46,11 +52,11 @@ export function ShortcutRowActions({
         variant="ghost"
         size="sm"
         onClick={onReset}
-        disabled={JSON.stringify(shortcut.keys) === JSON.stringify(shortcut.defaultKeys)}
+        disabled={isResetDisabled}
         title={t('keyboard.reset')}
       >
         <RotateCcw className="h-4 w-4" />
       </Button>
     </div>
   )
-}
+})

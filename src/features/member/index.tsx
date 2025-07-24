@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Main } from '@/components/layout/main'
@@ -30,7 +30,7 @@ const defaultMemberFilterUIState: MemberFilterUIState = {
   tier: []
 }
 
-export default function Members() {
+const MembersComponent = () => {
   const { t } = useTranslation(['member'])
   const [open, setOpen] = useState<MemberDialogType | null>(null)
   const [currentMember, setCurrentMember] = useState<Member | null>(null)
@@ -45,27 +45,33 @@ export default function Members() {
     refetch
   } = useQuery<MemberListResponse>({
     queryKey: ['members', filters],
-    queryFn: () => memberOperations.fetchItems(filters)
+    queryFn: () => memberOperations.fetchItems(filters),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false
   })
 
   const { data: memberDetailResponse, isLoading: isLoadingDetail } = useQuery({
     queryKey: ['member-detail', currentMember?.id],
     queryFn: () => memberOperations.fetchItemDetail(currentMember!.id),
     enabled: !!currentMember?.id,
-    select: (response) => response.data
+    select: (response) => response.data,
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    refetchOnWindowFocus: false
   })
 
-  // Access data with proper types
-  const members = membersResponse?.data?.members ?? []
-  const memberDetail = memberDetailResponse ?? null
-  const { totalPages = 0, currentPage = 1, totalCount = 0 } = membersResponse?.data ?? {}
+  // Access data with proper types and memoization
+  const members = useMemo(() => membersResponse?.data?.members ?? [], [membersResponse])
+  const memberDetail = useMemo(() => memberDetailResponse ?? null, [memberDetailResponse])
 
-  const pagination = {
-    totalPages,
-    currentPage,
-    pageSize: filters.pageSize ?? 10,
-    totalCount
-  }
+  const pagination = useMemo(() => {
+    const { totalPages = 0, currentPage = 1, totalCount = 0 } = membersResponse?.data ?? {}
+    return {
+      totalPages,
+      currentPage,
+      pageSize: filters.pageSize ?? 10,
+      totalCount
+    }
+  }, [membersResponse, filters.pageSize])
 
   // Update filters function
   const updateFilters = useCallback((newFilters: Partial<MemberFilterParams>) => {
@@ -77,16 +83,32 @@ export default function Members() {
     setFilterUIState(defaultMemberFilterUIState)
   }, [])
 
+  const handleEdit = useCallback((member: Member) => {
+    setCurrentMember(member)
+    setOpen('edit')
+  }, [])
+
+  const handleView = useCallback((member: Member) => {
+    setCurrentMember(member)
+    setOpen('view')
+  }, [])
+
+  const handleCreateMember = useCallback(() => {
+    setOpen('create')
+  }, [])
+
   const columns = useMemberColumns({
-    onEdit: (member) => {
-      setCurrentMember(member)
-      setOpen('edit')
-    },
-    onView: (member) => {
-      setCurrentMember(member)
-      setOpen('view')
-    }
+    onEdit: handleEdit,
+    onView: handleView
   })
+
+  const paginationHandlers = useMemo(
+    () => ({
+      onPageChange: (page: number) => updateFilters({ page }),
+      onPageSizeChange: (size: number) => updateFilters({ pageSize: size, page: 1 })
+    }),
+    [updateFilters]
+  )
 
   return (
     <Main>
@@ -96,7 +118,7 @@ export default function Members() {
           <p className="text-muted-foreground">{t('member.description')}</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setOpen('create')}>
+          <Button onClick={handleCreateMember}>
             <UserPlus className="mr-2 h-4 w-4" />
             {t('member.actions.addMember')}
           </Button>
@@ -129,10 +151,7 @@ export default function Members() {
               pageIndex: (pagination.currentPage || 1) - 1,
               pageSize: pagination.pageSize || 10
             }}
-            onPaginationChange={{
-              onPageChange: (page) => updateFilters({ page }),
-              onPageSizeChange: (size) => updateFilters({ pageSize: size, page: 1 })
-            }}
+            onPaginationChange={paginationHandlers}
             totalCount={pagination.totalCount || 0}
           />
         )}
@@ -149,3 +168,5 @@ export default function Members() {
     </Main>
   )
 }
+
+export default memo(MembersComponent)

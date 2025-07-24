@@ -23,6 +23,7 @@ export const transactionOperations = {
     const response = await window.api.request(
       `${API_ENDPOINTS.TRANSACTIONS.BASE}?${params.toString()}`
     )
+
     return response
   },
 

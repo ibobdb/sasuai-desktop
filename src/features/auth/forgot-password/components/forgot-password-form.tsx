@@ -55,7 +55,8 @@ export function ForgotForm({ className, ...props }: ForgotFormProps) {
         navigate({ to: '/sign-in' })
       }
     } catch (error) {
-      console.error('Forgot password error:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Forgot password error:', error)
       toast.error(t('auth.forgotPassword.toast.error'))
     } finally {
       setIsLoading(false)

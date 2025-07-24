@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { format } from 'date-fns'
 import { MemberDetail } from '@/types/members'
@@ -6,7 +7,7 @@ interface MemberBasicInfoProps {
   memberDetail: MemberDetail
 }
 
-export function MemberBasicInfo({ memberDetail }: MemberBasicInfoProps) {
+const MemberBasicInfoComponent = ({ memberDetail }: MemberBasicInfoProps) => {
   const { t } = useTranslation(['member'])
 
   return (
@@ -61,3 +62,5 @@ export function MemberBasicInfo({ memberDetail }: MemberBasicInfoProps) {
     </div>
   )
 }
+
+export const MemberBasicInfo = memo(MemberBasicInfoComponent)

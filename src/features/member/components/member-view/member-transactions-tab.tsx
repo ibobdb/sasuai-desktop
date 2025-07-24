@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
@@ -8,7 +9,7 @@ interface MemberTransactionsTabProps {
   memberDetail: MemberDetail
 }
 
-export function MemberTransactionsTab({ memberDetail }: MemberTransactionsTabProps) {
+const MemberTransactionsTabComponent = ({ memberDetail }: MemberTransactionsTabProps) => {
   const { t } = useTranslation(['member'])
 
   if (!memberDetail.transactions?.length) {
@@ -54,3 +55,5 @@ export function MemberTransactionsTab({ memberDetail }: MemberTransactionsTabPro
     </div>
   )
 }
+
+export const MemberTransactionsTab = memo(MemberTransactionsTabComponent)

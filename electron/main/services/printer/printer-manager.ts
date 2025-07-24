@@ -1,25 +1,40 @@
-import { BrowserWindow, webContents } from 'electron'
+import { BrowserWindow } from 'electron'
 import { getTypedStore } from '../../index'
-import { PrinterSettings } from '../../types/printer'
+import { generateTestPrintHTML, TestPrintData } from './test-print-template'
+
+interface PrinterSettings {
+  printerName: string
+  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
+  margin: string
+  copies: number
+  fontSize: number
+  fontFamily: string
+  lineHeight: number
+  enableBold: boolean
+}
 
 export class PrinterManager {
   private store = getTypedStore()
+  private readonly PAPER_WIDTHS: Record<string, number> = {
+    '44mm': 44,
+    '57mm': 57,
+    '58mm': 58,
+    '76mm': 76,
+    '78mm': 78,
+    '80mm': 80
+  }
+  private isPrinting = false
 
-  // Default printer settings
   private getDefaultSettings(): PrinterSettings {
     return {
       printerName: '',
       paperSize: '58mm',
-      margin: '0 0 0 0',
+      margin: '0',
       copies: 1,
-      timeOutPerLine: 400,
       fontSize: 12,
       fontFamily: 'Courier New',
       lineHeight: 1.2,
-      enableBold: true,
-      autocut: false,
-      cashdrawer: false,
-      encoding: 'utf-8'
+      enableBold: true
     }
   }
 
@@ -35,56 +50,53 @@ export class PrinterManager {
     this.store.set('printer.settings', newSettings)
   }
 
-  // Utility functions
   getPaperWidthMm(paperSize: string): number {
-    const widthMap: Record<string, number> = {
-      '44mm': 44,
-      '57mm': 57,
-      '58mm': 58,
-      '76mm': 76,
-      '78mm': 78,
-      '80mm': 80
-    }
-    return widthMap[paperSize] || 58
+    return this.PAPER_WIDTHS[paperSize] || 58
   }
 
-  private mmToMicrons(mm: number): number {
-    return Math.round(mm * 1000)
-  }
-
-  private parseMarginString(marginString: string): {
-    top: number
-    right: number
-    bottom: number
-    left: number
-  } {
-    const margins = marginString
-      .trim()
-      .split(/\s+/)
-      .map((val) => parseFloat(val) || 0)
-
-    if (margins.length === 1) {
-      return { top: margins[0], right: margins[0], bottom: margins[0], left: margins[0] }
-    } else if (margins.length === 2) {
-      return { top: margins[0], right: margins[1], bottom: margins[0], left: margins[1] }
-    } else if (margins.length === 3) {
-      return { top: margins[0], right: margins[1], bottom: margins[2], left: margins[1] }
-    } else if (margins.length >= 4) {
-      return { top: margins[0], right: margins[1], bottom: margins[2], left: margins[3] }
+  private parseMarginSettings(marginString: string): any {
+    if (!marginString?.trim() || marginString === '0' || marginString === '0 0 0 0') {
+      return { marginType: 'none' }
     }
 
-    return { top: 0, right: 0, bottom: 0, left: 0 }
+    const margins = marginString.trim().split(/\s+/)
+
+    switch (margins.length) {
+      case 1: {
+        const val = Math.max(0, parseFloat(margins[0]) || 0)
+        return { marginType: 'custom', top: val, bottom: val, left: val, right: val }
+      }
+      case 2: {
+        const vertical = Math.max(0, parseFloat(margins[0]) || 0)
+        const horizontal = Math.max(0, parseFloat(margins[1]) || 0)
+        return {
+          marginType: 'custom',
+          top: vertical,
+          bottom: vertical,
+          left: horizontal,
+          right: horizontal
+        }
+      }
+      case 4: {
+        const [top, right, bottom, left] = margins.map((m) => Math.max(0, parseFloat(m) || 0))
+        return { marginType: 'custom', top, right, bottom, left }
+      }
+      default:
+        return { marginType: 'none' }
+    }
   }
 
-  // Printer discovery
   async getAvailablePrinters(): Promise<string[]> {
     try {
-      const windows = webContents.getAllWebContents()
-      if (windows.length === 0) {
-        return []
+      const windows = BrowserWindow.getAllWindows()
+      const targetWindow = windows[0] || this.createTempWindow()
+
+      const printers = await targetWindow.webContents.getPrintersAsync()
+
+      if (!windows[0]) {
+        targetWindow.close()
       }
 
-      const printers = await windows[0].getPrintersAsync()
       return printers.map((printer) => printer.name)
     } catch (error) {
       console.error('Failed to get available printers:', error)
@@ -92,117 +104,116 @@ export class PrinterManager {
     }
   }
 
-  // Print functionality
-  async print(htmlContent: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const settings = this.getSettings()
+  private createTempWindow(): BrowserWindow {
+    return new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    })
+  }
 
+  async print(htmlContent: string): Promise<boolean> {
+    if (this.isPrinting) {
+      throw new Error('Another print operation is in progress')
+    }
+
+    this.isPrinting = true
+    const settings = this.getSettings()
+
+    return new Promise((resolve, reject) => {
       const printWindow = new BrowserWindow({
         show: false,
+        width: 400,
+        height: 600,
         webPreferences: {
           nodeIntegration: true,
           contextIsolation: false
         }
       })
 
-      printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent))
+      const cleanup = (success: boolean, error?: string) => {
+        this.isPrinting = false
+        printWindow.close()
+        if (success) {
+          resolve(true)
+        } else {
+          reject(new Error(error || 'Print failed'))
+        }
+      }
+
+      const loadTimeout = setTimeout(() => {
+        cleanup(false, 'Print timeout: Failed to load content')
+      }, 10000)
 
       printWindow.webContents.once('did-finish-load', () => {
-        const marginValues = this.parseMarginString(settings.margin)
+        clearTimeout(loadTimeout)
 
-        const printOptions = {
-          silent: true,
-          printBackground: true,
-          color: false,
-          deviceName: settings.printerName || undefined,
-          copies: settings.copies,
-          dpi: { horizontal: 300, vertical: 300 },
-          pageSize: {
-            width: this.mmToMicrons(this.getPaperWidthMm(settings.paperSize)),
-            height: this.mmToMicrons(200)
-          },
-          margins: {
-            marginType: 'custom' as const,
-            top: marginValues.top,
-            bottom: marginValues.bottom,
-            left: marginValues.left,
-            right: marginValues.right
+        setTimeout(() => {
+          const printOptions: any = {
+            silent: true,
+            copies: settings.copies || 1,
+            pageSize: {
+              width: this.getPaperWidthMm(settings.paperSize) * 1000,
+              height: 100000
+            },
+            margins: this.parseMarginSettings(settings.margin),
+            printBackground: false,
+            color: false,
+            landscape: false,
+            scaleFactor: 100
           }
-        }
 
-        printWindow.webContents.print(printOptions, (success, failureReason) => {
-          printWindow.close()
-
-          if (success) {
-            resolve(true)
-          } else {
-            reject(new Error(`Print failed: ${failureReason}`))
+          if (settings.printerName?.trim()) {
+            printOptions.deviceName = settings.printerName.trim()
           }
-        })
+
+          printWindow.webContents.print(printOptions, (success, failureReason) => {
+            if (success) {
+              setTimeout(() => cleanup(true), 2000)
+            } else {
+              cleanup(false, `Print failed: ${failureReason || 'Unknown error'}`)
+            }
+          })
+        }, 1000)
       })
+
+      printWindow.webContents.once('did-fail-load', (_event, _errorCode, errorDescription) => {
+        clearTimeout(loadTimeout)
+        cleanup(false, `Failed to load content: ${errorDescription}`)
+      })
+
+      printWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent))
     })
+  }
+
+  private generateTestContent(title: string, additionalInfo: string = ''): string {
+    const settings = this.getSettings()
+    const currentTime = new Date()
+
+    const testData: TestPrintData = {
+      title,
+      paperSize: settings.paperSize,
+      paperWidth: this.getPaperWidthMm(settings.paperSize),
+      fontFamily: settings.fontFamily,
+      fontSize: settings.fontSize,
+      lineHeight: settings.lineHeight,
+      enableBold: settings.enableBold,
+      margin: settings.margin,
+      additionalInfo: additionalInfo || 'System Default',
+      currentDate: currentTime.toLocaleString('id-ID')
+    }
+
+    return generateTestPrintHTML(testData)
   }
 
   async testPrint(): Promise<boolean> {
     const settings = this.getSettings()
-    const paperWidth = this.getPaperWidthMm(settings.paperSize)
-
-    const testContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Test Print</title>
-        <style>
-          @page {
-            margin: ${settings.margin};
-            size: ${paperWidth}mm auto;
-          }
-          body {
-            width: ${paperWidth}mm;
-            font-family: '${settings.fontFamily}', 'Courier New', 'Consolas', monospace;
-            font-size: ${settings.fontSize}px;
-            line-height: ${settings.lineHeight};
-            margin: 0;
-            padding: 8px;
-            text-align: center;
-            color: #000000 !important;
-            background-color: #ffffff !important;
-            font-weight: ${settings.enableBold ? '900' : '700'};
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .header { 
-            font-size: ${settings.fontSize + 4}px; 
-            font-weight: 900 !important; 
-            margin-bottom: 10px; 
-            color: #000000 !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          }
-          .separator { 
-            border-top: 2px solid #000000; 
-            margin: 8px 0; 
-          }
-          .footer { 
-            font-size: ${settings.fontSize - 2}px; 
-            margin-top: 10px; 
-            font-weight: 700;
-            color: #000000 !important;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">TEST PRINT</div>
-        <div class="separator"></div>
-        <div>Hello World!</div>
-        <div>Printer Test</div>
-        <div style="font-size: ${settings.fontSize - 2}px;">${new Date().toLocaleString('id-ID')}</div>
-        <div class="separator"></div>
-        <div class="footer">Success!</div>
-      </body>
-      </html>
-    `
+    const testContent = this.generateTestContent(
+      'TEST PRINT',
+      `Printer: ${settings.printerName || 'System Default'}`
+    )
     return this.print(testContent)
   }
 }

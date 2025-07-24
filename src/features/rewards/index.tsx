@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Main } from '@/components/layout/main'
@@ -11,7 +11,7 @@ import { Reward, RewardFilterParams } from '@/types/rewards'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fetchRewards } from './actions/reward-operations'
 
-function RewardContent() {
+function RewardContentComponent() {
   const { t } = useTranslation(['rewards'])
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<string>('rewards')
@@ -25,23 +25,37 @@ function RewardContent() {
     includeInactive: false
   })
 
-  const { data: rewardDialogData } = useQuery({
-    queryKey: ['rewards-for-dialog', rewardFilters],
-    queryFn: () => fetchRewards(rewardFilters),
-    select: (response) => response.data
-  })
+  const rewardQueryConfig = useMemo(
+    () => ({
+      queryKey: ['rewards-for-dialog', rewardFilters],
+      queryFn: () => fetchRewards(rewardFilters),
+      select: (response: any) => response.data,
+      staleTime: 5 * 60 * 1000
+    }),
+    [rewardFilters]
+  )
 
-  const availableRewards = rewardDialogData?.rewards || []
+  const { data: rewardDialogData } = useQuery(rewardQueryConfig)
 
-  const handleClaimClick = () => {
+  const availableRewards = useMemo(
+    () => rewardDialogData?.rewards || [],
+    [rewardDialogData?.rewards]
+  )
+
+  const handleClaimClick = useCallback(() => {
     setIsClaimDialogOpen(true)
-  }
+  }, [])
 
-  const handleClaimSuccess = () => {
+  const handleClaimSuccess = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['rewards'] })
     queryClient.invalidateQueries({ queryKey: ['reward-claims'] })
     queryClient.invalidateQueries({ queryKey: ['rewards-for-dialog'] })
-  }
+  }, [queryClient])
+
+  const handleCloseDialog = useCallback(() => {
+    setIsClaimDialogOpen(false)
+    setSelectedReward(null)
+  }, [])
 
   return (
     <>
@@ -78,14 +92,13 @@ function RewardContent() {
         isOpen={isClaimDialogOpen}
         rewards={availableRewards}
         onClaimSuccess={handleClaimSuccess}
-        onClose={() => {
-          setIsClaimDialogOpen(false)
-          setSelectedReward(null)
-        }}
+        onClose={handleCloseDialog}
       />
     </>
   )
 }
+
+const RewardContent = memo(RewardContentComponent)
 
 export default function Rewards() {
   return <RewardContent />

@@ -20,7 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate({ to: '/sign-in', replace: true })
       }
     } catch (error) {
-      console.error('Failed to initialize auth:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Failed to initialize auth:', error)
       if (isAuthenticatedRoute) {
         navigate({ to: '/sign-in', replace: true })
       }

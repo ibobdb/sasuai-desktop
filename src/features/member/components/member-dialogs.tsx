@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react'
 import { MemberViewDialog } from './member-view-dialog'
 import { MemberFormDialog } from './member-form-dialog'
 import type { Member, MemberDetail, MemberDialogType } from '@/types/members'
@@ -11,17 +12,17 @@ interface MemberDialogsProps {
   onRefetch: () => void
 }
 
-export function MemberDialogs({
+const MemberDialogsComponent = ({
   open,
   currentMember,
   memberDetail,
   isLoadingDetail,
   onOpenChange,
   onRefetch
-}: MemberDialogsProps) {
-  const handleDialogClose = () => {
+}: MemberDialogsProps) => {
+  const handleDialogClose = useCallback(() => {
     onOpenChange(null)
-  }
+  }, [onOpenChange])
 
   return (
     <>
@@ -58,3 +59,5 @@ export function MemberDialogs({
     </>
   )
 }
+
+export const MemberDialogs = memo(MemberDialogsComponent)

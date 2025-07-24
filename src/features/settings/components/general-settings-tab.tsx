@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSettings } from '../hooks/use-settings'
@@ -16,8 +16,18 @@ export function GeneralSettingsTab() {
   const [localSettings, setLocalSettings] = useState<GeneralConfig>(settings.general)
   const [isSaving, setIsSaving] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Only update local settings when settings change from external source (not user input)
+  const hasStoreInfoChanges = useMemo(
+    () => JSON.stringify(localSettings.storeInfo) !== JSON.stringify(settings.general.storeInfo),
+    [localSettings.storeInfo, settings.general.storeInfo]
+  )
+
+  const hasFooterInfoChanges = useMemo(
+    () => JSON.stringify(localSettings.footerInfo) !== JSON.stringify(settings.general.footerInfo),
+    [localSettings.footerInfo, settings.general.footerInfo]
+  )
+
   useEffect(() => {
     if (!isInitialized) {
       setLocalSettings(settings.general)
@@ -29,50 +39,58 @@ export function GeneralSettingsTab() {
     setLocalSettings((prev) => ({ ...prev, ...updates }))
   }, [])
 
-  // Check if there are changes for each section
-  const hasStoreInfoChanges =
-    JSON.stringify(localSettings.storeInfo) !== JSON.stringify(settings.general.storeInfo)
-  const hasFooterInfoChanges =
-    JSON.stringify(localSettings.footerInfo) !== JSON.stringify(settings.general.footerInfo)
-
-  // Separate functions for different sections
-  const handleSaveStoreInfo = useCallback(async () => {
-    setIsSaving(true)
-    try {
-      const success = await updateGeneralSettings({ storeInfo: localSettings.storeInfo })
-      if (success) {
-        // Update the initialized state to sync with saved data
-        setIsInitialized(false)
-        toast.success(t('general.storeInfoSaved'))
-      } else {
-        toast.error(t('general.saveError'))
-      }
-    } catch (error) {
-      console.error('Failed to update store info:', error)
-      toast.error(t('general.saveError'))
-    } finally {
-      setIsSaving(false)
+  const debouncedSave = useCallback(async (saveFunction: () => Promise<void>) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
     }
-  }, [localSettings.storeInfo, updateGeneralSettings, t])
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      await saveFunction()
+    }, 500)
+  }, [])
+  const handleSaveStoreInfo = useCallback(async () => {
+    await debouncedSave(async () => {
+      setIsSaving(true)
+      try {
+        const success = await updateGeneralSettings({ storeInfo: localSettings.storeInfo })
+        if (success) {
+          setIsInitialized(false)
+          toast.success(t('general.storeInfoSaved'))
+        } else {
+          toast.error(t('general.saveError'))
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error('Failed to update store info:', error)
+        }
+        toast.error(t('general.saveError'))
+      } finally {
+        setIsSaving(false)
+      }
+    })
+  }, [localSettings.storeInfo, updateGeneralSettings, t, debouncedSave])
 
   const handleSaveFooterInfo = useCallback(async () => {
-    setIsSaving(true)
-    try {
-      const success = await updateGeneralSettings({ footerInfo: localSettings.footerInfo })
-      if (success) {
-        // Update the initialized state to sync with saved data
-        setIsInitialized(false)
-        toast.success(t('general.footerInfoSaved'))
-      } else {
+    await debouncedSave(async () => {
+      setIsSaving(true)
+      try {
+        const success = await updateGeneralSettings({ footerInfo: localSettings.footerInfo })
+        if (success) {
+          setIsInitialized(false)
+          toast.success(t('general.footerInfoSaved'))
+        } else {
+          toast.error(t('general.saveError'))
+        }
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error('Failed to update footer info:', error)
+        }
         toast.error(t('general.saveError'))
+      } finally {
+        setIsSaving(false)
       }
-    } catch (error) {
-      console.error('Failed to update footer info:', error)
-      toast.error(t('general.saveError'))
-    } finally {
-      setIsSaving(false)
-    }
-  }, [localSettings.footerInfo, updateGeneralSettings, t])
+    })
+  }, [localSettings.footerInfo, updateGeneralSettings, t, debouncedSave])
 
   return (
     <div className="space-y-6">

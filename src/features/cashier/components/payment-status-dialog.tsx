@@ -11,7 +11,7 @@ import { CheckCircle2, XCircle, Receipt, CreditCard, ArrowRight, Copy } from 'lu
 import { Button } from '@/components/ui/button'
 import { Member, PaymentMethod } from '@/types/cashier'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, memo, useCallback, useMemo } from 'react'
 import { paymentMethods } from '@/lib/payment-methods'
 
 interface PaymentStatusDialogProps {
@@ -42,34 +42,36 @@ export function PaymentStatusDialog({
   const { t } = useTranslation(['cashier'])
   const [copied, setCopied] = useState(false)
 
-  // Format number with thousands separator
-  const formatNumber = (value: number): string => {
+  const formatNumber = useCallback((value: number): string => {
     return value.toLocaleString('id-ID')
-  }
+  }, [])
 
-  // Get payment method display name and icon
-  const getPaymentMethodInfo = (method: PaymentMethod) => {
-    const paymentMethod = paymentMethods.find((p) => p.value === method)
-    if (paymentMethod) {
-      const Icon = paymentMethod.icon
+  const paymentMethodInfo = useMemo(() => {
+    const method = paymentMethods.find((p) => p.value === paymentMethod)
+    if (method) {
+      const Icon = method.icon
       return {
-        name: paymentMethod.label,
+        name: method.label,
         icon: <Icon className="h-4 w-4" />
       }
     }
-    // Fallback
-    return { name: 'Other', icon: <CreditCard className="h-4 w-4" /> }
-  }
+    return {
+      name: paymentMethod,
+      icon: <CreditCard className="h-4 w-4" />
+    }
+  }, [paymentMethod])
 
-  const copyTransactionId = () => {
-    if (transactionId) {
-      navigator.clipboard.writeText(transactionId)
+  const copyToClipboard = useCallback(async () => {
+    if (!transactionId) return
+
+    try {
+      await navigator.clipboard.writeText(transactionId)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy transaction ID:', err)
     }
-  }
-
-  const paymentInfo = getPaymentMethodInfo(paymentMethod)
+  }, [transactionId])
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -124,7 +126,7 @@ export function PaymentStatusDialog({
                   size="sm"
                   variant="ghost"
                   className="h-8 text-xs flex items-center gap-1 hover:bg-muted-foreground/10"
-                  onClick={copyTransactionId}
+                  onClick={copyToClipboard}
                 >
                   <span className="font-mono truncate max-w-40">{transactionId}</span>
                   {copied ? (
@@ -143,8 +145,8 @@ export function PaymentStatusDialog({
                   {t('cashier.paymentStatus.paymentMethod')}
                 </span>
                 <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-md">
-                  {paymentInfo.icon}
-                  <span>{paymentInfo.name}</span>
+                  {paymentMethodInfo.icon}
+                  <span>{paymentMethodInfo.name}</span>
                 </div>
               </div>
 
@@ -184,8 +186,8 @@ export function PaymentStatusDialog({
                   {t('cashier.paymentStatus.paymentMethod')}
                 </span>
                 <div className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-md">
-                  {paymentInfo.icon}
-                  <span>{paymentInfo.name}</span>
+                  {paymentMethodInfo.icon}
+                  <span>{paymentMethodInfo.name}</span>
                 </div>
               </div>
             </div>
@@ -209,3 +211,5 @@ export function PaymentStatusDialog({
     </Dialog>
   )
 }
+
+export default memo(PaymentStatusDialog)

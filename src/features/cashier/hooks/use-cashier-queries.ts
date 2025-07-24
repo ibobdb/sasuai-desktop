@@ -24,8 +24,9 @@ export function useProductSearch(params: ProductSearchParams, enabled: boolean =
   return useQuery({
     queryKey: CASHIER_QUERY_KEYS.products(params),
     queryFn: () => cashierOperations.searchProducts(params),
-    enabled: enabled && params.query.length >= 3,
-    staleTime: 30000, // 30 seconds
+    enabled: enabled && params.query.length >= 3 && params.query.trim().length >= 3,
+    staleTime: 60000,
+    gcTime: 600000,
     select: (data) => data.data || []
   })
 }
@@ -36,7 +37,7 @@ export function useMemberSearch(params: MemberSearchParams, enabled: boolean = t
     queryKey: CASHIER_QUERY_KEYS.members(params),
     queryFn: () => cashierOperations.searchMembers(params),
     enabled: enabled && params.query.length >= 3,
-    staleTime: 30000,
+    staleTime: 60000,
     select: (data) => data.data?.members || []
   })
 }
@@ -47,7 +48,8 @@ export function usePointsCalculation(params: PointsCalculationParams, enabled: b
     queryKey: CASHIER_QUERY_KEYS.points(params),
     queryFn: () => cashierOperations.calculatePoints(params),
     enabled: enabled && params.amount > 0,
-    staleTime: 0, // Always fresh for points calculation
+    staleTime: 30000,
+    gcTime: 300000,
     select: (data) => data.points || 0
   })
 }
@@ -60,7 +62,8 @@ export function useDiscountValidation() {
     mutationFn: (params: DiscountValidationParams) =>
       cashierOperations.validateDiscountCode(params),
     onError: (error) => {
-      console.error('Error validating discount code:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error validating discount code:', error)
       toast.error(t('cashier.redeemCode.validationError'), {
         description: t('cashier.redeemCode.tryAgainLater')
       })
@@ -91,7 +94,8 @@ export function useCreateMember() {
       }
     },
     onError: (error) => {
-      console.error('Error creating member:', error)
+      if (import.meta.env.DEV)
+        if (import.meta.env.DEV) console.error('Error creating member:', error)
       toast.error(t('cashier.createMember.errorTitle'), {
         description: t('cashier.createMember.errorDefault')
       })
@@ -119,7 +123,7 @@ export function useProcessTransaction() {
       }
     },
     onError: (error) => {
-      console.error('Transaction error:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Transaction error:', error)
       toast.error(t('cashier.errors.transactionFailed'), {
         description: t('cashier.errors.unexpectedError')
       })

@@ -57,7 +57,7 @@ export function TransactionViewDialog({
         throw new Error(response.error?.message || t('transaction.receipt.printError'))
       }
     } catch (error) {
-      console.error('Print failed:', error)
+      if (import.meta.env.DEV) if (import.meta.env.DEV) console.error('Print failed:', error)
       toast.error(error instanceof Error ? error.message : t('transaction.receipt.printError'))
     } finally {
       setIsPrinting(false)

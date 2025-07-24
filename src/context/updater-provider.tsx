@@ -51,7 +51,8 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
         ])
         setAppInfo({ name, version })
       } catch (err) {
-        console.error('Failed to fetch app info:', err)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to fetch app info:', err)
       }
     }
 
@@ -163,7 +164,6 @@ export function UpdaterProvider({ children }: { children: React.ReactNode }) {
   return <UpdaterContext.Provider value={value}>{children}</UpdaterContext.Provider>
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useUpdater = () => {
   const context = useContext(UpdaterContext)
   if (context === undefined) {

@@ -1,5 +1,15 @@
 import { PrinterManager } from './printer/printer-manager'
-import { PrinterSettings } from '../types/printer'
+
+interface PrinterSettings {
+  printerName: string
+  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
+  margin: string
+  copies: number
+  fontSize: number
+  fontFamily: string
+  lineHeight: number
+  enableBold: boolean
+}
 
 export class PrinterService {
   private printerManager = new PrinterManager()

@@ -38,8 +38,10 @@ export default function PaymentInput({
   }, [isDialogOpen, onPaymentAmountChange])
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | undefined
+
     if (isDialogOpen) {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         if (inputRef.current && document.activeElement !== inputRef.current) {
           inputRef.current.focus()
           setInputFocused(true)
@@ -47,6 +49,12 @@ export default function PaymentInput({
           inputRef.current.setSelectionRange(len, len)
         }
       }, 150)
+    }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer)
+      }
     }
   }, [isDialogOpen])
 

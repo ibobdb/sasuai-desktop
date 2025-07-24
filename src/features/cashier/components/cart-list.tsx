@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Minus,
@@ -32,66 +32,69 @@ import {
 import { Discount, CartListProps } from '@/types/cashier'
 import { isDiscountValid } from '../utils/cashier-utils'
 
-export default function CartList({
-  items,
-  onUpdateQuantity,
-  onRemoveItem,
-  onUpdateDiscount
-}: CartListProps) {
+function CartList({ items, onUpdateQuantity, onRemoveItem, onUpdateDiscount }: CartListProps) {
   const { t } = useTranslation(['cashier'])
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [editingQuantity, setEditingQuantity] = useState<string | null>(null)
   const [quantityInput, setQuantityInput] = useState<string>('')
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items])
 
-  const handleSelectItem = (id: string, checked: boolean) => {
-    const newSelected = new Set(selectedItems)
-    if (checked) {
-      newSelected.add(id)
-    } else {
-      newSelected.delete(id)
-    }
-    setSelectedItems(newSelected)
-  }
+  const formatDiscount = useCallback((discount: Discount) => {
+    return discount.type === 'PERCENTAGE'
+      ? `${discount.value}%`
+      : `Rp ${discount.value.toLocaleString()}`
+  }, [])
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIds = items.map((item) => item.id)
-      setSelectedItems(new Set(allIds))
-    } else {
-      setSelectedItems(new Set())
-    }
-  }
+  const handleSelectItem = useCallback(
+    (id: string, checked: boolean) => {
+      const newSelected = new Set(selectedItems)
+      if (checked) {
+        newSelected.add(id)
+      } else {
+        newSelected.delete(id)
+      }
+      setSelectedItems(newSelected)
+    },
+    [selectedItems]
+  )
 
-  const handleRemoveSelected = () => {
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        const allIds = items.map((item) => item.id)
+        setSelectedItems(new Set(allIds))
+      } else {
+        setSelectedItems(new Set())
+      }
+    },
+    [items]
+  )
+
+  const handleRemoveSelected = useCallback(() => {
     selectedItems.forEach((id) => {
       onRemoveItem(id)
     })
     setSelectedItems(new Set())
-  }
+  }, [selectedItems, onRemoveItem])
 
-  const startEditingQuantity = (id: string, currentQuantity: number) => {
+  const startEditingQuantity = useCallback((id: string, currentQuantity: number) => {
     setEditingQuantity(id)
     setQuantityInput(currentQuantity.toString())
-  }
+  }, [])
 
-  const finishEditingQuantity = (id: string) => {
-    const quantity = parseInt(quantityInput)
-    if (!isNaN(quantity) && quantity > 0) {
-      onUpdateQuantity(id, quantity)
-    }
-    setEditingQuantity(null)
-  }
+  const finishEditingQuantity = useCallback(
+    (id: string) => {
+      const quantity = parseInt(quantityInput)
+      if (!isNaN(quantity) && quantity > 0) {
+        onUpdateQuantity(id, quantity)
+      }
+      setEditingQuantity(null)
+    },
+    [quantityInput, onUpdateQuantity]
+  )
 
   const selectedCount = selectedItems.size
-
-  // Format discount for display
-  const formatDiscount = (discount: Discount) => {
-    return discount.type === 'PERCENTAGE'
-      ? `${discount.value}%`
-      : `Rp ${discount.value.toLocaleString()}`
-  }
 
   return (
     <div className="space-y-2">
@@ -320,3 +323,5 @@ export default function CartList({
     </div>
   )
 }
+
+export default memo(CartList)

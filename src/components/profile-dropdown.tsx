@@ -14,7 +14,7 @@ import { useAuth } from '@/stores/authStore'
 import { useUpdater } from '@/context/updater-provider'
 import { toast } from 'sonner'
 import { LogOut, RefreshCw, Download, CheckCircle, AlertCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { UpdateDialog } from './update-dialog'
 import { useTranslation } from 'react-i18next'
 
@@ -26,6 +26,16 @@ export function ProfileDropdown() {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false)
   const [isManualCheck, setIsManualCheck] = useState(false)
   const { t } = useTranslation(['common', 'updater'])
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -33,7 +43,7 @@ export function ProfileDropdown() {
       toast.success('You have been logged out')
       navigate({ to: '/sign-in' })
     } catch (error) {
-      console.error('Logout failed:', error)
+      if (import.meta.env.DEV) console.error('Logout failed:', error)
       toast.error('Failed to logout. Please try again.')
     }
   }
@@ -43,8 +53,13 @@ export function ProfileDropdown() {
     try {
       await checkForUpdates()
 
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
       // Small delay to show the checking state
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         if (available && updateInfo) {
           setShowUpdateDialog(true)
         } else {
@@ -53,7 +68,7 @@ export function ProfileDropdown() {
         setIsManualCheck(false)
       }, 1000)
     } catch (error) {
-      console.error('Update check failed:', error)
+      if (import.meta.env.DEV) console.error('Update check failed:', error)
       toast.error(t('updater:messages.checkFailed'))
       setIsManualCheck(false)
     }

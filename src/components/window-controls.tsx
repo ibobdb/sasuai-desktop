@@ -35,7 +35,8 @@ export function WindowControls({ className }: WindowControlsProps) {
           const maximized = await window.electronAPI.isWindowMaximized()
           setIsMaximized(maximized)
         } catch (error) {
-          console.error('Failed to check window state:', error)
+          if (import.meta.env.DEV)
+            if (import.meta.env.DEV) console.error('Failed to check window state:', error)
         }
       }
     }
@@ -60,7 +61,8 @@ export function WindowControls({ className }: WindowControlsProps) {
       try {
         await window.electronAPI.minimizeWindow()
       } catch (error) {
-        console.error('Failed to minimize window:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to minimize window:', error)
       }
     }
   }
@@ -71,7 +73,8 @@ export function WindowControls({ className }: WindowControlsProps) {
         const newMaximized = await window.electronAPI.maximizeWindow()
         setIsMaximized(newMaximized)
       } catch (error) {
-        console.error('Failed to toggle maximize state:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to toggle maximize state:', error)
       }
     }
   }
@@ -81,7 +84,8 @@ export function WindowControls({ className }: WindowControlsProps) {
       try {
         await window.electronAPI.closeWindow()
       } catch (error) {
-        console.error('Failed to close window:', error)
+        if (import.meta.env.DEV)
+          if (import.meta.env.DEV) console.error('Failed to close window:', error)
       }
     }
   }

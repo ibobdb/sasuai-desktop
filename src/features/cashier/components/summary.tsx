@@ -1,9 +1,10 @@
 import { Receipt, Minus, Award } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { TransactionSummaryProps } from '@/types/cashier'
 
-export default function TransactionSummary({
+function TransactionSummary({
   subtotal,
   productDiscounts,
   memberDiscount,
@@ -14,14 +15,18 @@ export default function TransactionSummary({
 }: TransactionSummaryProps) {
   const { t } = useTranslation(['cashier'])
 
-  // Calculate if we have any special values
-  const hasProductDiscount = productDiscounts > 0
-  const hasMemberDiscount = memberDiscount > 0
-  const hasTierDiscount = tierDiscount > 0 // Add check for tier discount
-  const hasGlobalDiscount = globalDiscount > 0
-  const hasAnyDiscount =
-    hasProductDiscount || hasMemberDiscount || hasTierDiscount || hasGlobalDiscount
-  const hasPointsToEarn = pointsToEarn > 0
+  const discountInfo = useMemo(
+    () => ({
+      hasProductDiscount: productDiscounts > 0,
+      hasMemberDiscount: memberDiscount > 0,
+      hasTierDiscount: tierDiscount > 0,
+      hasGlobalDiscount: globalDiscount > 0,
+      hasAnyDiscount:
+        productDiscounts > 0 || memberDiscount > 0 || tierDiscount > 0 || globalDiscount > 0,
+      hasPointsToEarn: pointsToEarn > 0
+    }),
+    [productDiscounts, memberDiscount, tierDiscount, globalDiscount, pointsToEarn]
+  )
 
   return (
     <div className="space-y-3">
@@ -38,7 +43,7 @@ export default function TransactionSummary({
         </div>
 
         {/* Show product discounts if any */}
-        {hasProductDiscount && (
+        {discountInfo.hasProductDiscount && (
           <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
             <span className="flex items-center">
               <Minus className="h-3 w-3 mr-1" />
@@ -49,7 +54,7 @@ export default function TransactionSummary({
         )}
 
         {/* Show member discount if any */}
-        {hasMemberDiscount && (
+        {discountInfo.hasMemberDiscount && (
           <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
             <span className="flex items-center">
               <Minus className="h-3 w-3 mr-1" />
@@ -60,7 +65,7 @@ export default function TransactionSummary({
         )}
 
         {/* Show tier discount if any */}
-        {hasTierDiscount && (
+        {discountInfo.hasTierDiscount && (
           <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
             <span className="flex items-center">
               <Minus className="h-3 w-3 mr-1" />
@@ -71,7 +76,7 @@ export default function TransactionSummary({
         )}
 
         {/* Show global discount if any */}
-        {hasGlobalDiscount && (
+        {discountInfo.hasGlobalDiscount && (
           <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
             <span className="flex items-center">
               <Minus className="h-3 w-3 mr-1" />
@@ -84,13 +89,15 @@ export default function TransactionSummary({
         {/* Always show total */}
         <div className="flex justify-between text-lg font-bold pt-2 border-t">
           <span>{t('cashier.summary.total')}</span>
-          <span className={cn(hasAnyDiscount ? 'text-green-600 dark:text-green-400' : '')}>
+          <span
+            className={cn(discountInfo.hasAnyDiscount ? 'text-green-600 dark:text-green-400' : '')}
+          >
             Rp {total.toLocaleString()}
           </span>
         </div>
 
         {/* Points to earn information */}
-        {hasPointsToEarn && (
+        {discountInfo.hasPointsToEarn && (
           <div className="flex justify-between items-center mt-2 pt-2 text-sm border-t border-dashed">
             <span className="flex items-center text-amber-600 dark:text-amber-400">
               <Award className="h-3.5 w-3.5 mr-1.5" />
@@ -107,3 +114,5 @@ export default function TransactionSummary({
     </div>
   )
 }
+
+export default memo(TransactionSummary)

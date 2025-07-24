@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ticket, X, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Discount } from '@/types/cashier'
-import { API_ENDPOINTS } from '@/config/api'
+import { cashierOperations } from '@/features/cashier/actions/cashier-operations'
 
 interface RedeemCodeSectionProps {
   onApplyDiscount: (discount: Discount | null) => void
@@ -17,128 +17,106 @@ interface RedeemCodeSectionProps {
   subtotal: number
 }
 
-export function RedeemCodeSection({
+function RedeemCodeSectionComponent({
   onApplyDiscount,
   appliedDiscount,
   disabled = false,
-  disabledReason,
-  subtotal
+  disabledReason
 }: RedeemCodeSectionProps) {
   const { t } = useTranslation(['cashier'])
   const [code, setCode] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
-  const validateCode = async () => {
+  const formatDiscount = useCallback((discount: Discount) => {
+    return discount.type === 'PERCENTAGE'
+      ? `${discount.value}%`
+      : `Rp ${discount.value.toLocaleString()}`
+  }, [])
+
+  const validateCode = useCallback(async () => {
     if (!code.trim()) {
-      toast.error(t('cashier.redeemCode.emptyCode'))
       return
     }
 
     setIsLoading(true)
 
     try {
-      const response = await window.api.request(
-        `${API_ENDPOINTS.DISCOUNTS.BASE}?code=${encodeURIComponent(code.trim())}`,
-        {
-          method: 'GET'
-        }
-      )
+      const response = await cashierOperations.validateDiscountCode({
+        code: code.trim()
+      })
 
       if (response.success && response.discount) {
-        const discount = response.discount as Discount
-
-        // Check minimum purchase requirement
-        if (discount.minPurchase && subtotal < discount.minPurchase) {
-          toast.error(t('cashier.redeemCode.minimumPurchaseNotMet'), {
-            description: t('cashier.redeemCode.minimumPurchaseRequired', {
-              amount: discount.minPurchase.toLocaleString()
-            })
-          })
-          return
-        }
-
-        // Apply the discount
+        const discount = response.discount
         onApplyDiscount(discount)
-        toast.success(t('cashier.redeemCode.codeApplied'), {
-          description: t('cashier.redeemCode.discountAdded', { name: discount.name })
-        })
         setCode('')
-      } else {
-        toast.error(t('cashier.redeemCode.invalidCode'), {
-          description: response.message || t('cashier.redeemCode.tryAnotherCode')
+        toast.success(t('cashier.redeemCode.success'), {
+          description: `${discount.name} (${formatDiscount(discount)})`
         })
+      } else {
+        toast.error(t('cashier.redeemCode.invalidCode'))
       }
     } catch (error) {
       console.error('Error validating discount code:', error)
-      toast.error(t('cashier.redeemCode.validationError'), {
-        description: t('cashier.redeemCode.tryAgainLater')
-      })
+      toast.error(t('cashier.redeemCode.error'))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [code, onApplyDiscount, t, formatDiscount])
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      validateCode()
-    }
-  }
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        validateCode()
+      }
+    },
+    [validateCode]
+  )
 
-  const removeDiscount = () => {
+  const removeDiscount = useCallback(() => {
     onApplyDiscount(null)
-    toast.info(t('cashier.redeemCode.discountRemoved'))
-  }
-
-  const formatDiscountValue = (discount: Discount) => {
-    return discount.type === 'PERCENTAGE'
-      ? `${discount.value}%`
-      : `Rp ${discount.value.toLocaleString()}`
-  }
-
-  // If a discount is already applied, show details
-  if (appliedDiscount) {
-    return (
-      <Card className="p-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-start gap-2">
-            <Ticket className="h-5 w-5 text-green-500 mt-0.5" />
-            <div>
-              <h3 className="font-medium">{appliedDiscount.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {appliedDiscount.code && (
-                  <span className="font-mono text-xs mr-2">{appliedDiscount.code}</span>
-                )}
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  {formatDiscountValue(appliedDiscount)}
-                </Badge>
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={removeDiscount}
-            className="h-7 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </Card>
-    )
-  }
+    toast.success(t('cashier.redeemCode.removed'))
+  }, [onApplyDiscount, t])
 
   return (
-    <Card className="p-3">
+    <Card className="p-4">
       <div className="space-y-3">
-        <div className="flex items-center">
-          <Ticket className="h-4 w-4 mr-2 text-muted-foreground" />
-          <h3 className="font-medium text-sm">{t('cashier.redeemCode.title')}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-medium flex items-center">
+            <Ticket className="h-4 w-4 mr-2" />
+            {t('cashier.redeemCode.title')}
+          </h3>
         </div>
 
-        {disabled ? (
-          <div className="text-sm text-muted-foreground bg-muted/30 p-2 rounded-md">
-            {disabledReason || t('cashier.redeemCode.alreadyHasDiscount')}
+        {appliedDiscount ? (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center">
+                  <Badge variant="outline" className="text-green-700 dark:text-green-300 mr-2">
+                    {appliedDiscount.name}
+                  </Badge>
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    {formatDiscount(appliedDiscount)}
+                  </span>
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  {t('cashier.redeemCode.applied')}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={removeDiscount}
+                className="text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : disabled ? (
+          <div className="bg-muted/50 border border-dashed rounded-md p-3 text-center">
+            <p className="text-sm text-muted-foreground">{disabledReason}</p>
           </div>
         ) : (
           <div className="flex gap-2">
@@ -169,3 +147,5 @@ export function RedeemCodeSection({
     </Card>
   )
 }
+
+export const RedeemCodeSection = memo(RedeemCodeSectionComponent)
