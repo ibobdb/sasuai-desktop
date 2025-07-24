@@ -5,7 +5,7 @@ import { createWindow, getMainWindow } from './window'
 import { setupAutoUpdater } from './updater'
 import { AUTH_STORE_TOKEN_KEY, AUTH_STORE_USER_KEY } from './constants'
 import { CookieService } from './services/cookie-service'
-import { setupPrinterHandlers } from './handlers/printer-handlers'
+import { setupPrinterService } from './services/printer-service'
 import { createApiClient } from './api-client'
 
 export interface StoreSchema {
@@ -60,7 +60,7 @@ class ElectronApp {
     this.setupAppHandlers()
     this.setupWindowHandlers()
     this.setupCookieHandlers()
-    setupPrinterHandlers() // Use dedicated printer handlers
+    setupPrinterService()
     this.setupApiHandlers()
   }
 
