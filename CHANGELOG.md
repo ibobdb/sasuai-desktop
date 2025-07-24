@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.8.1](https://github.com/ibobdb/sasuai-desktop/compare/v1.8.0...v1.8.1) (2025-07-24)
+
+
+### Bug Fixes
+
+* **settings:** Optimizes settings components with debouncing and memoization ([cf65915](https://github.com/ibobdb/sasuai-desktop/commit/cf659150982c9b111838622011e1a6155a360ff0))
+
+
+### Code Refactoring
+
+* optimize component imports and enhance error logging ([d84fb59](https://github.com/ibobdb/sasuai-desktop/commit/d84fb598c05d9502aa666814d7aceb58587159a2))
+* optimize performance and improve readability across cashier components ([d5d86ed](https://github.com/ibobdb/sasuai-desktop/commit/d5d86ed8cc9f0f2fb78c46e100b10926dfe8987b))
+* remove unnecessary memo imports and improve component memoization ([6e394f6](https://github.com/ibobdb/sasuai-desktop/commit/6e394f6fa88f4d346d9ca3735b5d06b1d42284f9))
+* remove unnecessary memo imports from components ([2123e50](https://github.com/ibobdb/sasuai-desktop/commit/2123e5031f7c074033ced7f49fee718b4980822b))
+* **settings:** printer handling and settings management ([249f7eb](https://github.com/ibobdb/sasuai-desktop/commit/249f7ebc5ceeccc17a5d5ceba75150c1d352613a))
+* **transactions:** enhance transaction components and improve data handling ([c182cf9](https://github.com/ibobdb/sasuai-desktop/commit/c182cf98d33fc6386775b7db49416481f23a17a1))
+
 ## [1.8.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.7.0...v1.8.0) (2025-07-22)
 
 
