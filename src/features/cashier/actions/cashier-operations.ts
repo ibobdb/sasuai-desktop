@@ -55,7 +55,7 @@ export const cashierOperations = {
   // Points calculation
   calculatePoints: async (params: PointsCalculationParams): Promise<PointsResponse> => {
     const response = await window.api.request(API_ENDPOINTS.MEMBERS.CALCULATE_POINTS, {
-      method: 'POST',
+      method: 'GET',
       data: params
     })
     return response
