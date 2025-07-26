@@ -10,7 +10,6 @@ import {
 import { CheckCircle2, XCircle, Receipt, CreditCard, ArrowRight, Copy, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Member, PaymentMethod } from '@/types/cashier'
-import { cn } from '@/lib/utils'
 import { useState, memo, useCallback, useMemo } from 'react'
 import { paymentMethods } from '@/lib/payment-methods'
 
@@ -201,32 +200,27 @@ export function PaymentStatusDialog({
         <DialogFooter className="pt-4">
           {success ? (
             <div className="flex gap-2 w-full">
-              {onRetryPrint && (
-                <Button
-                  variant="outline"
-                  onClick={onRetryPrint}
-                  disabled={isRetryingPrint}
-                  className="flex-1"
-                >
-                  {isRetryingPrint ? (
-                    <>
-                      <Printer className="mr-2 h-4 w-4 animate-pulse" />
-                      {t('cashier.paymentStatus.retryingPrint')}
-                    </>
-                  ) : (
-                    <>
-                      <Printer className="mr-2 h-4 w-4" />
-                      {t('cashier.paymentStatus.retryPrint')}
-                    </>
-                  )}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                onClick={onRetryPrint}
+                disabled={isRetryingPrint || !onRetryPrint}
+                className="flex-1"
+              >
+                {isRetryingPrint ? (
+                  <>
+                    <Printer className="mr-2 h-4 w-4 animate-pulse" />
+                    {t('cashier.paymentStatus.retryingPrint')}
+                  </>
+                ) : (
+                  <>
+                    <Printer className="mr-2 h-4 w-4" />
+                    {t('cashier.paymentStatus.retryPrint')}
+                  </>
+                )}
+              </Button>
               <Button
                 onClick={onClose}
-                className={cn(
-                  onRetryPrint ? 'flex-1' : 'w-full',
-                  'bg-green-600 hover:bg-green-700 text-white'
-                )}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 {t('cashier.paymentStatus.close')}
               </Button>

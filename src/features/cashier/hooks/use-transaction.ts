@@ -33,7 +33,7 @@ export function useTransaction(
   const { user } = useAuthStore()
   const processTransactionMutation = useProcessTransaction()
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
+  const [paymentMethod, setPaymentMethodState] = useState<PaymentMethod>('cash')
   const [paymentAmount, setPaymentAmount] = useState<number>(0)
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false)
   const [paymentStatusDialogOpen, setPaymentStatusDialogOpen] = useState(false)
@@ -41,6 +41,22 @@ export function useTransaction(
     success: false
   })
   const [isRetryingPrint, setIsRetryingPrint] = useState(false)
+
+  // Custom payment method setter to handle non-cash payment amounts
+  const setPaymentMethod = useCallback(
+    (method: PaymentMethod) => {
+      setPaymentMethodState(method)
+
+      // Auto-set payment amount for non-cash methods
+      if (method !== 'cash') {
+        setPaymentAmount(total)
+      } else {
+        // Reset to 0 for cash payments to allow manual input
+        setPaymentAmount(0)
+      }
+    },
+    [total]
+  )
 
   const isProcessingTransaction = processTransactionMutation.isPending
 
@@ -64,7 +80,7 @@ export function useTransaction(
       return false
     }
 
-    if (paymentAmount < total) {
+    if (paymentMethod === 'cash' && paymentAmount < total) {
       toast.error(t('cashier.validation.insufficientPayment'), {
         description: t('cashier.validation.insufficientPaymentDescription', {
           amount: total.toLocaleString()
@@ -106,7 +122,7 @@ export function useTransaction(
     }
 
     return true
-  }, [cart, paymentAmount, total, selectedMemberDiscount, selectedTierDiscount, t])
+  }, [cart, paymentAmount, total, selectedMemberDiscount, selectedTierDiscount, paymentMethod, t])
 
   const printReceiptAfterTransaction = useCallback(
     async (transactionId: string) => {
@@ -134,15 +150,26 @@ export function useTransaction(
         const response = await window.api.printer.printHTML(receiptHTML)
 
         if (response.success) {
-          toast.success('Receipt dicetak otomatis')
+          toast.success(t('cashier.paymentStatus.printSuccess'), {
+            description: t('cashier.paymentStatus.printSuccessDescription')
+          })
         } else {
+          const errorMessage = response.error?.message || t('cashier.paymentStatus.printError')
           if (import.meta.env.DEV) console.error('Print failed:', response.error?.message)
+          toast.error(t('cashier.paymentStatus.printError'), {
+            description: errorMessage
+          })
         }
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : t('cashier.paymentStatus.printError')
         if (import.meta.env.DEV) console.error('Failed to print receipt:', error)
+        toast.error(t('cashier.paymentStatus.printError'), {
+          description: errorMessage
+        })
       }
     },
-    [settings.general.storeInfo, settings.general.footerInfo]
+    [settings.general.storeInfo, settings.general.footerInfo, t]
   )
 
   const retryPrintReceipt = useCallback(async (): Promise<void> => {
@@ -152,18 +179,14 @@ export function useTransaction(
 
     try {
       await printReceiptAfterTransaction(paymentStatus.internalId)
-      toast.success(t('cashier.paymentStatus.printSuccess'), {
-        description: t('cashier.paymentStatus.printSuccessDescription')
-      })
+      // printReceiptAfterTransaction already handles success/error toasts
     } catch (error) {
-      toast.error(t('cashier.paymentStatus.printError'), {
-        description: t('cashier.paymentStatus.printErrorDescription')
-      })
+      // printReceiptAfterTransaction already handles error toasts
       if (import.meta.env.DEV) console.error('Failed to retry print:', error)
     } finally {
       setIsRetryingPrint(false)
     }
-  }, [paymentStatus.internalId, isRetryingPrint, printReceiptAfterTransaction, t])
+  }, [paymentStatus.internalId, isRetryingPrint, printReceiptAfterTransaction])
 
   const handlePayment = useCallback(async (): Promise<void> => {
     if (isProcessingTransaction) return
@@ -173,10 +196,6 @@ export function useTransaction(
     try {
       const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
       const finalAmount = totalAmount - totalDiscount
-
-      if (paymentMethod !== 'cash') {
-        setPaymentAmount(finalAmount)
-      }
 
       const transactionItems: TransactionItem[] = cart.map((item) => {
         const batch = item.batches?.find((b) => b.id === item.batchId)
@@ -256,7 +275,6 @@ export function useTransaction(
     globalDiscount?.code,
     paymentMethod,
     paymentAmount,
-    setPaymentAmount,
     processTransactionMutation,
     printReceiptAfterTransaction,
     t
