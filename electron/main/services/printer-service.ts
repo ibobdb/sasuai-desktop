@@ -1,16 +1,6 @@
 import { ipcMain } from 'electron'
 import { PrinterManager } from './printer/printer-manager'
-
-interface PrinterSettings {
-  printerName: string
-  paperSize: '58mm' | '80mm' | '78mm' | '76mm' | '57mm' | '44mm'
-  margin: string
-  copies: number
-  fontSize: number
-  fontFamily: string
-  lineHeight: number
-  enableBold: boolean
-}
+import { PrinterSettings } from './printer/printer-settings'
 
 export class PrinterService {
   private static instance: PrinterService
@@ -33,7 +23,6 @@ export class PrinterService {
         const printers = await this.getAvailablePrinters()
         return { success: true, data: printers }
       } catch (error) {
-        console.error('Failed to get printers:', error)
         return {
           success: false,
           error: {
@@ -48,7 +37,6 @@ export class PrinterService {
         const settings = this.getSettings()
         return { success: true, data: settings }
       } catch (error) {
-        console.error('Failed to get printer settings:', error)
         return {
           success: false,
           error: {
@@ -63,7 +51,6 @@ export class PrinterService {
         this.saveSettings(settings)
         return { success: true }
       } catch (error) {
-        console.error('Failed to save printer settings:', error)
         return {
           success: false,
           error: {
@@ -78,7 +65,6 @@ export class PrinterService {
         const result = await this.testPrint()
         return { success: true, data: result }
       } catch (error) {
-        console.error('Failed to test print:', error)
         return {
           success: false,
           error: {
@@ -93,7 +79,6 @@ export class PrinterService {
         const result = await this.printHTML(htmlContent)
         return { success: true, data: result }
       } catch (error) {
-        console.error('Failed to print HTML:', error)
         return {
           success: false,
           error: {
