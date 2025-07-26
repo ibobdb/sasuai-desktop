@@ -178,6 +178,8 @@
       "title": "Redeem Voucher",
       "placeholder": "Enter voucher code",
       "apply": "Apply",
+      "success": "Voucher applied successfully",
+      "applied": "Voucher has been applied",
       "emptyCode": "Please enter a voucher code",
       "invalidCode": "Invalid voucher code",
       "tryAnotherCode": "Please try another code or check for typos",
