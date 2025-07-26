@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.8.1...v1.9.0) (2025-07-26)
+
+
+### Features
+
+* optimize startup performance and resource loading ([40ac18d](https://github.com/ibobdb/sasuai-desktop/commit/40ac18d6a4be536e1b14aeef15119db436cc808a))
+* **printer:** enhance printer status management and caching ([8be84fa](https://github.com/ibobdb/sasuai-desktop/commit/8be84fa3acf9e554a82db8fbc89e148792fb4841))
+* **printer:** implement printer service and settings management ([7a25b7f](https://github.com/ibobdb/sasuai-desktop/commit/7a25b7f84c8106bde86c034e0d5a718c414f23ba))
+
+
+### Code Refactoring
+
+* clean up unused code and comments in cashier components and hooks ([ea2e9f7](https://github.com/ibobdb/sasuai-desktop/commit/ea2e9f78beb25853117bbce997749a3176934756))
+* replace printer handlers with printer service integration ([b36c60a](https://github.com/ibobdb/sasuai-desktop/commit/b36c60a40279e5e17c11e2a9639f704067b8ea57))
+
 ## [1.8.1](https://github.com/ibobdb/sasuai-desktop/compare/v1.8.0...v1.8.1) (2025-07-24)
 
 ### Bug Fixes
