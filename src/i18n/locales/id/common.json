@@ -78,5 +78,31 @@
       "thisYear": "Tahun Ini"
     }
   },
+  "networkHealth": {
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "error": "Error",
+      "unknown": "Tidak Diketahui",
+      "connecting": "Menghubungkan"
+    },
+    "description": {
+      "online": "Terhubung ke server",
+      "offline": "Tidak ada koneksi internet",
+      "error": "Masalah koneksi",
+      "unknown": "Status tidak diketahui",
+      "connecting": "Menginisialisasi koneksi..."
+    },
+    "errors": {
+      "noInternet": "Tidak ada koneksi internet",
+      "browserOffline": "Browser sedang offline",
+      "serverError": "Error server"
+    },
+    "tooltip": {
+      "status": "Status",
+      "lastChecked": "Terakhir dicek",
+      "latency": "Latensi"
+    }
+  },
   "tip": "Tips"
 }

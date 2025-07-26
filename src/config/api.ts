@@ -24,5 +24,6 @@ export const API_ENDPOINTS = {
   },
   DISCOUNTS: {
     BASE: `${API_BASE_URL}/discount`
-  }
+  },
+  HEALTH: `${API_BASE_URL}/health`
 }

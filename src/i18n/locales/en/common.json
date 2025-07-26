@@ -78,5 +78,31 @@
       "thisYear": "This Year"
     }
   },
+  "networkHealth": {
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "error": "Error",
+      "unknown": "Unknown",
+      "connecting": "Connecting"
+    },
+    "description": {
+      "online": "Connected to server",
+      "offline": "No internet connection",
+      "error": "Connection issues",
+      "unknown": "Unknown status",
+      "connecting": "Initializing connection..."
+    },
+    "errors": {
+      "noInternet": "No internet connection",
+      "browserOffline": "Browser is offline",
+      "serverError": "Server error"
+    },
+    "tooltip": {
+      "status": "Status",
+      "lastChecked": "Last checked",
+      "latency": "Latency"
+    }
+  },
   "tip": "Tip"
 }
