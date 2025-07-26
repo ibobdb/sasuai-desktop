@@ -2,57 +2,78 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { languageStore } from '@/utils/language-store'
 
-// Import resources
+// Load only essential resources first for faster startup
 import commonEN from './locales/en/common.json'
-import transactionsEN from './locales/en/transactions.json'
-import cashierEN from './locales/en/cashier.json'
-import memberEN from './locales/en/member.json'
-import sidebarEN from './locales/en/sidebar.json'
-import updaterEN from './locales/en/updater.json'
-import rewardsEN from './locales/en/rewards.json'
 import authEN from './locales/en/auth.json'
-import settingsEN from './locales/en/settings.json'
+import sidebarEN from './locales/en/sidebar.json'
 
 import commonID from './locales/id/common.json'
-import transactionsID from './locales/id/transactions.json'
-import cashierID from './locales/id/cashier.json'
-import memberID from './locales/id/member.json'
-import sidebarID from './locales/id/sidebar.json'
-import updaterID from './locales/id/updater.json'
-import rewardsID from './locales/id/rewards.json'
 import authID from './locales/id/auth.json'
-import settingsID from './locales/id/settings.json'
+import sidebarID from './locales/id/sidebar.json'
 
-// Configure resources
-const resources = {
+// Essential resources for initial load
+const essentialResources = {
   en: {
     common: commonEN,
-    transactions: transactionsEN,
-    cashier: cashierEN,
-    member: memberEN,
-    sidebar: sidebarEN,
-    updater: updaterEN,
-    rewards: rewardsEN,
     auth: authEN,
-    settings: settingsEN
+    sidebar: sidebarEN
   },
   id: {
     common: commonID,
-    transactions: transactionsID,
-    cashier: cashierID,
-    member: memberID,
-    sidebar: sidebarID,
-    updater: updaterID,
-    rewards: rewardsID,
     auth: authID,
-    settings: settingsID
+    sidebar: sidebarID
   }
 }
 
-// Initialize i18next with a default language, then update when we load the preference
+// Function to lazy load remaining resources
+export const loadAdditionalResources = async () => {
+  const [
+    transactionsEN,
+    cashierEN,
+    memberEN,
+    updaterEN,
+    rewardsEN,
+    settingsEN,
+    transactionsID,
+    cashierID,
+    memberID,
+    updaterID,
+    rewardsID,
+    settingsID
+  ] = await Promise.all([
+    import('./locales/en/transactions.json'),
+    import('./locales/en/cashier.json'),
+    import('./locales/en/member.json'),
+    import('./locales/en/updater.json'),
+    import('./locales/en/rewards.json'),
+    import('./locales/en/settings.json'),
+    import('./locales/id/transactions.json'),
+    import('./locales/id/cashier.json'),
+    import('./locales/id/member.json'),
+    import('./locales/id/updater.json'),
+    import('./locales/id/rewards.json'),
+    import('./locales/id/settings.json')
+  ])
+
+  i18n.addResourceBundle('en', 'transactions', transactionsEN.default)
+  i18n.addResourceBundle('en', 'cashier', cashierEN.default)
+  i18n.addResourceBundle('en', 'member', memberEN.default)
+  i18n.addResourceBundle('en', 'updater', updaterEN.default)
+  i18n.addResourceBundle('en', 'rewards', rewardsEN.default)
+  i18n.addResourceBundle('en', 'settings', settingsEN.default)
+
+  i18n.addResourceBundle('id', 'transactions', transactionsID.default)
+  i18n.addResourceBundle('id', 'cashier', cashierID.default)
+  i18n.addResourceBundle('id', 'member', memberID.default)
+  i18n.addResourceBundle('id', 'updater', updaterID.default)
+  i18n.addResourceBundle('id', 'rewards', rewardsID.default)
+  i18n.addResourceBundle('id', 'settings', settingsID.default)
+}
+
+// Initialize i18next with essential resources only
 i18n.use(initReactI18next).init({
-  resources,
-  lng: 'en', // Default initial language
+  resources: essentialResources,
+  lng: 'id', // Default to Indonesian
   fallbackLng: 'en',
   supportedLngs: ['en', 'id'],
   debug: import.meta.env.DEV,
@@ -64,12 +85,29 @@ i18n.use(initReactI18next).init({
   }
 })
 
-// Load the language preference from the store (async)
-languageStore.get().then((language) => {
-  if (language && language !== i18n.language) {
-    i18n.changeLanguage(language)
+// Load language preference and additional resources after startup
+const initializeLanguageAndResources = async () => {
+  try {
+    const savedLanguage = await languageStore.get()
+    if (savedLanguage && savedLanguage !== i18n.language) {
+      await i18n.changeLanguage(savedLanguage)
+    }
+
+    // Load additional resources in background
+    setTimeout(() => {
+      loadAdditionalResources()
+    }, 100)
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error('Failed to initialize language:', error)
+    }
   }
-})
+}
+
+// Initialize after DOM is ready
+if (typeof window !== 'undefined') {
+  initializeLanguageAndResources()
+}
 
 // Save language preference when it changes
 i18n.on('languageChanged', (lng) => {

@@ -111,10 +111,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true })
 
     try {
-      const [token, userDataStr] = await Promise.all([
+      // Use Promise.allSettled to continue even if one operation fails
+      const [tokenResult, userDataResult] = await Promise.allSettled([
         window.api.cookies.get(AUTH_COOKIE_NAME),
         window.api.cookies.get(USER_DATA_COOKIE_NAME)
       ])
+
+      const token = tokenResult.status === 'fulfilled' ? tokenResult.value : null
+      const userDataStr = userDataResult.status === 'fulfilled' ? userDataResult.value : null
 
       if (token && userDataStr) {
         try {
@@ -125,10 +129,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isLoading: false
           })
 
-          return await get().validateSession()
+          // Validate session in background, don't block startup
+          get()
+            .validateSession()
+            .catch(() => {
+              // Session validation failed, but don't block UI
+              if (import.meta.env.DEV) {
+                console.warn('Session validation failed during startup')
+              }
+            })
+
+          return true
         } catch (error) {
-          if (import.meta.env.DEV)
-            if (import.meta.env.DEV) console.error('Error parsing user data:', error)
+          if (import.meta.env.DEV) {
+            console.error('Error parsing user data:', error)
+          }
           await window.api.cookies.clearAuth()
         }
       }
@@ -136,8 +151,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false })
       return false
     } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Error during initialization:', error)
+      if (import.meta.env.DEV) {
+        console.error('Error during initialization:', error)
+      }
       set({ isLoading: false })
       return false
     }

@@ -20,8 +20,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate({ to: '/sign-in', replace: true })
       }
     } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Failed to initialize auth:', error)
+      if (import.meta.env.DEV) {
+        console.error('Failed to initialize auth:', error)
+      }
       if (isAuthenticatedRoute) {
         navigate({ to: '/sign-in', replace: true })
       }
@@ -31,7 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [initialize, isAuthenticatedRoute, navigate])
 
   useEffect(() => {
-    initAuth()
+    // Defer auth initialization to allow UI to render first
+    const timeoutId = setTimeout(() => {
+      initAuth()
+    }, 0)
+
+    return () => clearTimeout(timeoutId)
   }, [initAuth])
 
   useEffect(() => {
@@ -40,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthReady, isLoading, user, isAuthenticatedRoute, navigate])
 
+  // Show loading spinner only for authenticated routes
   if (!isAuthReady || (isLoading && isAuthenticatedRoute)) {
     return (
       <div className="flex h-screen items-center justify-center">
