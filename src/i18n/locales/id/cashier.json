@@ -48,7 +48,7 @@
     "memberSection": {
       "title": "Pelanggan",
       "clear": "Hapus",
-      "points": "{{points}} poin",
+      "points": "poin",
       "memberDiscount": "Diskon Pelanggan:",
       "selectDiscount": "Pilih diskon",
       "removeDiscount": "Hapus Diskon",

@@ -48,7 +48,7 @@
     "memberSection": {
       "title": "Member",
       "clear": "Clear",
-      "points": "{{points}} points",
+      "points": "points",
       "memberDiscount": "Member Discount:",
       "selectDiscount": "Select discount",
       "removeDiscount": "Remove Discount",

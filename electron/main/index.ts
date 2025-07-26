@@ -3,14 +3,11 @@ import { electronApp as electronAppUtils, optimizer } from '@electron-toolkit/ut
 import Store from 'electron-store'
 import { createWindow, getMainWindow } from './window'
 import { setupAutoUpdater } from './updater'
-import { AUTH_STORE_TOKEN_KEY, AUTH_STORE_USER_KEY } from './constants'
 import { CookieService } from './services/cookie-service'
 import { setupPrinterService } from './services/printer-service'
 import { createApiClient } from './api-client'
 
 export interface StoreSchema {
-  [AUTH_STORE_TOKEN_KEY]?: string
-  [AUTH_STORE_USER_KEY]?: string
   language?: string
   [key: string]: unknown
 }
@@ -84,8 +81,19 @@ class ElectronApp {
           ...options
         })
 
-        const result = { success: true, data: response.data }
+        // Extract set-cookie headers for manual token handling when needed
+        let sessionCookies = null
+        if (response.headers && response.headers['set-cookie']) {
+          sessionCookies = response.headers['set-cookie']
+        }
+
+        const result = {
+          success: true,
+          data: response.data,
+          cookies: sessionCookies
+        }
         this.requestCache.set(cacheKey, { data: response.data, timestamp: Date.now() })
+
         return result
       } catch (error: any) {
         if (error.response) {
@@ -249,7 +257,8 @@ class ElectronApp {
     })
 
     ipcMain.handle('cookies:clearAuth', async () => {
-      return await this.cookieService!.clearAuthCookies()
+      const result = await this.cookieService!.clearAuthCookies()
+      return result
     })
   }
 
@@ -262,15 +271,11 @@ class ElectronApp {
 
   cleanup() {
     this.requestCache.clear()
-    if (this.cookieService) {
-      this.cookieService.cleanup()
-    }
   }
 
   getCacheStats() {
     return {
-      requestCache: this.requestCache.size,
-      cookieCache: this.cookieService?.getCacheStats() || { size: 0, keys: [] }
+      requestCache: this.requestCache.size
     }
   }
 }

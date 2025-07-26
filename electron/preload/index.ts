@@ -61,7 +61,8 @@ class ApiClient {
       throw error
     }
 
-    const result = response.success ? response.data : response
+    // Return response data with any cookies for compatibility
+    const result = response.success ? { ...response.data, cookies: response.cookies } : response
 
     if (response.success) {
       this.cache.set(cacheKey, { data: result, timestamp: Date.now() })

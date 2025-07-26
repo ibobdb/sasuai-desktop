@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useMatches } from '@tanstack/react-router'
 import { useAuth } from '@/stores/authStore'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { initialize, user, isLoading } = useAuth()
   const [isAuthReady, setIsAuthReady] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
   const navigate = useNavigate()
   const matches = useMatches()
 
@@ -13,38 +14,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [matches]
   )
 
-  const initAuth = useCallback(async () => {
-    try {
-      const hasValidSession = await initialize()
-      if (!hasValidSession && isAuthenticatedRoute) {
-        navigate({ to: '/sign-in', replace: true })
-      }
-    } catch (error) {
-      if (import.meta.env.DEV) {
+  // Initialize auth only once
+  useEffect(() => {
+    if (hasInitialized) return
+
+    const initAuth = async () => {
+      try {
+        await initialize()
+        setIsAuthReady(true)
+        setHasInitialized(true)
+      } catch (error) {
         console.error('Failed to initialize auth:', error)
+        setIsAuthReady(true)
+        setHasInitialized(true)
       }
-      if (isAuthenticatedRoute) {
-        navigate({ to: '/sign-in', replace: true })
-      }
-    } finally {
-      setIsAuthReady(true)
     }
-  }, [initialize, isAuthenticatedRoute, navigate])
 
+    initAuth()
+  }, [initialize, hasInitialized])
+
+  // Handle route-based redirects after auth is ready
   useEffect(() => {
-    // Defer auth initialization to allow UI to render first
-    const timeoutId = setTimeout(() => {
-      initAuth()
-    }, 0)
+    if (!isAuthReady || !hasInitialized) return
 
-    return () => clearTimeout(timeoutId)
-  }, [initAuth])
-
-  useEffect(() => {
-    if (isAuthReady && !isLoading && isAuthenticatedRoute && !user) {
+    if (isAuthenticatedRoute && !user && !isLoading) {
       navigate({ to: '/sign-in', replace: true })
     }
-  }, [isAuthReady, isLoading, user, isAuthenticatedRoute, navigate])
+  }, [isAuthReady, hasInitialized, user, isLoading, isAuthenticatedRoute, navigate])
 
   // Show loading spinner only for authenticated routes
   if (!isAuthReady || (isLoading && isAuthenticatedRoute)) {
