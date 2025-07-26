@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.10.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.9.0...v1.10.0) (2025-07-26)
+
+
+### Features
+
+* implement network health monitoring with visual indicators ([5cd8a8b](https://github.com/ibobdb/sasuai-desktop/commit/5cd8a8b493ac03d50eaa4baf7ac61b1d2499c834))
+
+
+### Bug Fixes
+
+* **cashier:** add success messages for voucher application in English and Indonesian ([3bf6507](https://github.com/ibobdb/sasuai-desktop/commit/3bf6507972c15c5960c337fa902c31778e95ea70))
+* **cashier:** change calculatePoints method to use GET instead of POST ([1df36b6](https://github.com/ibobdb/sasuai-desktop/commit/1df36b6dab8a235421021a3197f62cb24c5c2bfd))
+* **cashier:** change calculatePoints method to use POST instead of GET ([3bf6507](https://github.com/ibobdb/sasuai-desktop/commit/3bf6507972c15c5960c337fa902c31778e95ea70))
+* **cashier:** improve payment and printer error handling ([5f3c718](https://github.com/ibobdb/sasuai-desktop/commit/5f3c718989ebe6e6e0e32b9e156b2cb379c1b980))
+
+
+### Code Refactoring
+
+* **api-client:** streamline cookie handling and remove unused constants ([d267d63](https://github.com/ibobdb/sasuai-desktop/commit/d267d6328161225b794d1149522111566584639a))
+
 ## [1.9.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.8.1...v1.9.0) (2025-07-26)
 
 ### Features
