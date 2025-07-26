@@ -12,26 +12,46 @@ const FontContext = createContext<FontContextType | undefined>(undefined)
 
 export const FontProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [font, _setFont] = useState<Font>(() => {
-    const savedFont = localStorage.getItem('font')
-    // Default to 'opensans' if no font is saved
-    return fonts.includes(savedFont as Font) ? (savedFont as Font) : 'opensans'
+    // Use synchronous check to avoid layout shifts
+    if (typeof window === 'undefined') return 'opensans'
+
+    try {
+      const savedFont = localStorage.getItem('font')
+      return fonts.includes(savedFont as Font) ? (savedFont as Font) : 'opensans'
+    } catch {
+      return 'opensans'
+    }
   })
 
   useEffect(() => {
-    const applyFont = (font: string) => {
+    const applyFont = (fontName: string) => {
       const root = document.documentElement
-      root.classList.forEach((cls) => {
-        if (cls.startsWith('font-')) root.classList.remove(cls)
-      })
-      root.classList.add(`font-${font}`)
+
+      // Remove existing font classes more efficiently
+      const fontClasses = Array.from(root.classList).filter((cls) => cls.startsWith('font-'))
+      root.classList.remove(...fontClasses)
+
+      // Add new font class
+      root.classList.add(`font-${fontName}`)
     }
 
-    applyFont(font)
+    // Apply font with requestAnimationFrame to avoid blocking
+    requestAnimationFrame(() => {
+      applyFont(font)
+    })
   }, [font])
 
-  const setFont = (font: Font) => {
-    localStorage.setItem('font', font)
-    _setFont(font)
+  const setFont = (newFont: Font) => {
+    try {
+      localStorage.setItem('font', newFont)
+      _setFont(newFont)
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Failed to save font preference:', error)
+      }
+      // Still update state even if localStorage fails
+      _setFont(newFont)
+    }
   }
 
   return <FontContext value={{ font, setFont }}>{children}</FontContext>

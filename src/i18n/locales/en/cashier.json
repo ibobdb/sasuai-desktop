@@ -15,22 +15,21 @@
       "select": "Select"
     },
     "productSearch": {
-      "title": "Product Search",
+      "title": "Search Products",
       "placeholder": "Search by name, barcode or SKU...",
       "noResults": "No products found matching \"{{query}}\"",
-      "minCharacters": "Enter at least 3 characters to search",
       "quickAdd": "Quick Add",
-      "barcode": "Barcode",
-      "sku": "SKU",
+      "searching": "Searching products...",
+      "searchingDescription": "Please wait a moment",
       "inStock": "In stock",
-      "limitedStock": "Limited",
-      "lowStock": "Low stock",
       "outOfStock": "Out of stock",
       "expired": "Expired",
-      "expiringFormat": "Expiring soon: {{date}} ({{days}} days)",
-      "expiresOn": "Expires: {{date}}",
-      "fetchError": "Failed to fetch products",
-      "fetchErrorDescription": "Please try again later"
+      "productNotFound": "Product not found",
+      "daysLeft": "{{days}}d",
+      "barcode": "Barcode",
+      "sku": "SKU",
+      "expiresOn": "Expires on {{date}}",
+      "expiringFormat": "Expires {{date}} ({{days}} days left)"
     },
     "quantityDialog": {
       "title": "Add Product to Cart",
@@ -49,7 +48,7 @@
     "memberSection": {
       "title": "Member",
       "clear": "Clear",
-      "points": "points",
+      "points": "{{points}} points",
       "memberDiscount": "Member Discount:",
       "selectDiscount": "Select discount",
       "removeDiscount": "Remove Discount",
@@ -65,11 +64,15 @@
       "noMembersFound": "No members found",
       "minCharacters": "Enter at least 3 characters to search",
       "newMember": "New Member",
-      "phone": "Phone",
-      "cardId": "Card ID",
+      "phone": "Phone: {{phone}}",
+      "cardId": "Card ID: {{cardId}}",
       "banned": "Banned",
       "memberBanned": "Member is banned",
-      "memberBannedDescription": "This member has been banned and cannot be selected."
+      "memberBannedDescription": "This member has been banned and cannot be selected.",
+      "discounts": "{{count}} discount(s)",
+      "searching": "Searching members...",
+      "searchingDescription": "Please wait a moment",
+      "noResults": "No members found matching \"{{query}}\""
     },
     "createMember": {
       "title": "Add New Member",
@@ -119,7 +122,13 @@
       "amountPaid": "Amount Paid",
       "change": "Change",
       "close": "Close",
-      "tryAgain": "Try Again"
+      "tryAgain": "Try Again",
+      "retryPrint": "Retry Print",
+      "retryingPrint": "Printing...",
+      "printSuccess": "Receipt printed successfully",
+      "printSuccessDescription": "Transaction receipt has been printed successfully",
+      "printError": "Failed to print receipt",
+      "printErrorDescription": "An error occurred while printing the receipt. Please try again."
     },
     "summary": {
       "title": "Total Payment",

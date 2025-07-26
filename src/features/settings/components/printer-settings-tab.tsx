@@ -166,17 +166,27 @@ export function PrinterSettingsTab() {
   )
 
   const printerOptions = useMemo(() => {
-    return [
-      { value: 'system-default', label: t('printer.systemDefault') },
-      ...availablePrinters.map((printer) => ({ value: printer, label: printer }))
+    const options = [
+      {
+        value: 'system-default',
+        label: t('printer.systemDefault')
+      }
     ]
+
+    availablePrinters.forEach((printer) => {
+      options.push({
+        value: printer,
+        label: printer
+      })
+    })
+
+    return options
   }, [availablePrinters, t])
 
   return (
     <div className="space-y-6">
       <Card>
         <CardContent className="pt-6 space-y-6">
-          {/* Printer Selection */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm">{t('printer.selectPrinter')}</Label>
@@ -192,9 +202,19 @@ export function PrinterSettingsTab() {
                 <SelectContent>
                   {printerOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                      <div className="flex items-center justify-between w-full">
+                        <span>{option.label}</span>
+                        {option.value === 'system-default' && (
+                          <span className="text-xs text-muted-foreground ml-2">(OS Default)</span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
+                  {availablePrinters.length === 0 && (
+                    <SelectItem value="no-printers" disabled>
+                      <span className="text-muted-foreground">No physical printers found</span>
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

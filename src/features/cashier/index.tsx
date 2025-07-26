@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo, useCallback, useMemo } from 'react'
+import { useRef, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Main } from '@/components/layout/main'
 import ProductSearch from './components/product-search'
@@ -158,11 +158,7 @@ function Cashier() {
     [globalDiscount, memberDiscounts]
   )
 
-  useEffect(() => {
-    if (calculations.total > 0 && transaction.paymentMethod === 'cash') {
-      transaction.setPaymentAmount(calculations.total)
-    }
-  }, [calculations.total, transaction.paymentMethod, transaction])
+  // Removed inconsistent auto-fill logic
 
   const handleStatusDialogClose = useCallback(() => {
     transaction.handleStatusDialogClose()
@@ -196,10 +192,15 @@ function Cashier() {
     [memberDiscounts.selectedMember]
   )
 
-  const isPayEnabled = useMemo(
-    () => cart.cart.length > 0 && transaction.paymentAmount >= calculations.total,
-    [cart.cart.length, transaction.paymentAmount, calculations.total]
-  )
+  const isPayEnabled = useMemo(() => {
+    if (cart.cart.length === 0) return false
+
+    if (transaction.paymentMethod === 'cash') {
+      return transaction.paymentAmount >= calculations.total
+    }
+
+    return true
+  }, [cart.cart.length, transaction.paymentAmount, calculations.total, transaction.paymentMethod])
 
   const paymentButtonText = useMemo(() => {
     if (calculations.total > 0) {
@@ -308,6 +309,8 @@ function Cashier() {
         paymentAmount={transaction.paymentAmount}
         errorMessage={transaction.paymentStatus.errorMessage}
         memberInfo={memberInfo}
+        onRetryPrint={transaction.retryPrintReceipt}
+        isRetryingPrint={transaction.isRetryingPrint}
       />
     </Main>
   )

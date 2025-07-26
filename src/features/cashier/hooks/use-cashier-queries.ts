@@ -11,7 +11,6 @@ import {
   TransactionResponse
 } from '@/types/cashier'
 
-// Query keys
 export const CASHIER_QUERY_KEYS = {
   products: (params: ProductSearchParams) => ['cashier', 'products', params] as const,
   members: (params: MemberSearchParams) => ['cashier', 'members', params] as const,
@@ -19,7 +18,6 @@ export const CASHIER_QUERY_KEYS = {
   discount: (code: string) => ['cashier', 'discount', code] as const
 }
 
-// Product search hook
 export function useProductSearch(params: ProductSearchParams, enabled: boolean = true) {
   return useQuery({
     queryKey: CASHIER_QUERY_KEYS.products(params),

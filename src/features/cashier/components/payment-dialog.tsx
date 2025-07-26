@@ -1,4 +1,4 @@
-import { useRef, useEffect, memo, useCallback, useMemo } from 'react'
+import { useRef, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -68,13 +68,7 @@ function PaymentDialog({
     [paymentMethod]
   )
 
-  useEffect(() => {
-    if (open && paymentMethod !== 'cash') {
-      onPaymentAmountChange(total)
-    } else if (open && paymentMethod === 'cash') {
-      onPaymentAmountChange(0)
-    }
-  }, [open, paymentMethod, total, onPaymentAmountChange])
+  // Removed auto-fill payment amount logic
 
   return (
     <Dialog open={open} onOpenChange={isProcessing ? () => {} : onOpenChange}>

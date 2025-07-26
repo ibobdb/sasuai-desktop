@@ -130,7 +130,8 @@ export interface UseProductSearchProps {
 
 export interface PaymentStatus {
   success: boolean
-  transactionId?: string
+  transactionId?: string // For display (tranId)
+  internalId?: string // For API calls (id)
   change?: number
   errorMessage?: string
 }
@@ -142,11 +143,13 @@ export interface UseTransactionReturn {
   paymentStatusDialogOpen: boolean
   paymentStatus: PaymentStatus
   isProcessingTransaction: boolean
+  isRetryingPrint: boolean
   setPaymentMethod: (method: PaymentMethod) => void
   setPaymentAmount: (amount: number) => void
   setPaymentDialogOpen: (open: boolean) => void
   handlePayment: () => Promise<void>
   handleStatusDialogClose: () => void
+  retryPrintReceipt: () => Promise<void>
 }
 
 // Enhanced Types for UI Components

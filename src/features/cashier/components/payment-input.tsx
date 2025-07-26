@@ -20,31 +20,36 @@ export default function PaymentInput({
   externalAmount
 }: PaymentInputProps) {
   const { t } = useTranslation(['cashier'])
-  const [inputFocused, setInputFocused] = useState(false)
-  const [amountString, setAmountString] = useState('')
+  const [isInputFocused, setIsInputFocused] = useState(false)
+  const [displayAmount, setDisplayAmount] = useState('')
+  const [previousExternalAmount, setPreviousExternalAmount] = useState<number | undefined>(
+    undefined
+  )
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const getFormattedInputValue = (): string => {
-    if (!amountString) return ''
-    const numericValue = parseInt(amountString, 10)
+  const formatDisplayValue = (): string => {
+    if (!displayAmount) return ''
+    const numericValue = parseInt(displayAmount, 10)
     return numericValue.toLocaleString('id-ID')
   }
 
+  // Reset input when dialog opens
   useEffect(() => {
     if (isDialogOpen) {
-      setAmountString('')
+      setDisplayAmount('')
+      setPreviousExternalAmount(undefined)
       onPaymentAmountChange(0)
     }
   }, [isDialogOpen, onPaymentAmountChange])
 
   useEffect(() => {
-    let timer: NodeJS.Timeout | undefined
+    let focusTimer: NodeJS.Timeout | undefined
 
     if (isDialogOpen) {
-      timer = setTimeout(() => {
+      focusTimer = setTimeout(() => {
         if (inputRef.current && document.activeElement !== inputRef.current) {
           inputRef.current.focus()
-          setInputFocused(true)
+          setIsInputFocused(true)
           const len = inputRef.current.value.length
           inputRef.current.setSelectionRange(len, len)
         }
@@ -52,32 +57,38 @@ export default function PaymentInput({
     }
 
     return () => {
-      if (timer) {
-        clearTimeout(timer)
+      if (focusTimer) {
+        clearTimeout(focusTimer)
       }
     }
   }, [isDialogOpen])
 
+  // Handle external amount changes from quick cash buttons
   useEffect(() => {
     if (externalAmount !== undefined) {
-      if (externalAmount === 0) {
-        setAmountString('')
-      } else {
-        setAmountString(externalAmount.toString())
+      // Only update if externalAmount actually changed (user clicked quick cash button)
+      if (externalAmount !== previousExternalAmount) {
+        if (externalAmount === 0) {
+          setDisplayAmount('')
+        } else {
+          // Update input when external amount changes (from quick cash buttons)
+          setDisplayAmount(externalAmount.toString())
+        }
+        setPreviousExternalAmount(externalAmount)
       }
     }
-  }, [externalAmount])
+  }, [externalAmount, previousExternalAmount])
 
-  const handleKeypadInput = (value: string) => {
+  const handleKeypadClick = (value: string) => {
     if (value === 'backspace') {
-      const newValue = amountString.slice(0, -1)
-      setAmountString(newValue)
+      const newValue = displayAmount.slice(0, -1)
+      setDisplayAmount(newValue)
       onPaymentAmountChange(parseInt(newValue || '0', 10))
     } else if (value === 'clear') {
-      setAmountString('')
+      setDisplayAmount('')
       onPaymentAmountChange(0)
     } else {
-      let newValue = amountString
+      let newValue = displayAmount
       if (newValue === '0' && value !== '0') {
         newValue = value
       } else if (newValue === '') {
@@ -85,7 +96,7 @@ export default function PaymentInput({
       } else {
         newValue = newValue + value
       }
-      setAmountString(newValue)
+      setDisplayAmount(newValue)
       onPaymentAmountChange(parseInt(newValue || '0', 10))
     }
 
@@ -98,13 +109,13 @@ export default function PaymentInput({
     }, 0)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleManualInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/[^\d]/g, '')
     let newValue = inputValue
     if (newValue.length > 0 && newValue[0] === '0') {
       newValue = newValue.substring(1)
     }
-    setAmountString(newValue)
+    setDisplayAmount(newValue)
     onPaymentAmountChange(parseInt(newValue || '0', 10))
   }
 
@@ -118,7 +129,7 @@ export default function PaymentInput({
   return (
     <div className="p-6 pt-0 flex flex-col">
       <div className="space-y-2 mb-4">
-        <Label htmlFor="paymentAmount" className={cn(inputFocused ? 'text-primary' : '')}>
+        <Label htmlFor="paymentAmount" className={cn(isInputFocused ? 'text-primary' : '')}>
           {t('cashier.payment.paymentAmount')}
         </Label>
         <div className="relative">
@@ -128,10 +139,10 @@ export default function PaymentInput({
           <Input
             ref={inputRef}
             id="paymentAmount"
-            value={getFormattedInputValue()}
-            onChange={handleInputChange}
+            value={formatDisplayValue()}
+            onChange={handleManualInput}
             onFocus={() => {
-              setInputFocused(true)
+              setIsInputFocused(true)
               setTimeout(() => {
                 if (inputRef.current) {
                   const len = inputRef.current.value.length
@@ -139,7 +150,7 @@ export default function PaymentInput({
                 }
               }, 0)
             }}
-            onBlur={() => setInputFocused(false)}
+            onBlur={() => setIsInputFocused(false)}
             onKeyDown={handleKeyDown}
             className="pl-12 text-right font-bold h-16 [&:not(:focus)]:text-2xl [&:focus]:text-2xl"
             style={{ fontSize: '1.5rem' }}
@@ -155,7 +166,7 @@ export default function PaymentInput({
               key={num}
               variant="outline"
               className="h-16 text-2xl font-semibold hover:bg-primary/10"
-              onClick={() => handleKeypadInput(num.toString())}
+              onClick={() => handleKeypadClick(num.toString())}
             >
               {num}
             </Button>
@@ -163,21 +174,21 @@ export default function PaymentInput({
           <Button
             variant="outline"
             className="h-16 text-2xl font-semibold hover:bg-primary/10"
-            onClick={() => handleKeypadInput('0')}
+            onClick={() => handleKeypadClick('0')}
           >
             0
           </Button>
           <Button
             variant="outline"
             className="h-16 text-2xl font-semibold hover:bg-primary/10"
-            onClick={() => handleKeypadInput('000')}
+            onClick={() => handleKeypadClick('000')}
           >
             000
           </Button>
           <Button
             variant="outline"
             className="h-16 hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => handleKeypadInput('backspace')}
+            onClick={() => handleKeypadClick('backspace')}
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
@@ -187,7 +198,7 @@ export default function PaymentInput({
           <Button
             variant="ghost"
             className="h-12 hover:bg-destructive/10 hover:text-destructive"
-            onClick={() => handleKeypadInput('clear')}
+            onClick={() => handleKeypadClick('clear')}
           >
             <Delete className="mr-2 h-4 w-4" /> {t('cashier.actions.clear')}
           </Button>

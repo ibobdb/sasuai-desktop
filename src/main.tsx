@@ -10,6 +10,7 @@ import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
 import './i18n/i18n'
 import './index.css'
+import './utils/startup-optimizer' // Initialize startup optimizations
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 
@@ -18,7 +19,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error) => {
         if (import.meta.env.DEV) {
-          if (import.meta.env.DEV) if (import.meta.env.DEV) console.log({ failureCount, error })
+          console.log({ failureCount, error })
         }
 
         if (failureCount >= 0 && import.meta.env.DEV) return false
@@ -62,11 +63,11 @@ const queryClient = new QueryClient({
   })
 })
 
-// Create a new router instance
+// Create a new router instance with optimized settings
 const router = createRouter({
   routeTree,
   context: { queryClient },
-  defaultPreload: 'intent',
+  defaultPreload: false, // Disable preloading for faster startup
   defaultPreloadStaleTime: 0,
   history: createHashHistory()
 })
