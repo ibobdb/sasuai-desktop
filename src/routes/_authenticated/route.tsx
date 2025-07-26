@@ -11,6 +11,7 @@ import { Search } from '@/components/search'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { WindowControls } from '@/components/window-controls'
 import { LanguageSwitcher } from '@/components/common/language-switcher'
+import NetworkHealthIndicator from '@/components/network-health-indicator'
 
 export const Route = createFileRoute('/_authenticated')({
   component: RouteComponent
@@ -47,6 +48,7 @@ function RouteComponent() {
 
               <div className="flex items-center justify-end z-10">
                 <div className="flex items-center space-x-4 header-right-section">
+                  <NetworkHealthIndicator />
                   <LanguageSwitcher />
                   <ThemeToggle />
                   <ProfileDropdown />

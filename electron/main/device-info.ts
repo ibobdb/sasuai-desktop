@@ -24,8 +24,7 @@ async function getMachineId(): Promise<string> {
   try {
     cachedMachineId = await machineId()
     return cachedMachineId
-  } catch (error) {
-    console.error('Failed to get machine ID:', error)
+  } catch {
     cachedMachineId = `${hostname()}-${platform()}-${arch()}`.replace(/[^a-zA-Z0-9-]/g, '')
     return cachedMachineId
   }

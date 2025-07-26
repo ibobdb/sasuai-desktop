@@ -48,7 +48,7 @@
     "memberSection": {
       "title": "Pelanggan",
       "clear": "Hapus",
-      "points": "{{points}} poin",
+      "points": "poin",
       "memberDiscount": "Diskon Pelanggan:",
       "selectDiscount": "Pilih diskon",
       "removeDiscount": "Hapus Diskon",
@@ -178,6 +178,8 @@
       "title": "Gunakan Voucher",
       "placeholder": "Masukkan kode voucher",
       "apply": "Terapkan",
+      "success": "Voucher berhasil diterapkan",
+      "applied": "Voucher telah diterapkan",
       "emptyCode": "Silakan masukkan kode voucher",
       "invalidCode": "Kode voucher tidak valid",
       "tryAnotherCode": "Silakan coba kode lain atau periksa kesalahan ketik",
