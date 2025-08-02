@@ -129,12 +129,12 @@ export function useTransaction(
       try {
         const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
 
-        if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
+        if (!detailResponse.success || !detailResponse.data) {
           if (import.meta.env.DEV) console.error('Failed to load transaction details for printing')
           return
         }
 
-        const transactionDetail = detailResponse.data.transactionDetails
+        const transactionDetail = detailResponse.data
 
         const printerSettingsResponse = await window.api.printer.getSettings()
         const printerSettings = printerSettingsResponse.success

@@ -53,7 +53,7 @@ export default function Transactions() {
     queryKey: ['transaction', currentTransaction?.id],
     queryFn: () => transactionOperations.fetchItemDetail(currentTransaction?.id || ''),
     enabled: !!currentTransaction?.id,
-    select: (response) => response.data?.transactionDetails
+    select: (response) => response.data
   })
 
   const transactions = useMemo(

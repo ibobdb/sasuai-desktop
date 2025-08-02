@@ -117,15 +117,15 @@ export interface TransactionDetail {
     finalAmount: number
     discounts: {
       total: number
-      products?: number // Changed from 'product' to 'products'
-      member?: {
+      products: number // Changed from 'product' to 'products' to match API
+      member: {
         id?: string
         type?: string
         name: string
         valueType?: string
         value?: number
         amount: number
-      }
+      } | null // Can be null based on API response
       tier?: {
         id: string
         name: string
@@ -142,7 +142,7 @@ export interface TransactionDetail {
   paymentMethod?: PaymentMethod
   items: TransactionItem[]
   pointsEarned: number
-  createdAt: Date
+  createdAt: Date | string // API returns string, can be parsed to Date
 }
 
 // Filter types for transactions
@@ -189,7 +189,5 @@ export interface TransactionListResponse {
 // API response structure for single transaction
 export interface TransactionDetailResponse {
   success: boolean
-  data: {
-    transactionDetails: TransactionDetail
-  }
+  data: TransactionDetail
 }

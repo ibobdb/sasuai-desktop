@@ -208,7 +208,9 @@ export function TransactionViewDialog({
             </div>
           ) : null}
 
-          {pricing?.discounts?.member && Number(pricing.discounts.member.amount || 0) > 0 ? (
+          {pricing?.discounts?.member &&
+          pricing.discounts.member !== null &&
+          Number(pricing.discounts.member.amount || 0) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground flex items-center gap-1">
                 {t('transaction.details.memberDiscount')}

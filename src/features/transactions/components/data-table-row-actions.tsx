@@ -40,11 +40,11 @@ export function DataTableRowActions({ row, onView }: DataTableRowActionsProps) {
     try {
       // Get transaction detail first
       const detailResponse = await transactionOperations.fetchItemDetail(row.original.id)
-      if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
+      if (!detailResponse.success || !detailResponse.data) {
         throw new Error(t('transaction.receipt.failedToLoadDetails'))
       }
 
-      const transactionDetail = detailResponse.data.transactionDetails
+      const transactionDetail = detailResponse.data
 
       // Get printer settings
       const printerSettingsResponse = await window.api.printer.getSettings()
