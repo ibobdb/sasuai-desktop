@@ -60,14 +60,14 @@ export interface Pricing {
 
 export interface Payment {
   method: string
-  amount: number
-  change: number
+  amount: number | null
+  change: number | null
 }
 
 // Transaction list type
 export interface Transaction {
   id: string
-  tranId: string
+  tranId: string | null // Can be null based on API response
   cashier: Entity
   member: Entity | null
   pricing: Pricing

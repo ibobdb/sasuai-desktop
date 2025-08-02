@@ -244,10 +244,10 @@ export function TransactionViewDialog({
 
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('transaction.details.paymentAmount')}</span>
-            <span>{formatCurrency(Number(payment?.amount || 0))}</span>
+            <span>{payment?.amount != null ? formatCurrency(Number(payment.amount)) : '-'}</span>
           </div>
 
-          {payment?.change && Number(payment.change) > 0 ? (
+          {payment?.change != null && Number(payment.change) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t('transaction.details.change')}</span>
               <span>{formatCurrency(Number(payment.change))}</span>
@@ -317,7 +317,13 @@ export function TransactionViewDialog({
         loadingTitle={t('transaction.receipt.loading')}
         loadingDescription={t('transaction.receipt.loadingDescription')}
         title={t('transaction.receipt.title')}
-        description={transactionDetail ? `Transaction ID: ${transactionDetail.tranId}` : ''}
+        description={
+          transactionDetail?.tranId
+            ? `Transaction ID: ${transactionDetail.tranId}`
+            : transactionDetail
+              ? 'Transaction Details'
+              : ''
+        }
         icon={<IconReceipt className="h-5 w-5" />}
         footerContent={footerContent}
       >
