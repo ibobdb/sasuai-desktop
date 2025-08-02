@@ -41,6 +41,8 @@
       "active": "Aktif",
       "banned": "Diblokir",
       "pointMultiplier": "Pengali Poin",
+      "joinDate": "Tanggal Bergabung",
+      "notes": "Catatan",
       "required": "{field} wajib diisi",
       "validEmail": "Mohon masukkan alamat email yang valid",
       "validPhone": "Mohon masukkan nomor telepon yang valid",

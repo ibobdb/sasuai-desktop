@@ -129,12 +129,11 @@ export function useTransaction(
       try {
         const detailResponse = await transactionOperations.fetchItemDetail(transactionId)
 
-        if (!detailResponse.success || !detailResponse.data?.transactionDetails) {
-          if (import.meta.env.DEV) console.error('Failed to load transaction details for printing')
+        if (!detailResponse.success || !detailResponse.data) {
           return
         }
 
-        const transactionDetail = detailResponse.data.transactionDetails
+        const transactionDetail = detailResponse.data
 
         const printerSettingsResponse = await window.api.printer.getSettings()
         const printerSettings = printerSettingsResponse.success
@@ -155,7 +154,6 @@ export function useTransaction(
           })
         } else {
           const errorMessage = response.error?.message || t('cashier.paymentStatus.printError')
-          if (import.meta.env.DEV) console.error('Print failed:', response.error?.message)
           toast.error(t('cashier.paymentStatus.printError'), {
             description: errorMessage
           })
@@ -163,7 +161,6 @@ export function useTransaction(
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : t('cashier.paymentStatus.printError')
-        if (import.meta.env.DEV) console.error('Failed to print receipt:', error)
         toast.error(t('cashier.paymentStatus.printError'), {
           description: errorMessage
         })
@@ -180,18 +177,15 @@ export function useTransaction(
     try {
       await printReceiptAfterTransaction(paymentStatus.internalId)
       // printReceiptAfterTransaction already handles success/error toasts
-    } catch (error) {
+    } catch {
       // printReceiptAfterTransaction already handles error toasts
-      if (import.meta.env.DEV) console.error('Failed to retry print:', error)
     } finally {
       setIsRetryingPrint(false)
     }
   }, [paymentStatus.internalId, isRetryingPrint, printReceiptAfterTransaction])
 
   const handlePayment = useCallback(async (): Promise<void> => {
-    if (isProcessingTransaction) return
-
-    if (!validateTransaction()) return
+    if (isProcessingTransaction || !validateTransaction()) return
 
     try {
       const totalAmount = cart.reduce((sum, item) => sum + item.subtotal, 0)
@@ -254,7 +248,6 @@ export function useTransaction(
       setPaymentDialogOpen(false)
       setPaymentStatusDialogOpen(true)
     } catch (error) {
-      if (import.meta.env.DEV) console.error('Transaction error:', error)
       setPaymentStatus({
         success: false,
         errorMessage:

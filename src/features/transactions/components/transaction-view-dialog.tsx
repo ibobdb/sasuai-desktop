@@ -28,7 +28,7 @@ export function TransactionViewDialog({
   transactionDetail,
   isLoadingDetail
 }: Props) {
-  const { t } = useTranslation(['transactions', 'common'])
+  const { t } = useTranslation(['transactions', 'common', 'member'])
   const { settings } = useSettings()
   const [isPrinting, setIsPrinting] = useState(false)
 
@@ -107,7 +107,7 @@ export function TransactionViewDialog({
                   <>
                     {member.name}
                     <Badge className={getTierBadgeVariant(member.tier)}>
-                      {member.tier || t('member.tiers.regular')}
+                      {member.tier || t('transaction.tiers.regular')}
                     </Badge>
                   </>
                 ) : (
@@ -199,37 +199,37 @@ export function TransactionViewDialog({
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
-          {pricing?.discounts?.products && Number(pricing.discounts.products) > 0 ? (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {t('transaction.details.productDiscounts')}
-              </span>
-              <span className="text-rose-600">-{formatCurrency(pricing.discounts.products)}</span>
-            </div>
-          ) : null}
-
-          {pricing?.discounts?.member && Number(pricing.discounts.member.amount || 0) > 0 ? (
+          {/* Display discount information */}
+          {pricing?.discounts && Number(pricing.discounts.amount || 0) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground flex items-center gap-1">
-                {t('transaction.details.memberDiscount')}
-                {pricing.discounts.member.name && (
-                  <Badge variant="outline" className="text-xs">
-                    {pricing.discounts.member.name}
-                  </Badge>
-                )}
+                {pricing.discounts.isGlobal
+                  ? t('transaction.details.globalDiscount')
+                  : t('transaction.details.discount')}
+                <div className="flex gap-1">
+                  {pricing.discounts.name && (
+                    <Badge variant="outline" className="text-xs">
+                      {pricing.discounts.name}
+                    </Badge>
+                  )}
+                  {pricing.discounts.code && (
+                    <Badge variant="secondary" className="text-xs">
+                      {pricing.discounts.code}
+                    </Badge>
+                  )}
+                  {pricing.discounts.type && (
+                    <Badge
+                      variant={pricing.discounts.type === 'PERCENTAGE' ? 'default' : 'outline'}
+                      className="text-xs"
+                    >
+                      {pricing.discounts.type === 'PERCENTAGE'
+                        ? `${pricing.discounts.value}%`
+                        : pricing.discounts.type}
+                    </Badge>
+                  )}
+                </div>
               </span>
-              <span className="text-rose-600">
-                -{formatCurrency(pricing.discounts.member.amount)}
-              </span>
-            </div>
-          ) : null}
-
-          {pricing?.discounts?.total && Number(pricing.discounts.total) > 0 ? (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {t('transaction.details.totalDiscount')}
-              </span>
-              <span className="text-rose-600">-{formatCurrency(pricing.discounts.total)}</span>
+              <span className="text-rose-600">-{formatCurrency(pricing.discounts.amount)}</span>
             </div>
           ) : null}
 
@@ -242,10 +242,10 @@ export function TransactionViewDialog({
 
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('transaction.details.paymentAmount')}</span>
-            <span>{formatCurrency(Number(payment?.amount || 0))}</span>
+            <span>{payment?.amount != null ? formatCurrency(Number(payment.amount)) : '-'}</span>
           </div>
 
-          {payment?.change && Number(payment.change) > 0 ? (
+          {payment?.change != null && Number(payment.change) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t('transaction.details.change')}</span>
               <span>{formatCurrency(Number(payment.change))}</span>
@@ -315,7 +315,13 @@ export function TransactionViewDialog({
         loadingTitle={t('transaction.receipt.loading')}
         loadingDescription={t('transaction.receipt.loadingDescription')}
         title={t('transaction.receipt.title')}
-        description={transactionDetail ? `Transaction ID: ${transactionDetail.tranId}` : ''}
+        description={
+          transactionDetail?.tranId
+            ? `Transaction ID: ${transactionDetail.tranId}`
+            : transactionDetail
+              ? 'Transaction Details'
+              : ''
+        }
         icon={<IconReceipt className="h-5 w-5" />}
         footerContent={footerContent}
       >

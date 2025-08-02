@@ -58,7 +58,7 @@ export function useTransactionColumns({
           <DataTableColumnHeader column={column} title={t('transaction.table.id')} />
         ),
         cell: ({ row }) => {
-          const tranId = row.getValue('tranId') as string | undefined
+          const tranId = row.getValue('tranId') as string | null
           if (!tranId) return <span className="text-muted-foreground">-</span>
           return <div className="font-medium">{tranId}</div>
         },

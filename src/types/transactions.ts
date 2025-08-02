@@ -1,5 +1,3 @@
-import { PaymentMethod } from '@/lib/payment-methods'
-
 export interface Entity {
   id: string
   name: string
@@ -60,14 +58,14 @@ export interface Pricing {
 
 export interface Payment {
   method: string
-  amount: number
-  change: number
+  amount: number | null
+  change: number | null
 }
 
 // Transaction list type
 export interface Transaction {
   id: string
-  tranId: string
+  tranId: string | null // Can be null based on API response
   cashier: Entity
   member: Entity | null
   pricing: Pricing
@@ -107,42 +105,34 @@ export interface DetailedCashier {
   email: string
 }
 
+export interface TransactionPricing {
+  originalAmount: number
+  finalAmount: number
+  discounts?: {
+    id: string
+    type: string
+    name?: string
+    code?: string
+    valueType: string
+    value: number
+    amount: number
+    isGlobal: boolean
+    applyTo: string
+    total: number
+  }
+}
+
 export interface TransactionDetail {
   id: string
-  tranId: string | null
+  tranId: string
+  createdAt: string
   cashier: DetailedCashier
   member: DetailedMember | null
-  pricing: {
-    originalAmount: number
-    finalAmount: number
-    discounts: {
-      total: number
-      products?: number // Changed from 'product' to 'products'
-      member?: {
-        id?: string
-        type?: string
-        name: string
-        valueType?: string
-        value?: number
-        amount: number
-      }
-      tier?: {
-        id: string
-        name: string
-        amount: number
-      }
-      global?: {
-        code: string
-        name: string
-        amount: number
-      }
-    }
-  }
+  pricing: TransactionPricing
   payment: Payment
-  paymentMethod?: PaymentMethod
   items: TransactionItem[]
   pointsEarned: number
-  createdAt: Date
+  paymentMethod?: string // For backward compatibility
 }
 
 // Filter types for transactions
@@ -189,7 +179,5 @@ export interface TransactionListResponse {
 // API response structure for single transaction
 export interface TransactionDetailResponse {
   success: boolean
-  data: {
-    transactionDetails: TransactionDetail
-  }
+  data: TransactionDetail
 }

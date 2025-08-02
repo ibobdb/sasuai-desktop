@@ -38,6 +38,7 @@ export interface PointsCalculationParams {
 
 export interface DiscountValidationParams {
   code: string
+  totalAmount: number
 }
 
 // API Response Types
@@ -59,7 +60,10 @@ export interface PointsResponse {
 
 export interface DiscountResponse {
   success: boolean
-  discount: Discount
+  data?: Discount & {
+    calculatedDiscount: number
+    finalAmount: number
+  }
   message?: string
 }
 

@@ -37,6 +37,8 @@
       "totalPointsEarned": "Total Points Earned",
       "pointsPlaceholder": "Enter points",
       "pointMultiplier": "Point Multiplier",
+      "joinDate": "Join Date",
+      "notes": "Notes",
       "points": "points",
       "status": "Status",
       "active": "Active",

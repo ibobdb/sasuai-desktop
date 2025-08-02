@@ -64,7 +64,7 @@ export const cashierOperations = {
   // Discount operations
   validateDiscountCode: async (params: DiscountValidationParams): Promise<DiscountResponse> => {
     const response = await window.api.request(
-      `${API_ENDPOINTS.DISCOUNTS.BASE}?code=${encodeURIComponent(params.code)}`,
+      `${API_ENDPOINTS.DISCOUNTS.BASE}?code=${encodeURIComponent(params.code)}&totalAmount=${params.totalAmount}`,
       {
         method: 'GET'
       }

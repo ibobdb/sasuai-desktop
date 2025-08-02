@@ -228,43 +228,45 @@ function Cashier() {
         </div>
 
         {/* Right Panel - Transaction Details */}
-        <div className="w-full lg:w-96 space-y-6">
-          <MemberSection
-            onMemberSelect={handleMemberSelect}
-            onMemberDiscountSelect={handleMemberDiscountSelect}
-            selectedDiscount={selectedDiscount}
-            subtotal={calculations.subtotal}
-            member={memberDiscounts.selectedMember}
-          />
+        <div className="w-full lg:w-[28rem]">
+          <div className="space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto pb-6">
+            <MemberSection
+              onMemberSelect={handleMemberSelect}
+              onMemberDiscountSelect={handleMemberDiscountSelect}
+              selectedDiscount={selectedDiscount}
+              subtotal={calculations.subtotal}
+              member={memberDiscounts.selectedMember}
+            />
 
-          <RedeemCodeSection
-            onApplyDiscount={handleGlobalDiscountApply}
-            appliedDiscount={globalDiscount.globalDiscount}
-            disabled={isDisabled}
-            disabledReason={disabledReason}
-            subtotal={calculations.subtotal}
-          />
+            <RedeemCodeSection
+              onApplyDiscount={handleGlobalDiscountApply}
+              appliedDiscount={globalDiscount.globalDiscount}
+              disabled={isDisabled}
+              disabledReason={disabledReason}
+              subtotal={calculations.subtotal}
+            />
 
-          <TransactionSummary
-            itemCount={cart.cart.length}
-            subtotal={calculations.subtotal}
-            productDiscounts={calculations.productDiscountsTotal}
-            memberDiscount={calculations.memberDiscountAmount}
-            tierDiscount={calculations.tierDiscountAmount}
-            globalDiscount={calculations.globalDiscountAmount}
-            tax={0}
-            total={calculations.total}
-            pointsToEarn={pointsToEarn}
-          />
+            <TransactionSummary
+              itemCount={cart.cart.length}
+              subtotal={calculations.subtotal}
+              productDiscounts={calculations.productDiscountsTotal}
+              memberDiscount={calculations.memberDiscountAmount}
+              tierDiscount={calculations.tierDiscountAmount}
+              globalDiscount={calculations.globalDiscountAmount}
+              tax={0}
+              total={calculations.total}
+              pointsToEarn={pointsToEarn}
+            />
 
-          {cart.cart.length > 0 && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={clearAll} className="flex-1">
-                <X className="mr-2 h-4 w-4" />
-                {t('cashier.actions.clear')}
-              </Button>
-            </div>
-          )}
+            {cart.cart.length > 0 && (
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={clearAll} className="flex-1">
+                  <X className="mr-2 h-4 w-4" />
+                  {t('cashier.actions.clear')}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -36,6 +36,7 @@
       "itemsPurchased": "Items Purchased",
       "subtotal": "Subtotal",
       "memberDiscount": "Member Discount",
+      "discount": "Discount",
       "totalDiscount": "Total Discount",
       "total": "Total",
       "paymentAmount": "Payment Amount",
@@ -67,6 +68,14 @@
     },
     "detail-dialog": {
       "loading": "Loading Transaction Details"
+    },
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
     }
   }
 }

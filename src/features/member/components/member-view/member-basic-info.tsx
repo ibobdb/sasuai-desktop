@@ -46,6 +46,18 @@ const MemberBasicInfoComponent = ({ memberDetail }: MemberBasicInfoProps) => {
         </p>
       </div>
 
+      <div>
+        <h4 className="font-medium text-muted-foreground">{t('member.fields.tier')}</h4>
+        <p className="mt-1">{memberDetail.tier?.name || t('member.tiers.regular')}</p>
+      </div>
+
+      <div>
+        <h4 className="font-medium text-muted-foreground">{t('member.fields.totalPoints')}</h4>
+        <p className="mt-1">
+          {memberDetail.totalPoints || 0} {t('member.fields.points')}
+        </p>
+      </div>
+
       {memberDetail.address && (
         <div className="sm:col-span-2">
           <h4 className="font-medium text-muted-foreground">{t('member.fields.address')}</h4>

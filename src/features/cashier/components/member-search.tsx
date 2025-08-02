@@ -12,7 +12,7 @@ import { getTierBadgeVariant } from '@/features/member/components/member-columns
 import { useMemberSearch as useMemberSearchHook } from '../hooks/use-member-search'
 
 export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
-  const { t } = useTranslation(['cashier'])
+  const { t } = useTranslation(['cashier', 'member'])
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
 
   const handleMemberSelect = useCallback(
@@ -57,7 +57,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
 
   return (
     <div className="space-y-1.5">
-      <div className="relative">
+      <div className="relative px-1">
         <Input
           ref={inputRef}
           placeholder={t('cashier.memberSearch.placeholder')}
@@ -65,7 +65,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
-          className="pr-16 h-9"
+          className="pr-14 h-9"
           tabIndex={2}
           data-member-search-input
         />
@@ -74,7 +74,7 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-10 top-0 h-full w-8"
+            className="absolute right-9 top-0 h-full w-7"
             onClick={clearSearch}
           >
             <X className="h-3 w-3" />
@@ -83,21 +83,21 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
 
         <Button
           size="icon"
-          className="absolute right-0 top-0 h-full rounded-l-none w-10"
+          className="absolute right-1 top-0 h-full rounded-l-none w-8"
           onClick={handleManualSearch}
           disabled={query.trim().length < 3 || isLoading || isDebouncing}
         >
           {isLoading || isDebouncing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Search className="h-4 w-4" />
+            <Search className="h-3.5 w-3.5" />
           )}
         </Button>
 
         {/* Search results dropdown */}
         {showResults && (
           <Card
-            className="absolute z-50 w-full left-0 right-0 mt-1 max-h-64 overflow-auto shadow-lg"
+            className="absolute z-50 w-full left-1 right-1 mt-1 max-h-64 overflow-auto shadow-lg"
             ref={resultsRef}
           >
             <div className="p-2">
@@ -157,11 +157,11 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                             <Badge
                               className={`capitalize ${getTierBadgeVariant(member.tier?.name)}`}
                             >
-                              {member.tier?.name || t('member.tiers.regular')}
+                              {member.tier?.name || t('cashier.tiers.regular')}
                             </Badge>
                           </div>
                           <p className="text-xs text-amber-500 mt-1">
-                            {t('cashier.memberSection.points', { points: member.totalPoints })}
+                            {member.totalPoints} {t('cashier.memberSection.points')}
                           </p>
 
                           {member.discounts && member.discounts.length > 0 && (

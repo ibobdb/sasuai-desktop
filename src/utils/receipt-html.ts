@@ -359,33 +359,11 @@ export function generateReceiptHTML(
         </div>
         
         ${
-          pricing.productDiscounts > 0
+          pricing.discount > 0
             ? `
         <div class="total-row">
-          <span class="total-label">Diskon Produk:</span>
-          <span class="total-value">-${formatCurrency(pricing.productDiscounts)}</span>
-        </div>
-        `
-            : ''
-        }
-        
-        ${
-          pricing.memberDiscount > 0
-            ? `
-        <div class="total-row">
-          <span class="total-label">Diskon Member:</span>
-          <span class="total-value">-${formatCurrency(pricing.memberDiscount)}</span>
-        </div>
-        `
-            : ''
-        }
-        
-        ${
-          pricing.totalDiscount > 0
-            ? `
-        <div class="total-row">
-          <span class="total-label">Total Diskon:</span>
-          <span class="total-value">-${formatCurrency(pricing.totalDiscount)}</span>
+          <span class="total-label">Diskon:</span>
+          <span class="total-value">-${formatCurrency(pricing.discount)}</span>
         </div>
         `
             : ''
