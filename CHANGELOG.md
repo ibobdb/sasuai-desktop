@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.10.1](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.0...v1.10.1) (2025-08-02)
+
+
+### Bug Fixes
+
+* **cashier, member, transactions:** enhance member tier and points display ([65f044b](https://github.com/ibobdb/sasuai-desktop/commit/65f044b345318a6d544c2a4fe4e5ebbbd4189d49))
+* **cashier, member:** improve layout and accessibility of member search and section components ([ebee947](https://github.com/ibobdb/sasuai-desktop/commit/ebee9477472c6730dfcfc1a8a9cf8576a039e6a1))
+* **cashier:** enhance discount code validation and handling ([c90435f](https://github.com/ibobdb/sasuai-desktop/commit/c90435fe1df8146504bb016a47f5a33a87969ab5))
+* **transactions:** handle nullable payment fields and improve transaction ID handling ([ac801fe](https://github.com/ibobdb/sasuai-desktop/commit/ac801fecf0238d1e0a02311df54d333da9b9c4ef))
+* **transactions:** unify discount handling in transaction view and receipt generation ([1cda06b](https://github.com/ibobdb/sasuai-desktop/commit/1cda06ba59fdb10b3eab56b4e64e57b8c96c0a65))
+
 ## [1.10.0](https://github.com/ibobdb/sasuai-desktop/compare/v1.9.0...v1.10.0) (2025-07-26)
 
 ### Features
