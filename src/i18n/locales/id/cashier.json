@@ -189,7 +189,7 @@
       "success": "Voucher berhasil diterapkan",
       "applied": "Voucher telah diterapkan",
       "removed": "Diskon telah dihapus",
-      "addItemsFirst": "Tambahkan produk ke keranjang untuk menggunakan kode diskon",
+      "addItemsFirst": "Tambahkan produk ke keranjang untuk menggunakan kode voucher",
       "emptyCode": "Silakan masukkan kode voucher",
       "invalidCode": "Kode voucher tidak valid",
       "error": "Terjadi kesalahan saat memvalidasi kode voucher",

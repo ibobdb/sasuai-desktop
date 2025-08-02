@@ -1,6 +1,6 @@
 import { useState, useEffect, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Ticket, Check, UserPlus, Phone, CreditCard, MapPin, Mail } from 'lucide-react'
+import { X, Ticket, Check, UserPlus, Phone, CreditCard, Mail, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -92,17 +92,11 @@ export function MemberSection({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <h3 className="font-medium flex items-center">
           <UserPlus className="h-4 w-4 mr-2 text-muted-foreground" />
           {t('cashier.memberSection.title')}
         </h3>
-
-        {selectedMember && (
-          <Button variant="ghost" size="sm" onClick={clearMember} className="h-6 px-2">
-            <X className="h-3 w-3 mr-1" /> {t('cashier.memberSection.clear')}
-          </Button>
-        )}
       </div>
 
       {/* Always show the search component */}
@@ -125,17 +119,27 @@ export function MemberSection({
                     {selectedMember.tier?.name || t('cashier.tiers.regular')}
                   </Badge>
                   <div className="ml-2 flex items-center text-amber-500 dark:text-amber-400 font-medium">
-                    <span className="text-xs">
+                    <span className="text-sm">
                       {selectedMember.totalPoints} {t('cashier.memberSection.points')}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Clear member button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearMember}
+              className="h-7 px-2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3 w-3 mr-1" /> {t('cashier.memberSection.clear')}
+            </Button>
           </div>
 
-          {/* Member contact details - reduced padding and spacing */}
-          <div className="p-3 space-y-1 text-sm">
+          {/* Member contact details - compact layout */}
+          <div className="px-3 pb-2 space-y-1.5 text-sm">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span>{selectedMember.phone}</span>
@@ -144,7 +148,7 @@ export function MemberSection({
             {selectedMember.cardId && (
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span>Card ID: {selectedMember.cardId}</span>
+                <span>ID: {selectedMember.cardId}</span>
               </div>
             )}
 
@@ -171,7 +175,7 @@ export function MemberSection({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div className="flex items-center">
                       <Ticket className="h-4 w-4 mr-1 text-green-600 dark:text-green-500" />
-                      <span className="font-medium text-sm">
+                      <span className="font-medium">
                         {t('cashier.memberSection.availableDiscounts')}
                       </span>
                     </div>
@@ -183,8 +187,8 @@ export function MemberSection({
                           size="sm"
                           className={
                             selectedDiscount
-                              ? 'text-green-600 border-green-200 hover:bg-green-50 w-full sm:w-auto h-7 text-xs'
-                              : 'w-full sm:w-auto h-7 text-xs'
+                              ? 'text-green-600 border-green-200 hover:bg-green-50 w-full sm:w-auto h-8 text-sm'
+                              : 'w-full sm:w-auto h-8 text-sm'
                           }
                         >
                           {selectedDiscount
@@ -249,7 +253,7 @@ export function MemberSection({
                 <div className="p-2 bg-muted/20 border-t">
                   <div className="flex items-center">
                     <Ticket className="h-4 w-4 mr-1 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-muted-foreground">
                       {t('cashier.memberSection.noDiscountsAvailable')}
                     </span>
                   </div>
