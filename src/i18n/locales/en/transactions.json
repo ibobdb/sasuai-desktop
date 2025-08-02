@@ -67,6 +67,14 @@
     },
     "detail-dialog": {
       "loading": "Loading Transaction Details"
+    },
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
     }
   }
 }

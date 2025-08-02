@@ -67,6 +67,14 @@
     },
     "detail-dialog": {
       "loading": "Memuat Detail Transaksi"
+    },
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Perunggu",
+      "silver": "Perak",
+      "gold": "Emas",
+      "platinum": "Platinum",
+      "diamond": "Berlian"
     }
   }
 }

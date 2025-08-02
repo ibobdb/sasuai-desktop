@@ -28,7 +28,7 @@ export function TransactionViewDialog({
   transactionDetail,
   isLoadingDetail
 }: Props) {
-  const { t } = useTranslation(['transactions', 'common'])
+  const { t } = useTranslation(['transactions', 'common', 'member'])
   const { settings } = useSettings()
   const [isPrinting, setIsPrinting] = useState(false)
 
@@ -107,7 +107,7 @@ export function TransactionViewDialog({
                   <>
                     {member.name}
                     <Badge className={getTierBadgeVariant(member.tier)}>
-                      {member.tier || t('member.tiers.regular')}
+                      {member.tier || t('transaction.tiers.regular')}
                     </Badge>
                   </>
                 ) : (

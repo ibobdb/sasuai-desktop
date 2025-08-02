@@ -59,6 +59,14 @@
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "platinum": "Platinum",
+      "diamond": "Diamond"
+    },
     "memberSearch": {
       "placeholder": "Search member ...",
       "noMembersFound": "No members found",

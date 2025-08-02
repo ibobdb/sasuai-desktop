@@ -12,7 +12,7 @@ import { getTierBadgeVariant } from '@/features/member/components/member-columns
 import { useMemberSearch as useMemberSearchHook } from '../hooks/use-member-search'
 
 export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
-  const { t } = useTranslation(['cashier'])
+  const { t } = useTranslation(['cashier', 'member'])
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
 
   const handleMemberSelect = useCallback(
@@ -157,11 +157,11 @@ export function MemberSearch({ onMemberSelect }: MemberSearchProps) {
                             <Badge
                               className={`capitalize ${getTierBadgeVariant(member.tier?.name)}`}
                             >
-                              {member.tier?.name || t('member.tiers.regular')}
+                              {member.tier?.name || t('cashier.tiers.regular')}
                             </Badge>
                           </div>
                           <p className="text-xs text-amber-500 mt-1">
-                            {t('cashier.memberSection.points', { points: member.totalPoints })}
+                            {member.totalPoints} {t('cashier.memberSection.points')}
                           </p>
 
                           {member.discounts && member.discounts.length > 0 && (

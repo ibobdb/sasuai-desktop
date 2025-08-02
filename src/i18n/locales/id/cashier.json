@@ -59,6 +59,14 @@
       "tierDiscount": "tier",
       "personalDiscount": "personal"
     },
+    "tiers": {
+      "regular": "Regular",
+      "bronze": "Perunggu",
+      "silver": "Perak",
+      "gold": "Emas",
+      "platinum": "Platinum",
+      "diamond": "Berlian"
+    },
     "memberSearch": {
       "placeholder": "Cari pelanggan ...",
       "noMembersFound": "Pelanggan tidak ditemukan",
