@@ -35,6 +35,7 @@
       "paymentMethod": "Metode Pembayaran",
       "itemsPurchased": "Item Dibeli",
       "subtotal": "Subtotal",
+      "discount": "Diskon",
       "totalDiscount": "Total Diskon",
       "total": "Total",
       "paymentAmount": "Jumlah Pembayaran",

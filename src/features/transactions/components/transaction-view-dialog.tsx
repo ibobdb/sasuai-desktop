@@ -199,39 +199,37 @@ export function TransactionViewDialog({
             <span>{formatCurrency(totalAmount)}</span>
           </div>
 
-          {pricing?.discounts?.products && Number(pricing.discounts.products) > 0 ? (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {t('transaction.details.productDiscounts')}
-              </span>
-              <span className="text-rose-600">-{formatCurrency(pricing.discounts.products)}</span>
-            </div>
-          ) : null}
-
-          {pricing?.discounts?.member &&
-          pricing.discounts.member !== null &&
-          Number(pricing.discounts.member.amount || 0) > 0 ? (
+          {/* Display discount information */}
+          {pricing?.discounts && Number(pricing.discounts.amount || 0) > 0 ? (
             <div className="flex justify-between">
               <span className="text-muted-foreground flex items-center gap-1">
-                {t('transaction.details.memberDiscount')}
-                {pricing.discounts.member.name && (
-                  <Badge variant="outline" className="text-xs">
-                    {pricing.discounts.member.name}
-                  </Badge>
-                )}
+                {pricing.discounts.isGlobal
+                  ? t('transaction.details.globalDiscount')
+                  : t('transaction.details.discount')}
+                <div className="flex gap-1">
+                  {pricing.discounts.name && (
+                    <Badge variant="outline" className="text-xs">
+                      {pricing.discounts.name}
+                    </Badge>
+                  )}
+                  {pricing.discounts.code && (
+                    <Badge variant="secondary" className="text-xs">
+                      {pricing.discounts.code}
+                    </Badge>
+                  )}
+                  {pricing.discounts.type && (
+                    <Badge
+                      variant={pricing.discounts.type === 'PERCENTAGE' ? 'default' : 'outline'}
+                      className="text-xs"
+                    >
+                      {pricing.discounts.type === 'PERCENTAGE'
+                        ? `${pricing.discounts.value}%`
+                        : pricing.discounts.type}
+                    </Badge>
+                  )}
+                </div>
               </span>
-              <span className="text-rose-600">
-                -{formatCurrency(pricing.discounts.member.amount)}
-              </span>
-            </div>
-          ) : null}
-
-          {pricing?.discounts?.total && Number(pricing.discounts.total) > 0 ? (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                {t('transaction.details.totalDiscount')}
-              </span>
-              <span className="text-rose-600">-{formatCurrency(pricing.discounts.total)}</span>
+              <span className="text-rose-600">-{formatCurrency(pricing.discounts.amount)}</span>
             </div>
           ) : null}
 

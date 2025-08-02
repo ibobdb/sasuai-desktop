@@ -28,9 +28,7 @@ export interface ReceiptData {
   }>
   pricing: {
     subtotal: number
-    productDiscounts: number
-    memberDiscount: number
-    totalDiscount: number
+    discount: number
     finalAmount: number
     paymentAmount: number
     change: number
@@ -82,9 +80,7 @@ export function generateReceiptData(
   // Pricing
   const receiptPricing = {
     subtotal: pricing?.originalAmount || 0,
-    productDiscounts: Number(pricing?.discounts?.products || 0),
-    memberDiscount: Number(pricing?.discounts?.member?.amount || 0),
-    totalDiscount: Number(pricing?.discounts?.total || 0),
+    discount: Number(pricing?.discounts?.amount || 0),
     finalAmount: Math.abs(pricing?.finalAmount || 0),
     paymentAmount: Number(payment?.amount || 0),
     change: Number(payment?.change || 0)
