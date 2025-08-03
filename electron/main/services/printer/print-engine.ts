@@ -8,12 +8,22 @@ export interface PrintOptions {
     width: number
     height: number
   }
-  margins: any
+  margins: {
+    marginType: 'default' | 'none' | 'printableArea' | 'custom'
+    top?: number
+    bottom?: number
+    left?: number
+    right?: number
+  }
   printBackground: boolean
   color: boolean
   landscape: boolean
   scaleFactor: number
   deviceName?: string
+  dpi?: {
+    horizontal: number
+    vertical: number
+  }
 }
 
 export class PrintEngine {
@@ -26,9 +36,8 @@ export class PrintEngine {
     '80mm': 80
   }
 
-  private readonly PRINT_TIMEOUT = 10000
-  private readonly PRINT_DELAY = 1000
-  private readonly CLEANUP_DELAY = 2000
+  private readonly PRINT_DELAY = 2000
+  private readonly CLEANUP_DELAY = 3000
 
   private isPrinting = false
 
@@ -36,8 +45,25 @@ export class PrintEngine {
     return this.PAPER_WIDTHS[paperSize] || 58
   }
 
-  private parseMarginSettings(marginString: string): any {
-    if (!marginString?.trim() || marginString === '0' || marginString === '0 0 0 0') {
+  private calculateOptimalHeight(htmlContent: string): number {
+    const itemMatches = htmlContent.match(/<div[^>]*class="item"[^>]*>/g) || []
+    const itemCount = itemMatches.length
+
+    const baseHeight = 200000
+    const perItemHeight = 15000
+    const calculatedHeight = baseHeight + itemCount * perItemHeight
+
+    return Math.min(Math.max(calculatedHeight, 300000), 800000)
+  }
+
+  private parseMarginSettings(marginString: string): {
+    marginType: 'default' | 'none' | 'printableArea' | 'custom'
+    top?: number
+    bottom?: number
+    left?: number
+    right?: number
+  } {
+    if (!marginString?.trim()) {
       return { marginType: 'none' }
     }
 
@@ -68,19 +94,26 @@ export class PrintEngine {
     }
   }
 
-  private buildPrintOptions(settings: PrinterSettings): PrintOptions {
+  private buildPrintOptions(settings: PrinterSettings, htmlContent?: string): PrintOptions {
+    const paperWidthMicrons = this.getPaperWidthMm(settings.paperSize) * 1000
+    const optimalHeight = htmlContent ? this.calculateOptimalHeight(htmlContent) : 600000
+
     const printOptions: PrintOptions = {
       silent: true,
       copies: settings.copies || 1,
       pageSize: {
-        width: this.getPaperWidthMm(settings.paperSize) * 1000,
-        height: 100000
+        width: paperWidthMicrons,
+        height: optimalHeight
       },
       margins: this.parseMarginSettings(settings.margin),
-      printBackground: false,
+      printBackground: true,
       color: false,
       landscape: false,
-      scaleFactor: 100
+      scaleFactor: 100,
+      dpi: {
+        horizontal: 203,
+        vertical: 203
+      }
     }
 
     if (settings.printerName?.trim()) {
@@ -98,14 +131,21 @@ export class PrintEngine {
     this.isPrinting = true
 
     return new Promise((resolve, reject) => {
+      const paperWidthPx = this.getPaperWidthMm(settings.paperSize) * 3.7795
+
       const printWindow = new BrowserWindow({
         show: false,
-        width: 400,
-        height: 600,
+        width: Math.max(300, Math.ceil(paperWidthPx)),
+        height: 2000,
         webPreferences: {
-          nodeIntegration: true,
-          contextIsolation: false
-        }
+          nodeIntegration: false,
+          contextIsolation: true,
+          webSecurity: false,
+          backgroundThrottling: false,
+          offscreen: false
+        },
+        skipTaskbar: true,
+        focusable: false
       })
 
       const cleanup = (success: boolean, error?: string) => {
@@ -119,14 +159,14 @@ export class PrintEngine {
       }
 
       const loadTimeout = setTimeout(() => {
-        cleanup(false, 'Print timeout: Failed to load content')
-      }, this.PRINT_TIMEOUT)
+        cleanup(false, 'Failed to load print content: timeout')
+      }, 20000)
 
       printWindow.webContents.once('did-finish-load', () => {
         clearTimeout(loadTimeout)
 
         setTimeout(() => {
-          const printOptions = this.buildPrintOptions(settings)
+          const printOptions = this.buildPrintOptions(settings, htmlContent)
 
           printWindow.webContents.print(printOptions, (success, failureReason) => {
             if (success) {

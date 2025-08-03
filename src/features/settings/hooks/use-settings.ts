@@ -14,8 +14,8 @@ const defaultStoreInfo: StoreInfo = {
   name: 'Sasuai Store',
   address: 'Jl. Contoh No. 123, Jakarta',
   phone: '021-12345678',
-  email: 'info@sasuaistore.com',
-  website: 'www.sasuaistore.com'
+  email: '',
+  website: ''
 }
 
 const defaultFooterInfo: FooterInfo = {
@@ -92,18 +92,34 @@ export function useSettings() {
         translatedKeyboardShortcuts
       )
 
+      // Pastikan general config ter-merge dengan benar
+      const generalConfig =
+        storedGeneral && typeof storedGeneral === 'object'
+          ? { ...defaultGeneralConfig, ...storedGeneral }
+          : defaultGeneralConfig
+
+      // Pastikan store info dan footer info tidak null/undefined
+      if (generalConfig.storeInfo && typeof generalConfig.storeInfo === 'object') {
+        generalConfig.storeInfo = { ...defaultStoreInfo, ...generalConfig.storeInfo }
+      } else {
+        generalConfig.storeInfo = defaultStoreInfo
+      }
+
+      if (generalConfig.footerInfo && typeof generalConfig.footerInfo === 'object') {
+        generalConfig.footerInfo = { ...defaultFooterInfo, ...generalConfig.footerInfo }
+      } else {
+        generalConfig.footerInfo = defaultFooterInfo
+      }
+
       const loadedSettings = {
-        general: { ...defaultGeneralConfig, ...storedGeneral },
+        general: generalConfig,
         keyboard: keyboardShortcuts,
         printer: { ...defaultPrinterConfig, ...storedPrinter }
       }
 
       cacheRef.current = loadedSettings
       setSettings(loadedSettings)
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load settings from Electron Store:', error)
-      }
+    } catch {
       setSettings(defaultSettings)
     } finally {
       setLoading(false)
@@ -127,10 +143,7 @@ export function useSettings() {
           cacheRef.current = newSettings
           setSettings(newSettings)
           resolve(true)
-        } catch (error) {
-          if (import.meta.env.DEV) {
-            console.error('Failed to save settings to Electron Store:', error)
-          }
+        } catch {
           resolve(false)
         }
       }, 300)
@@ -228,9 +241,7 @@ export function useSettings() {
       URL.revokeObjectURL(url)
 
       return true
-    } catch (error) {
-      if (import.meta.env.DEV)
-        if (import.meta.env.DEV) console.error('Failed to export settings:', error)
+    } catch {
       return false
     }
   }, [settings])
@@ -250,9 +261,7 @@ export function useSettings() {
             } else {
               resolve(false)
             }
-          } catch (error) {
-            if (import.meta.env.DEV)
-              if (import.meta.env.DEV) console.error('Failed to import settings:', error)
+          } catch {
             resolve(false)
           }
         }
