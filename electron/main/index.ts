@@ -6,11 +6,7 @@ import { setupAutoUpdater } from './updater'
 import { CookieService } from './services/cookie-service'
 import { setupPrinterService } from './services/printer-service'
 import { createApiClient } from './api-client'
-
-export interface StoreSchema {
-  language?: string
-  [key: string]: unknown
-}
+import { StoreSchema } from './types/store'
 
 export const store = new Store<StoreSchema>()
 export const PERSIST_PARTITION = 'persist:sasuai-store-app'
@@ -138,6 +134,14 @@ class ElectronApp {
     const storeCache = new Map<string, any>()
 
     ipcMain.handle('store:get', (_event, key) => {
+      // Always get fresh data for settings to avoid stale cache
+      if (key.startsWith('settings.')) {
+        const value = store.get(key)
+        storeCache.set(key, value)
+        return value
+      }
+
+      // Use cache for other data
       if (!storeCache.has(key)) {
         storeCache.set(key, store.get(key))
       }
@@ -147,6 +151,12 @@ class ElectronApp {
     ipcMain.handle('store:set', (_event, key, value) => {
       store.set(key, value)
       storeCache.set(key, value)
+
+      // Invalidate settings cache when settings are updated
+      if (key.startsWith('settings.')) {
+        storeCache.delete(key)
+      }
+
       return true
     })
 

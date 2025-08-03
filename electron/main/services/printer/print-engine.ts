@@ -74,10 +74,10 @@ export class PrintEngine {
       copies: settings.copies || 1,
       pageSize: {
         width: this.getPaperWidthMm(settings.paperSize) * 1000,
-        height: 100000
+        height: 0 // Auto height untuk thermal receipt
       },
       margins: this.parseMarginSettings(settings.margin),
-      printBackground: false,
+      printBackground: true, // Enable background untuk thermal printer
       color: false,
       landscape: false,
       scaleFactor: 100

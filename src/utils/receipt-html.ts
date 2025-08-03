@@ -113,7 +113,7 @@ export function generateReceiptHTML(
       <style>
         @page {
           margin: ${cssMargin};
-          size: ${paperWidth}mm auto;
+          size: ${paperWidth}mm auto; /* Auto height penting untuk receipt panjang */
         }
         
         * {
@@ -125,11 +125,13 @@ export function generateReceiptHTML(
         html, body {
           margin: 0 !important;
           padding: 0 !important;
+          height: auto !important; /* Auto height */
         }
         
         body {
           width: ${paperWidth}mm;
           max-width: ${maxWidth}px;
+          min-height: auto; /* Auto height */
           font-family: '${settings.fontFamily}', 'Courier New', 'Consolas', 'Monaco', 'Lucida Console', monospace;
           font-size: ${settings.fontSize}px;
           line-height: ${settings.lineHeight};
@@ -140,20 +142,22 @@ export function generateReceiptHTML(
           font-weight: ${settings.enableBold ? 'bold' : '600'};
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
-          overflow: hidden;
+          overflow: visible !important; /* Penting: visible bukan hidden */
+          page-break-inside: avoid;
         }
         
         .header {
           text-align: center;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           border-bottom: 2px solid #000000;
-          padding-bottom: 8px;
+          padding-bottom: 6px;
+          page-break-inside: avoid;
         }
         
         .store-name {
           font-size: ${settings.fontSize + 2}px;
           font-weight: 900 !important;
-          margin-bottom: 3px;
+          margin-bottom: 2px;
           color: #000000 !important;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -161,61 +165,67 @@ export function generateReceiptHTML(
         
         .store-info {
           font-size: ${settings.fontSize - 2}px;
-          margin-bottom: 2px;
+          margin-bottom: 1px;
           font-weight: 600;
           color: #000000 !important;
         }
         
         .transaction-info {
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           font-size: ${settings.fontSize - 2}px;
           font-weight: 600;
           color: #000000 !important;
+          page-break-inside: avoid;
         }
         
         .transaction-info div {
-          margin-bottom: 2px;
+          margin-bottom: 1px;
           font-weight: 600;
         }
         
         .items-section {
-          margin-bottom: 10px;
+          margin-bottom: 8px;
+          page-break-inside: avoid;
         }
         
         .items-header {
           border-top: 2px solid #000000;
           border-bottom: 2px solid #000000;
-          padding: 4px 0;
+          padding: 3px 0;
           font-weight: 900 !important;
           font-size: ${settings.fontSize - 1}px;
           color: #000000 !important;
           text-transform: uppercase;
           letter-spacing: 1px;
+          page-break-after: avoid;
         }
         
         .item {
-          margin-bottom: 5px;
+          margin-bottom: 4px;
           font-size: ${settings.fontSize - 1}px;
           font-weight: 600;
           color: #000000 !important;
+          page-break-inside: avoid;
         }
         
         .item-name {
           word-wrap: break-word;
-          margin-bottom: 2px;
+          word-break: break-word; /* Tambahan untuk text wrapping */
+          margin-bottom: 1px;
           font-weight: 700;
         }
         
         .item-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 2px;
+          margin-bottom: 1px;
+          align-items: flex-start; /* Align ke atas untuk text panjang */
         }
         
         .item-details {
           display: flex;
           justify-content: space-between;
-          margin-left: 5px; /* Reduced margin untuk memaksimalkan area */
+          margin-left: 3px;
           font-size: ${settings.fontSize - 2}px;
           font-weight: 600;
         }
@@ -223,22 +233,23 @@ export function generateReceiptHTML(
         .item-discount {
           font-size: ${settings.fontSize - 3}px;
           color: #000000 !important;
-          margin-left: 5px; /* Reduced margin untuk memaksimalkan area */
+          margin-left: 3px;
           font-weight: 600;
         }
         
         .totals {
           border-top: 2px solid #000000;
-          padding-top: 8px;
+          padding-top: 6px;
           font-size: ${settings.fontSize - 1}px;
           font-weight: 700;
           color: #000000 !important;
+          page-break-inside: avoid;
         }
         
         .total-row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 3px;
           font-weight: 700;
         }
         
@@ -251,6 +262,7 @@ export function generateReceiptHTML(
           flex-shrink: 0;
           text-align: right;
           font-weight: 700;
+          margin-left: 5px; /* Spacing dari label */
         }
         
         .final-total {
@@ -258,38 +270,41 @@ export function generateReceiptHTML(
           border-bottom: 2px solid #000000;
           font-weight: 900 !important;
           font-size: ${settings.fontSize + 1}px;
-          padding: 8px 0;
-          margin-top: 8px;
+          padding: 6px 0;
+          margin-top: 6px;
           color: #000000 !important;
           text-transform: uppercase;
           letter-spacing: 1px;
         }
         
         .payment-info {
-          margin-top: 10px;
+          margin-top: 8px;
           font-size: ${settings.fontSize - 1}px;
           font-weight: 700;
           color: #000000 !important;
+          page-break-inside: avoid;
         }
         
         .points-earned {
           text-align: center;
-          margin-top: 8px;
+          margin-top: 6px;
           border: 1px solid #000000;
-          padding: 4px;
+          padding: 3px;
           font-size: ${settings.fontSize - 2}px;
           font-weight: 700;
           color: #000000 !important;
           background-color: #ffffff;
+          page-break-inside: avoid;
         }
         
         .footer {
           text-align: center;
-          margin-top: 5px;
+          margin-top: 8px;
           font-size: ${settings.fontSize - 2}px;
-          padding-top: 5px;
+          padding-top: 4px;
           font-weight: 600;
           color: #000000 !important;
+          page-break-inside: avoid;
         }
         
         .text-right {
@@ -298,6 +313,19 @@ export function generateReceiptHTML(
         
         .text-center {
           text-align: center;
+        }
+        
+        /* Print specific optimizations */
+        @media print {
+          body {
+            overflow: visible !important;
+            height: auto !important;
+          }
+          
+          .item-name {
+            max-width: ${Math.floor(paperWidth * 0.6)}mm; /* 60% dari paper width */
+            overflow-wrap: break-word;
+          }
         }
       </style>
     </head>
