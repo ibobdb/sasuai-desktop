@@ -69,13 +69,8 @@ export function generateReceiptHTML(
 
   // Parse margin setting untuk body padding (setengah dari margin)
   const parseBodyPadding = (marginString: string): string => {
-    if (
-      !marginString ||
-      marginString.trim() === '' ||
-      marginString === '0' ||
-      marginString === '0 0 0 0'
-    ) {
-      return '1mm' // minimal padding untuk readability
+    if (!marginString || marginString.trim() === '') {
+      return '0mm' // default 0 untuk thermal printer
     }
 
     const margins = marginString.trim().split(/\s+/)
@@ -98,8 +93,8 @@ export function generateReceiptHTML(
     return '1mm'
   }
 
-  const cssMargin = parseMarginForCSS(settings.margin || '0')
-  const bodyPadding = parseBodyPadding(settings.margin || '0')
+  const cssMargin = parseMarginForCSS(settings.margin || '')
+  const bodyPadding = parseBodyPadding(settings.margin || '')
 
   // Calculate total items
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
