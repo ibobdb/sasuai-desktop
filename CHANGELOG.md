@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.10.2](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.1...v1.10.2) (2025-08-03)
+
+
+### Bug Fixes
+
+* **printer:** refine print options and margin settings for better thermal printing ([e464300](https://github.com/ibobdb/sasuai-desktop/commit/e4643009ecd08e4d92c20568653e46fa3dfbd7f1))
+* **receipt:** resolve printing issues and improve store persistence ([58df82b](https://github.com/ibobdb/sasuai-desktop/commit/58df82b56eb78aeace07e8ce26988f90d6fc5aaf))
+* **transactions:** enhance transaction detail view with modular components ([3ce61bb](https://github.com/ibobdb/sasuai-desktop/commit/3ce61bb27bb819c3bc1e4916ddec3103017f40d6))
+
 ## [1.10.1](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.0...v1.10.1) (2025-08-02)
 
 ### Bug Fixes
