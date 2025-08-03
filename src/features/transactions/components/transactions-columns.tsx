@@ -8,7 +8,6 @@ import { paymentMethods, PaymentMethod } from '@/lib/payment-methods'
 import { Transaction } from '@/types/transactions'
 import { DataTableColumnHeader } from '@/components/common/data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
-import { Badge } from '@/components/ui/badge'
 
 interface UseTransactionColumnsProps {
   onView?: (transaction: Transaction) => void
@@ -95,26 +94,7 @@ export function useTransactionColumns({
 
           if (totalDiscount === 0) return <span className="text-muted-foreground">-</span>
 
-          // Check for multiple discounts based on actual API structure
-          const hasMultipleDiscounts =
-            (pricing.memberDiscount &&
-              pricing.memberDiscount > 0 &&
-              pricing.productDiscounts &&
-              pricing.productDiscounts > 0) ||
-            (pricing.discounts?.member && pricing.discounts?.product) ||
-            pricing.discounts?.tier ||
-            pricing.discounts?.global
-
-          return (
-            <div className="text-rose-500 flex items-center gap-1">
-              {formatCurrency(totalDiscount)}
-              {hasMultipleDiscounts && (
-                <Badge variant="outline" className="text-xs">
-                  {t('transaction.table.multipleDiscounts')}
-                </Badge>
-              )}
-            </div>
-          )
+          return <div className="text-rose-500">{formatCurrency(totalDiscount)}</div>
         }
       },
       {

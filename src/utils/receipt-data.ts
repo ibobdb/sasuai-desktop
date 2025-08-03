@@ -28,7 +28,13 @@ export interface ReceiptData {
   }>
   pricing: {
     subtotal: number
-    discount: number
+    discounts: {
+      product: number
+      member: number
+      tier: number
+      global: number
+      total: number
+    }
     finalAmount: number
     paymentAmount: number
     change: number
@@ -77,10 +83,44 @@ export function generateReceiptData(
       : undefined
   }))
 
-  // Pricing
+  // Pricing - Calculate different discount types
+  const calculateDiscounts = () => {
+    // Calculate product discounts from items
+    const productDiscount = items.reduce((sum, item) => {
+      return sum + (item.discountApplied?.amount || 0)
+    }, 0)
+
+    // Get transaction-level discount
+    const transactionDiscount = pricing?.discounts
+
+    let memberDiscount = 0
+    let tierDiscount = 0
+    let globalDiscount = 0
+
+    if (transactionDiscount) {
+      if (transactionDiscount.isGlobal) {
+        globalDiscount = transactionDiscount.amount || 0
+      } else if (transactionDiscount.applyTo === 'SPECIFIC_MEMBERS') {
+        memberDiscount = transactionDiscount.amount || 0
+      } else if (transactionDiscount.applyTo === 'SPECIFIC_MEMBER_TIERS') {
+        tierDiscount = transactionDiscount.amount || 0
+      }
+    }
+
+    const totalDiscount = productDiscount + memberDiscount + tierDiscount + globalDiscount
+
+    return {
+      product: productDiscount,
+      member: memberDiscount,
+      tier: tierDiscount,
+      global: globalDiscount,
+      total: totalDiscount
+    }
+  }
+
   const receiptPricing = {
     subtotal: pricing?.originalAmount || 0,
-    discount: Number(pricing?.discounts?.amount || 0),
+    discounts: calculateDiscounts(),
     finalAmount: Math.abs(pricing?.finalAmount || 0),
     paymentAmount: Number(payment?.amount || 0),
     change: Number(payment?.change || 0)
