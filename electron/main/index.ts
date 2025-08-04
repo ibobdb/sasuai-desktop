@@ -160,9 +160,20 @@ class ElectronApp {
       return true
     })
 
-    ipcMain.handle('store:delete', (_event, key) => {
-      store.delete(key)
-      storeCache.delete(key)
+    // Specific handlers for store info and footer info
+    ipcMain.handle('store:set-store-info', (_event, storeInfo) => {
+      const currentGeneral = store.get('settings.general') || {}
+      const updatedGeneral = { ...currentGeneral, storeInfo }
+      store.set('settings.general', updatedGeneral)
+      storeCache.set('settings.general', updatedGeneral)
+      return true
+    })
+
+    ipcMain.handle('store:set-footer-info', (_event, footerInfo) => {
+      const currentGeneral = store.get('settings.general') || {}
+      const updatedGeneral = { ...currentGeneral, footerInfo }
+      store.set('settings.general', updatedGeneral)
+      storeCache.set('settings.general', updatedGeneral)
       return true
     })
   }

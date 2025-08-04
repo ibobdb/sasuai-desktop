@@ -68,7 +68,6 @@ export function useSettings() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<SettingsConfig>(defaultSettings)
   const [loading, setLoading] = useState(true)
-  const pendingSaveRef = useRef<NodeJS.Timeout | null>(null)
   const cacheRef = useRef<SettingsConfig | null>(null)
 
   const translatedKeyboardShortcuts = getKeyboardShortcuts(t)
@@ -95,18 +94,25 @@ export function useSettings() {
       // Pastikan general config ter-merge dengan benar
       const generalConfig =
         storedGeneral && typeof storedGeneral === 'object'
-          ? { ...defaultGeneralConfig, ...storedGeneral }
+          ? {
+              language: storedGeneral.language || defaultGeneralConfig.language,
+              theme: storedGeneral.theme || defaultGeneralConfig.theme,
+              autoStart: storedGeneral.autoStart ?? defaultGeneralConfig.autoStart,
+              autoUpdate: storedGeneral.autoUpdate ?? defaultGeneralConfig.autoUpdate,
+              storeInfo: storedGeneral.storeInfo || defaultStoreInfo,
+              footerInfo: storedGeneral.footerInfo || defaultFooterInfo
+            }
           : defaultGeneralConfig
 
       // Pastikan store info dan footer info tidak null/undefined
       if (generalConfig.storeInfo && typeof generalConfig.storeInfo === 'object') {
-        generalConfig.storeInfo = { ...defaultStoreInfo, ...generalConfig.storeInfo }
+        generalConfig.storeInfo = { ...generalConfig.storeInfo }
       } else {
         generalConfig.storeInfo = defaultStoreInfo
       }
 
       if (generalConfig.footerInfo && typeof generalConfig.footerInfo === 'object') {
-        generalConfig.footerInfo = { ...defaultFooterInfo, ...generalConfig.footerInfo }
+        generalConfig.footerInfo = { ...generalConfig.footerInfo }
       } else {
         generalConfig.footerInfo = defaultFooterInfo
       }
@@ -126,50 +132,66 @@ export function useSettings() {
     }
   }, [translatedKeyboardShortcuts])
 
-  const debouncedSave = useCallback(async (newSettings: SettingsConfig): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (pendingSaveRef.current) {
-        clearTimeout(pendingSaveRef.current)
-      }
-
-      pendingSaveRef.current = setTimeout(async () => {
-        try {
-          await Promise.all([
-            window.api?.store?.set('settings.general', newSettings.general),
-            window.api?.store?.set('settings.keyboard', newSettings.keyboard),
-            window.api?.store?.set('settings.printer', newSettings.printer)
-          ])
-
-          cacheRef.current = newSettings
-          setSettings(newSettings)
-          resolve(true)
-        } catch {
-          resolve(false)
-        }
-      }, 300)
-    })
-  }, [])
-
-  const saveSettings = useCallback(
-    async (newSettings: SettingsConfig): Promise<boolean> => {
-      return await debouncedSave(newSettings)
-    },
-    [debouncedSave]
-  )
-
   useEffect(() => {
     loadSettings()
   }, [loadSettings])
 
-  const updateGeneralSettings = useCallback(
-    async (updates: Partial<GeneralConfig> | GeneralConfig): Promise<boolean> => {
-      const newSettings = {
-        ...settings,
-        general: { ...settings.general, ...updates }
+  const saveSettings = useCallback(async (newSettings: SettingsConfig): Promise<boolean> => {
+    try {
+      await Promise.all([
+        window.api?.store?.set('settings.general', newSettings.general),
+        window.api?.store?.set('settings.keyboard', newSettings.keyboard),
+        window.api?.store?.set('settings.printer', newSettings.printer)
+      ])
+
+      cacheRef.current = newSettings
+      setSettings(newSettings)
+      return true
+    } catch {
+      return false
+    }
+  }, [])
+
+  const updateStoreInfo = useCallback(
+    async (storeInfo: StoreInfo): Promise<boolean> => {
+      try {
+        const success = await window.api?.store?.setStoreInfo?.(storeInfo)
+        if (success) {
+          const newSettings = {
+            ...settings,
+            general: { ...settings.general, storeInfo }
+          }
+          cacheRef.current = newSettings
+          setSettings(newSettings)
+          return true
+        }
+        return false
+      } catch {
+        return false
       }
-      return await saveSettings(newSettings)
     },
-    [settings, saveSettings]
+    [settings]
+  )
+
+  const updateFooterInfo = useCallback(
+    async (footerInfo: FooterInfo): Promise<boolean> => {
+      try {
+        const success = await window.api?.store?.setFooterInfo?.(footerInfo)
+        if (success) {
+          const newSettings = {
+            ...settings,
+            general: { ...settings.general, footerInfo }
+          }
+          cacheRef.current = newSettings
+          setSettings(newSettings)
+          return true
+        }
+        return false
+      } catch {
+        return false
+      }
+    },
+    [settings]
   )
 
   const updateKeyboardShortcuts = useCallback(
@@ -274,7 +296,8 @@ export function useSettings() {
   return {
     settings,
     loading,
-    updateGeneralSettings,
+    updateStoreInfo,
+    updateFooterInfo,
     updateKeyboardShortcuts,
     updateKeyboardShortcut,
     resetKeyboardShortcut,
