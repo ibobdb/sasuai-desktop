@@ -12,10 +12,10 @@ import { GeneralConfig } from '@/types/settings'
 
 export function GeneralSettingsTab() {
   const { t } = useTranslation('settings')
-  const { settings, updateGeneralSettings } = useSettings()
+  const { settings, updateStoreInfo, updateFooterInfo } = useSettings()
   const [localSettings, setLocalSettings] = useState<GeneralConfig>(settings.general)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [isStoreInfoSaving, setIsStoreInfoSaving] = useState(false)
+  const [isFooterInfoSaving, setIsFooterInfoSaving] = useState(false)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const hasStoreInfoChanges = useMemo(
@@ -29,11 +29,8 @@ export function GeneralSettingsTab() {
   )
 
   useEffect(() => {
-    if (!isInitialized) {
-      setLocalSettings(settings.general)
-      setIsInitialized(true)
-    }
-  }, [settings.general, isInitialized])
+    setLocalSettings(settings.general)
+  }, [settings.general])
 
   const updateLocalConfig = useCallback((updates: Partial<GeneralConfig>) => {
     setLocalSettings((prev) => ({ ...prev, ...updates }))
@@ -50,11 +47,10 @@ export function GeneralSettingsTab() {
   }, [])
   const handleSaveStoreInfo = useCallback(async () => {
     await debouncedSave(async () => {
-      setIsSaving(true)
+      setIsStoreInfoSaving(true)
       try {
-        const success = await updateGeneralSettings({ storeInfo: localSettings.storeInfo })
+        const success = await updateStoreInfo(localSettings.storeInfo)
         if (success) {
-          setIsInitialized(false)
           toast.success(t('general.storeInfoSaved'))
         } else {
           toast.error(t('general.saveError'))
@@ -65,18 +61,17 @@ export function GeneralSettingsTab() {
         }
         toast.error(t('general.saveError'))
       } finally {
-        setIsSaving(false)
+        setIsStoreInfoSaving(false)
       }
     })
-  }, [localSettings.storeInfo, updateGeneralSettings, t, debouncedSave])
+  }, [localSettings.storeInfo, updateStoreInfo, t, debouncedSave])
 
   const handleSaveFooterInfo = useCallback(async () => {
     await debouncedSave(async () => {
-      setIsSaving(true)
+      setIsFooterInfoSaving(true)
       try {
-        const success = await updateGeneralSettings({ footerInfo: localSettings.footerInfo })
+        const success = await updateFooterInfo(localSettings.footerInfo)
         if (success) {
-          setIsInitialized(false)
           toast.success(t('general.footerInfoSaved'))
         } else {
           toast.error(t('general.saveError'))
@@ -87,10 +82,10 @@ export function GeneralSettingsTab() {
         }
         toast.error(t('general.saveError'))
       } finally {
-        setIsSaving(false)
+        setIsFooterInfoSaving(false)
       }
     })
-  }, [localSettings.footerInfo, updateGeneralSettings, t, debouncedSave])
+  }, [localSettings.footerInfo, updateFooterInfo, t, debouncedSave])
 
   return (
     <div className="space-y-6">
@@ -187,10 +182,10 @@ export function GeneralSettingsTab() {
           <div className="pt-4">
             <Button
               onClick={handleSaveStoreInfo}
-              disabled={isSaving || !hasStoreInfoChanges}
+              disabled={isStoreInfoSaving || !hasStoreInfoChanges}
               className="w-full sm:w-auto"
             >
-              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isStoreInfoSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               <Save className="w-4 h-4 mr-2" />
               {t('general.saveStoreInfo')}
             </Button>
@@ -242,10 +237,10 @@ export function GeneralSettingsTab() {
           <div className="pt-4">
             <Button
               onClick={handleSaveFooterInfo}
-              disabled={isSaving || !hasFooterInfoChanges}
+              disabled={isFooterInfoSaving || !hasFooterInfoChanges}
               className="w-full sm:w-auto"
             >
-              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isFooterInfoSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               <Save className="w-4 h-4 mr-2" />
               {t('general.saveFooterInfo')}
             </Button>

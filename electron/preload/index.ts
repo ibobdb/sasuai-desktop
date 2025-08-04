@@ -94,7 +94,8 @@ const api = {
   store: {
     get: (key) => ipcRenderer.invoke('store:get', key),
     set: (key, value) => ipcRenderer.invoke('store:set', key, value),
-    delete: (key) => ipcRenderer.invoke('store:delete', key)
+    setStoreInfo: (storeInfo) => ipcRenderer.invoke('store:set-store-info', storeInfo),
+    setFooterInfo: (footerInfo) => ipcRenderer.invoke('store:set-footer-info', footerInfo)
   },
 
   cookies: {

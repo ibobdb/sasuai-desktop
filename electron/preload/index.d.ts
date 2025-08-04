@@ -70,7 +70,8 @@ declare global {
       store: {
         get: (key: string) => Promise<any>
         set: (key: string, value: any) => Promise<boolean>
-        delete: (key: string) => Promise<boolean>
+        setStoreInfo: (storeInfo: any) => Promise<boolean>
+        setFooterInfo: (footerInfo: any) => Promise<boolean>
       }
       language: {
         get: () => Promise<string>
