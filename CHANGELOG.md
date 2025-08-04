@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.3](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.2...v1.10.3) (2025-08-04)
+
+
+### Bug Fixes
+
+* separate store info and footer info save functionality ([0023523](https://github.com/ibobdb/sasuai-desktop/commit/0023523ac736fd813af4bf4f83764887760264ff))
+
 ## [1.10.2](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.1...v1.10.2) (2025-08-03)
 
 ### Bug Fixes
