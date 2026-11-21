@@ -1,7 +1,7 @@
 import { Session } from 'electron'
 import { store } from '../index'
 
-const COOKIE_DOMAIN = 'sasuai.blastify.tech'
+const COOKIE_DOMAIN = 'sasuai.pippo.id'
 
 interface CookieOptions {
   name: string

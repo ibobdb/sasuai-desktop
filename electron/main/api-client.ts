@@ -4,7 +4,7 @@ import { persistentSession, store } from './index'
 import { getDeviceInfo } from './device-info'
 import { CookieService } from './services/cookie-service'
 
-const COOKIE_DOMAIN = 'sasuai.blastify.tech'
+const COOKIE_DOMAIN = 'sasuai.pippo.id'
 
 class ApiClient {
   private instance: AxiosInstance
