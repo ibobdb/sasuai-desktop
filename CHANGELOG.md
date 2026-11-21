@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.4](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.3...v1.10.4) (2026-11-21)
+
+
+### Bug Fixes
+
+* other url exist ([41e5165](https://github.com/ibobdb/sasuai-desktop/commit/41e5165291310e44cbbeb0e4ae632647bb2c9ca2))
+
 ## [1.10.3](https://github.com/ibobdb/sasuai-desktop/compare/v1.10.2...v1.10.3) (2025-08-04)
 
 
