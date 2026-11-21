@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://sasuai.blastify.tech/api'
+export const API_BASE_URL = 'https://sasuai.pippo.id/api'
 
 export const API_ENDPOINTS = {
   AUTH: {

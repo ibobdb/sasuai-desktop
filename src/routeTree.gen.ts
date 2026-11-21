@@ -10,117 +10,270 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedRewardsRouteImport } from './routes/_authenticated/rewards'
-import { Route as AuthenticatedMemberRouteImport } from './routes/_authenticated/member'
-import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
-import { Route as legalPrivacyRouteImport } from './routes/(legal)/privacy'
-import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
+// Import Routes
 
-const errors503LazyRouteImport = createFileRoute('/(errors)/503')()
-const errors500LazyRouteImport = createFileRoute('/(errors)/500')()
-const errors404LazyRouteImport = createFileRoute('/(errors)/404')()
-const errors403LazyRouteImport = createFileRoute('/(errors)/403')()
-const errors401LazyRouteImport = createFileRoute('/(errors)/401')()
-const authForgotPasswordLazyRouteImport = createFileRoute(
+import { Route as rootRoute } from './routes/__root'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTransactionsImport } from './routes/_authenticated/transactions'
+import { Route as AuthenticatedSettingsImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRewardsImport } from './routes/_authenticated/rewards'
+import { Route as AuthenticatedMemberImport } from './routes/_authenticated/member'
+import { Route as legalTermsImport } from './routes/(legal)/terms'
+import { Route as legalPrivacyImport } from './routes/(legal)/privacy'
+import { Route as authSignInImport } from './routes/(auth)/sign-in'
+
+// Create Virtual Routes
+
+const errors503LazyImport = createFileRoute('/(errors)/503')()
+const errors500LazyImport = createFileRoute('/(errors)/500')()
+const errors404LazyImport = createFileRoute('/(errors)/404')()
+const errors403LazyImport = createFileRoute('/(errors)/403')()
+const errors401LazyImport = createFileRoute('/(errors)/401')()
+const authForgotPasswordLazyImport = createFileRoute(
   '/(auth)/forgot-password',
 )()
 
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+// Create/Update Routes
+
+const AuthenticatedRouteRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+
+const AuthenticatedIndexRoute = AuthenticatedIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const errors503LazyRoute = errors503LazyRouteImport
+
+const errors503LazyRoute = errors503LazyImport
   .update({
     id: '/(errors)/503',
     path: '/503',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/503.lazy').then((d) => d.Route))
-const errors500LazyRoute = errors500LazyRouteImport
+
+const errors500LazyRoute = errors500LazyImport
   .update({
     id: '/(errors)/500',
     path: '/500',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/500.lazy').then((d) => d.Route))
-const errors404LazyRoute = errors404LazyRouteImport
+
+const errors404LazyRoute = errors404LazyImport
   .update({
     id: '/(errors)/404',
     path: '/404',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/404.lazy').then((d) => d.Route))
-const errors403LazyRoute = errors403LazyRouteImport
+
+const errors403LazyRoute = errors403LazyImport
   .update({
     id: '/(errors)/403',
     path: '/403',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/403.lazy').then((d) => d.Route))
-const errors401LazyRoute = errors401LazyRouteImport
+
+const errors401LazyRoute = errors401LazyImport
   .update({
     id: '/(errors)/401',
     path: '/401',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() => import('./routes/(errors)/401.lazy').then((d) => d.Route))
-const authForgotPasswordLazyRoute = authForgotPasswordLazyRouteImport
+
+const authForgotPasswordLazyRoute = authForgotPasswordLazyImport
   .update({
     id: '/(auth)/forgot-password',
     path: '/forgot-password',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => rootRoute,
   } as any)
   .lazy(() =>
     import('./routes/(auth)/forgot-password.lazy').then((d) => d.Route),
   )
-const AuthenticatedTransactionsRoute =
-  AuthenticatedTransactionsRouteImport.update({
-    id: '/transactions',
-    path: '/transactions',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+
+const AuthenticatedTransactionsRoute = AuthenticatedTransactionsImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+
+const AuthenticatedSettingsRoute = AuthenticatedSettingsImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRewardsRoute = AuthenticatedRewardsRouteImport.update({
+
+const AuthenticatedRewardsRoute = AuthenticatedRewardsImport.update({
   id: '/rewards',
   path: '/rewards',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedMemberRoute = AuthenticatedMemberRouteImport.update({
+
+const AuthenticatedMemberRoute = AuthenticatedMemberImport.update({
   id: '/member',
   path: '/member',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const legalTermsRoute = legalTermsRouteImport.update({
+
+const legalTermsRoute = legalTermsImport.update({
   id: '/(legal)/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const legalPrivacyRoute = legalPrivacyRouteImport.update({
-  id: '/(legal)/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const authSignInRoute = authSignInRouteImport.update({
-  id: '/(auth)/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
 
+const legalPrivacyRoute = legalPrivacyImport.update({
+  id: '/(legal)/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const authSignInRoute = authSignInImport.update({
+  id: '/(auth)/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRoute,
+} as any)
+
+// Populate the FileRoutesByPath interface
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/sign-in': {
+      id: '/(auth)/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof authSignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/(legal)/privacy': {
+      id: '/(legal)/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof legalPrivacyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(legal)/terms': {
+      id: '/(legal)/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof legalTermsImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/member': {
+      id: '/_authenticated/member'
+      path: '/member'
+      fullPath: '/member'
+      preLoaderRoute: typeof AuthenticatedMemberImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/rewards': {
+      id: '/_authenticated/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof AuthenticatedRewardsImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/_authenticated/transactions': {
+      id: '/_authenticated/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthenticatedTransactionsImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+    '/(auth)/forgot-password': {
+      id: '/(auth)/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(errors)/401': {
+      id: '/(errors)/401'
+      path: '/401'
+      fullPath: '/401'
+      preLoaderRoute: typeof errors401LazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(errors)/403': {
+      id: '/(errors)/403'
+      path: '/403'
+      fullPath: '/403'
+      preLoaderRoute: typeof errors403LazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(errors)/404': {
+      id: '/(errors)/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof errors404LazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(errors)/500': {
+      id: '/(errors)/500'
+      path: '/500'
+      fullPath: '/500'
+      preLoaderRoute: typeof errors500LazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/(errors)/503': {
+      id: '/(errors)/503'
+      path: '/503'
+      fullPath: '/503'
+      preLoaderRoute: typeof errors503LazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
+  }
+}
+
+// Create and export the route tree
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMemberRoute: typeof AuthenticatedMemberRoute
+  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMemberRoute: AuthenticatedMemberRoute,
+  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 export interface FileRoutesByFullPath {
+  '': typeof AuthenticatedRouteRouteWithChildren
   '/sign-in': typeof authSignInRoute
   '/privacy': typeof legalPrivacyRoute
   '/terms': typeof legalTermsRoute
@@ -136,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
 }
+
 export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/privacy': typeof legalPrivacyRoute
@@ -152,8 +306,9 @@ export interface FileRoutesByTo {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
 }
+
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
+  __root__: typeof rootRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/(auth)/sign-in': typeof authSignInRoute
   '/(legal)/privacy': typeof legalPrivacyRoute
@@ -170,9 +325,11 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
+
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | ''
     | '/sign-in'
     | '/privacy'
     | '/terms'
@@ -222,6 +379,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
+
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   authSignInRoute: typeof authSignInRoute
@@ -235,135 +393,6 @@ export interface RootRouteChildren {
   errors503LazyRoute: typeof errors503LazyRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/(errors)/503': {
-      id: '/(errors)/503'
-      path: '/503'
-      fullPath: '/503'
-      preLoaderRoute: typeof errors503LazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(errors)/500': {
-      id: '/(errors)/500'
-      path: '/500'
-      fullPath: '/500'
-      preLoaderRoute: typeof errors500LazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(errors)/404': {
-      id: '/(errors)/404'
-      path: '/404'
-      fullPath: '/404'
-      preLoaderRoute: typeof errors404LazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(errors)/403': {
-      id: '/(errors)/403'
-      path: '/403'
-      fullPath: '/403'
-      preLoaderRoute: typeof errors403LazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(errors)/401': {
-      id: '/(errors)/401'
-      path: '/401'
-      fullPath: '/401'
-      preLoaderRoute: typeof errors401LazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/transactions': {
-      id: '/_authenticated/transactions'
-      path: '/transactions'
-      fullPath: '/transactions'
-      preLoaderRoute: typeof AuthenticatedTransactionsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/rewards': {
-      id: '/_authenticated/rewards'
-      path: '/rewards'
-      fullPath: '/rewards'
-      preLoaderRoute: typeof AuthenticatedRewardsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/member': {
-      id: '/_authenticated/member'
-      path: '/member'
-      fullPath: '/member'
-      preLoaderRoute: typeof AuthenticatedMemberRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/(legal)/terms': {
-      id: '/(legal)/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof legalTermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(legal)/privacy': {
-      id: '/(legal)/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof legalPrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/sign-in': {
-      id: '/(auth)/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof authSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedMemberRoute: typeof AuthenticatedMemberRoute
-  AuthenticatedRewardsRoute: typeof AuthenticatedRewardsRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedMemberRoute: AuthenticatedMemberRoute,
-  AuthenticatedRewardsRoute: AuthenticatedRewardsRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   authSignInRoute: authSignInRoute,
@@ -376,6 +405,86 @@ const rootRouteChildren: RootRouteChildren = {
   errors500LazyRoute: errors500LazyRoute,
   errors503LazyRoute: errors503LazyRoute,
 }
-export const routeTree = rootRouteImport
+
+export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/_authenticated",
+        "/(auth)/sign-in",
+        "/(legal)/privacy",
+        "/(legal)/terms",
+        "/(auth)/forgot-password",
+        "/(errors)/401",
+        "/(errors)/403",
+        "/(errors)/404",
+        "/(errors)/500",
+        "/(errors)/503"
+      ]
+    },
+    "/_authenticated": {
+      "filePath": "_authenticated/route.tsx",
+      "children": [
+        "/_authenticated/member",
+        "/_authenticated/rewards",
+        "/_authenticated/settings",
+        "/_authenticated/transactions",
+        "/_authenticated/"
+      ]
+    },
+    "/(auth)/sign-in": {
+      "filePath": "(auth)/sign-in.tsx"
+    },
+    "/(legal)/privacy": {
+      "filePath": "(legal)/privacy.tsx"
+    },
+    "/(legal)/terms": {
+      "filePath": "(legal)/terms.tsx"
+    },
+    "/_authenticated/member": {
+      "filePath": "_authenticated/member.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/rewards": {
+      "filePath": "_authenticated/rewards.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/settings": {
+      "filePath": "_authenticated/settings.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/transactions": {
+      "filePath": "_authenticated/transactions.tsx",
+      "parent": "/_authenticated"
+    },
+    "/(auth)/forgot-password": {
+      "filePath": "(auth)/forgot-password.lazy.tsx"
+    },
+    "/(errors)/401": {
+      "filePath": "(errors)/401.lazy.tsx"
+    },
+    "/(errors)/403": {
+      "filePath": "(errors)/403.lazy.tsx"
+    },
+    "/(errors)/404": {
+      "filePath": "(errors)/404.lazy.tsx"
+    },
+    "/(errors)/500": {
+      "filePath": "(errors)/500.lazy.tsx"
+    },
+    "/(errors)/503": {
+      "filePath": "(errors)/503.lazy.tsx"
+    },
+    "/_authenticated/": {
+      "filePath": "_authenticated/index.tsx",
+      "parent": "/_authenticated"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
